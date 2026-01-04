@@ -2,14 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Early Maths Adventure</title>
 <style>
+  /* Basic reset for better mobile control */
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     font-family: Arial, sans-serif;
     background: #f2f7ff;
     margin: 0;
     padding: 0;
     text-align: center;
+    font-size: clamp(14px, 1.8vw, 16px);
   }
   header {
     background: #4a90e2;
@@ -18,42 +25,53 @@
   }
   header h1 {
     margin: 5px 0;
-    font-size: 22px;
+    font-size: clamp(20px, 3vw, 24px);
   }
+  header p {
+    margin: 0;
+    font-size: clamp(13px, 2.4vw, 16px);
+  }
+
   #levelTabs {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     background: #e0ecff;
     padding: 5px;
+    gap: 4px;
   }
   .tab-btn {
-    margin: 3px;
-    padding: 6px 10px;
+    flex: 1 1 120px;
+    max-width: 200px;
+    margin: 2px;
+    padding: 6px 8px;
     border: none;
     border-radius: 5px;
     background: #ffffff;
     color: #333;
     cursor: pointer;
-    font-size: 14px;
+    font-size: clamp(12px, 2.4vw, 14px);
   }
   .tab-btn.active {
     background: #4a90e2;
     color: white;
     font-weight: bold;
   }
+
   .level {
     display: none;
-    padding: 10px;
+    padding: 8px;
   }
   .level.active {
     display: block;
   }
+
   .task-box {
     background: #ffffff;
     margin: 10px auto;
     padding: 10px;
     max-width: 520px;
+    width: 95%;
     border-radius: 8px;
     box-shadow: 0 0 4px rgba(0,0,0,0.1);
     position: relative;
@@ -62,24 +80,27 @@
   .task-title {
     font-weight: bold;
     margin-bottom: 6px;
+    font-size: clamp(15px, 2.6vw, 18px);
   }
   .objects-row {
-    font-size: 28px;
+    font-size: clamp(24px, 5vw, 30px);
     margin: 6px 0;
+    word-wrap: break-word;
   }
+
   .btn {
-    padding: 6px 12px;
+    padding: 6px 10px;
     margin: 4px;
     border-radius: 6px;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: clamp(14px, 2.5vw, 16px);
   }
   .btn-choice {
     background: #fffbf0;
   }
   .btn-small {
-    font-size: 14px;
+    font-size: clamp(12px, 2.2vw, 14px);
     padding: 4px 8px;
   }
   .btn-primary {
@@ -89,10 +110,12 @@
   .btn-secondary {
     background: #ffd93b;
   }
+
   .feedback {
     min-height: 20px;
     margin-top: 4px;
     font-weight: bold;
+    font-size: clamp(13px, 2.4vw, 15px);
   }
   .good {
     color: #2e7d32;
@@ -100,6 +123,7 @@
   .bad {
     color: #c62828;
   }
+
   .shape {
     display: inline-block;
     margin: 4px;
@@ -127,6 +151,7 @@
     border-right: 20px solid transparent;
     border-bottom: 40px solid #55efc4;
   }
+
   .pattern-item {
     display: inline-block;
     padding: 6px 10px;
@@ -134,16 +159,19 @@
     border-radius: 6px;
     color: white;
     font-weight: bold;
+    font-size: clamp(13px, 2.4vw, 15px);
   }
   .red { background: #e74c3c; }
   .blue { background: #3498db; }
   .green { background: #27ae60; }
   .yellow { background: #f1c40f; color: #333; }
+
   input[type="number"], select {
-    font-size: 16px;
+    font-size: clamp(14px, 2.5vw, 16px);
     padding: 4px;
     margin: 4px;
   }
+
   .new-btn {
     position: absolute;
     right: 6px;
@@ -158,6 +186,7 @@
     background: #e0f7fa;
     border-radius: 6px;
     cursor: grab;
+    font-size: clamp(14px, 2.5vw, 16px);
   }
   .drop-box {
     display: inline-block;
@@ -168,13 +197,14 @@
     border-radius: 6px;
     border: 2px dashed #bbb;
     vertical-align: middle;
+    font-size: clamp(14px, 2.5vw, 16px);
   }
   .drop-box.filled {
     border-style: solid;
     border-color: #4a90e2;
   }
 
-  /* New: group boxes for A/B comparison */
+  /* Group boxes for A/B comparison */
   .group-box {
     border: 2px solid #ccccff;
     border-radius: 8px;
@@ -182,6 +212,23 @@
     margin: 4px;
     min-width: 100px;
     background: #f7f8ff;
+  }
+
+  /* Layout tweaks for small screens */
+  @media (max-width: 600px) {
+    .task-box {
+      padding: 8px;
+    }
+    #task-compare > div:first-of-type {
+      flex-direction: column;
+      align-items: center;
+    }
+    .objects-row {
+      font-size: clamp(22px, 6vw, 28px);
+    }
+    pre {
+      font-size: clamp(14px, 3.5vw, 18px) !important;
+    }
   }
 </style>
 </head>
@@ -212,7 +259,7 @@
   <!-- Recognises numbers using words -->
   <div class="task-box" id="task-recognise">
     <div class="task-title">Tap the number for the word</div>
-    <p>Word: <span id="say-number-word" style="font-size:22px;font-weight:bold;"></span></p>
+    <p>Word: <span id="say-number-word" style="font-size:clamp(18px,3.2vw,22px);font-weight:bold;"></span></p>
     <div id="recognise-options"></div>
     <button class="btn btn-small btn-secondary new-btn" onclick="newRecogniseTask()">New</button>
     <div class="feedback" id="recognise-feedback"></div>
@@ -221,7 +268,7 @@
   <!-- More / less / same using same object with group boxes -->
   <div class="task-box" id="task-compare">
     <div class="task-title">Which group has more, less, or the same?</div>
-    <div style="display:flex;justify-content:space-around;align-items:flex-start;gap:8px;">
+    <div style="display:flex;justify-content:space-around;align-items:flex-start;gap:8px;flex-wrap:wrap;">
       <div class="group-box">
         <div><strong>Group A</strong></div>
         <div class="objects-row" id="groupA">🐻🐻</div>
@@ -252,7 +299,7 @@
       <span style="font-size:20px;">+</span>
       <span class="drop-box" id="add-drop-b"></span>
       <span style="font-size:20px;">=</span>
-      <span id="add-total-show" style="font-size:20px;font-weight:bold;">8</span>
+      <span id="add-total-show" style="font-size:clamp(18px,3vw,22px);font-weight:bold;">8</span>
     </div>
     <p>Numbers:</p>
     <div id="add-drag-numbers"></div>
@@ -315,7 +362,7 @@
   <div class="task-box" id="task-3d">
     <div class="task-title">Explore 3D shapes</div>
     <p id="shape3d-question">Which 3D shape is like this object?</p>
-    <p id="shape3d-object" style="font-size:28px;">A dice 🎲 is a...</p>
+    <p id="shape3d-object" style="font-size:clamp(20px,3.5vw,24px);">A dice 🎲 is a...</p>
     <div>
       <button class="btn btn-choice" onclick="check3D('cube')">cube</button>
       <button class="btn btn-choice" onclick="check3D('sphere')">sphere</button>
@@ -331,8 +378,8 @@
   <!-- Length compare -->
   <div class="task-box" id="task-length">
     <div class="task-title">Which is longer?</div>
-    <pre id="length-a" style="font-size:16px;">======</pre>
-    <pre id="length-b" style="font-size:16px;">====</pre>
+    <pre id="length-a" style="font-size:clamp(16px,3.2vw,18px);">======</pre>
+    <pre id="length-b" style="font-size:clamp(16px,3.2vw,18px);">====</pre>
     <button class="btn btn-choice" onclick="checkLength('A')">A is longer</button>
     <button class="btn btn-choice" onclick="checkLength('B')">B is longer</button>
     <button class="btn btn-choice" onclick="checkLength('same')">Same length</button>
@@ -681,7 +728,6 @@
     }
   }
 
-  // 3D shapes – cube, sphere, cone
   const shapes3D = [
     {object: 'A dice 🎲 is a...',            answer: 'cube'},
     {object: 'A box 📦 is a...',             answer: 'cube'},
