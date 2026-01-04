@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Phonics Spelling Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #111827;
+            --card: #1f2937;
+            --accent: #fbbf24;
+            --accent2: #38bdf8;
+            --vowel: #ef4444;
+            --cons: #3b82f6;
+            --text: #f9fafb;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+            touch-action: manipulation;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+
+        /* Intro */
+        .intro-card {
+            background: var(--card);
+            border-radius: 18px;
+            padding: 24px 18px 28px;
+            text-align: center;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.5);
+        }
+
+        .intro-card h1 {
+            font-size: 2.1rem;
+            margin-bottom: 12px;
+            color: var(--accent);
+        }
+
+        .intro-card p {
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+        }
+
+        .intro-emoji {
+            font-size: 3.8rem;
+            margin: 10px 0 16px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 999px;
+            padding: 14px 34px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: #111827;
+            background: linear-gradient(135deg, #fbbf24, #f97316);
+            box-shadow: 0 8px 20px rgba(251,191,36,0.35);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        /* Game layout */
+        .game-card {
+            background: var(--card);
+            border-radius: 18px;
+            padding: 14px 12px 18px;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.5);
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .progress {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .stars-small {
+            font-size: 1.2rem;
+        }
+
+        .parent-instruction {
+            font-size: 0.85rem;
+            background: #065f46;
+            border-radius: 12px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            text-align: center;
+            color: #86efac;
+        }
+
+        .emoji-row {
+            text-align: center;
+            margin: 8px 0 6px;
+        }
+
+        .word-emoji {
+            font-size: 4.2rem;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .middle-area {
+            margin: 8px 0 4px;
+        }
+
+        .instruction {
+            text-align: center;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #fbbf24;
+            pointer-events: none;
+            user-select: none;
+            font-weight: 600;
+        }
+
+        .boxes-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        .drop-box {
+            width: 72px;
+            height: 80px;
+            border-radius: 10px;
+            border: 3px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f9fafb;
+            background: #020617;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: grab;
+            transition: box-shadow 0.15s ease, transform 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .drop-box.vowel {
+            background: #7f1d1d;
+            border-color: var(--vowel);
+        }
+
+        .drop-box.consonant {
+            background: #1e3a8a;
+            border-color: var(--cons);
+        }
+
+        .drop-box.highlight {
+            box-shadow: 0 0 0 3px rgba(248,250,252,0.7);
+            transform: scale(1.02);
+        }
+
+        .drop-box.dragging {
+            opacity: 0.6;
+            cursor: grabbing;
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 0.95rem;
+            min-height: 22px;
+            margin: 4px 0 4px;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .feedback.ok {
+            color: #22c55e;
+        }
+        .feedback.bad {
+            color: #f97316;
+        }
+
+        .tiles-area {
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1px solid #374151;
+        }
+
+        .tiles-label {
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 6px;
+            color: #e5e7eb;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .tiles-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 0 2px;
+        }
+
+        .tile {
+            width: 58px;
+            height: 58px;
+            border-radius: 12px;
+            background: #111827;
+            border: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #f9fafb;
+            cursor: grab;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .tile:active {
+            cursor: grabbing;
+        }
+
+        .tile.dragging {
+            opacity: 0.6;
+            cursor: grabbing;
+            z-index: 1000;
+        }
+
+        .tile.empty {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        .bottom-row {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-check {
+            background: #22c55e;
+            color: #022c22;
+            border-radius: 999px;
+            border: none;
+            padding: 10px 26px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        .btn-reset {
+            background: #f97316;
+            color: #111827;
+            border-radius: 999px;
+            border: none;
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        .btn-check:active,
+        .btn-reset:active {
+            transform: scale(0.96);
+        }
+
+        /* Results */
+        .results-card {
+            background: var(--card);
+            border-radius: 18px;
+            padding: 24px 18px 28px;
+            text-align: center;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.5);
+        }
+
+        .results-card h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .results-score {
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+
+        .results-stars {
+            font-size: 2.4rem;
+            margin: 4px 0 14px;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .btn-play-again {
+            border: none;
+            border-radius: 999px;
+            padding: 12px 28px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: #111827;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        @media (min-width: 640px) {
+            .intro-card h1 {
+                font-size: 2.4rem;
+            }
+            .word-emoji {
+                font-size: 4.8rem;
+            }
+            .drop-box {
+                width: 80px;
+                height: 88px;
+                font-size: 2.2rem;
+            }
+            .tile {
+                width: 64px;
+                height: 64px;
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Intro -->
+    <div class="screen active" id="introScreen">
+        <div class="intro-card">
+            <h1>Phonics Spelling</h1>
+            <p>Look at the picture and drag the letters to spell the word.</p>
+            <div class="intro-emoji">🐱 🔤 🎉</div>
+            <p style="font-size:0.95rem;opacity:0.9;">Sometimes fill vowels, sometimes fill consonants! Choose carefully!</p>
+            <div style="margin-top:18px;">
+                <button class="btn" onclick="startGame()">Start Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game -->
+    <div class="screen" id="gameScreen">
+        <div class="game-card">
+            <div class="top-row">
+                <div class="progress" id="progressText">Question 1 / 10</div>
+                <div class="stars-small" id="smallStars"></div>
+            </div>
+
+            <div class="parent-instruction" id="parentInstruction">
+                👨‍👩‍👧 Parent: Please say the word aloud for your child.
+            </div>
+
+            <div class="emoji-row">
+                <div class="word-emoji" id="wordEmoji">🐱</div>
+            </div>
+
+            <div class="middle-area">
+                <div class="instruction" id="instruction">Drag the vowels into the boxes.</div>
+                <div class="boxes-row" id="boxesRow"></div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+
+            <div class="tiles-area">
+                <div class="tiles-label">Letters to use:</div>
+                <div class="tiles-row" id="tilesRow"></div>
+            </div>
+
+            <div class="bottom-row">
+                <button class="btn-check" type="button" onclick="checkAnswer()">✅ Check</button>
+                <button class="btn-reset" type="button" onclick="resetLetters()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="screen" id="resultsScreen">
+        <div class="results-card">
+            <h2>Great job!</h2>
+            <div class="results-score">You spelled <span id="scoreText">0</span> / 10 words.</div>
+            <div class="results-stars" id="resultsStars"></div>
+            <button class="btn-play-again" type="button" onclick="playAgain()">Play again</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const wordEmojis = {
+        HOT: "🔥",
+        MUM: "👩",
+        POT: "🍲",
+        JAM: "🫙",
+        BUN: "🥐",
+        BAG: "👜",
+        NET: "🥅",
+        BUG: "🐛",
+        FUN: "🎉",
+        MUD: "🪵",
+        BUS: "🚌",
+        DOG: "🐕",
+        HUG: "🤗",
+        CUP: "☕",
+        DAD: "👨",
+        RAT: "🐭",
+        VAN: "🚐",
+        RED: "🔴",
+        ZIP: "🤐",
+        FAN: "🪭",
+        MOP: "🧹",
+        PIG: "🐷",
+        FIT: "💪",
+        CAT: "🐱"
+    };
+
+    const allWords = Object.keys(wordEmojis);
+    const vowels = ["A","E","I","O","U"];
+    const consonants = ["B","C","D","F","G","H","J","K","L","M","N","P","R","S","T","V","W","X","Y","Z"];
+
+    let gameWords = [];
+    let exerciseTypes = []; // 'vowels' or 'consonants'
+    let currentIndex = 0;
+    let score = 0;
+    let isDragging = false;
+    let draggedElement = null;
+    let dragStartX = 0;
+    let dragStartY = 0;
+
+    function shuffle(arr){
+        return arr.slice().sort(() => Math.random() - 0.5);
+    }
+
+    function startGame(){
+        gameWords = shuffle(allWords).slice(0,10);
+        exerciseTypes = [];
+        
+        // Alternate between vowels and consonants
+        for (let i = 0; i < gameWords.length; i++) {
+            exerciseTypes.push(i % 2 === 0 ? 'vowels' : 'consonants');
+        }
+        
+        currentIndex = 0;
+        score = 0;
+        updateSmallStars();
+        showScreen("gameScreen");
+        loadWord();
+    }
+
+    function showScreen(id){
+        document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+    }
+
+    function loadWord(){
+        const word = gameWords[currentIndex];
+        const exerciseType = exerciseTypes[currentIndex];
+        const instructionEl = document.getElementById("instruction");
+        
+        if (exerciseType === 'vowels') {
+            instructionEl.textContent = "Drag the vowels (A E I O U) into the red boxes.";
+        } else {
+            instructionEl.textContent = "Drag the consonants into the blue boxes.";
+        }
+
+        document.getElementById("progressText").textContent =
+            "Question " + (currentIndex+1) + " / 10";
+        document.getElementById("wordEmoji").textContent = wordEmojis[word];
+        document.getElementById("feedback").textContent = "";
+
+        const boxesRow = document.getElementById("boxesRow");
+        boxesRow.innerHTML = "";
+        word.split("").forEach((ch, i) => {
+            const box = document.createElement("div");
+            const isVowel = vowels.includes(ch);
+            const shouldShowEmpty = (exerciseType === 'vowels' && isVowel) || 
+                                    (exerciseType === 'consonants' && !isVowel);
+            
+            box.className = "drop-box " + (isVowel ? "vowel" : "consonant");
+            box.dataset.index = String(i);
+            box.dataset.letter = ch;
+            
+            // Pre-fill letters that shouldn't be filled in this exercise
+            if (!shouldShowEmpty) {
+                box.textContent = ch;
+                box.style.opacity = "0.5";
+            }
+            
+            box.addEventListener("pointerdown", boxPointerDown, false);
+            box.addEventListener("pointerenter", handleDragEnter, false);
+            box.addEventListener("pointerleave", handleDragLeave, false);
+            boxesRow.appendChild(box);
+        });
+
+        const tilesRow = document.getElementById("tilesRow");
+        tilesRow.innerHTML = "";
+        
+        let tilesToShow = [];
+        if (exerciseType === 'vowels') {
+            // Show only the vowels from the word
+            tilesToShow = word.split("").filter(ch => vowels.includes(ch));
+            
+            // Add 4 random distractor vowels
+            const availableVowels = vowels.filter(v => !tilesToShow.includes(v));
+            const distractors = shuffle(availableVowels).slice(0, 4);
+            tilesToShow = tilesToShow.concat(distractors);
+        } else {
+            // Show only the consonants from the word
+            tilesToShow = word.split("").filter(ch => !vowels.includes(ch));
+            
+            // Add 4 random distractor consonants
+            const availableConsonants = consonants.filter(c => !tilesToShow.includes(c));
+            const distractors = shuffle(availableConsonants).slice(0, 4);
+            tilesToShow = tilesToShow.concat(distractors);
+        }
+        
+        tilesToShow = shuffle(tilesToShow);
+
+        tilesToShow.forEach((letter, i) => {
+            const tile = document.createElement("div");
+            tile.className = "tile";
+            tile.textContent = letter;
+            tile.dataset.index = String(i);
+            tile.dataset.source = "tile";
+            tile.addEventListener("pointerdown", tilePointerDown, false);
+            tilesRow.appendChild(tile);
+        });
+    }
+
+    function tilePointerDown(e){
+        if (!e.target.textContent.trim()) return;
+        e.preventDefault();
+        e.target.setPointerCapture(e.pointerId);
+        
+        draggedElement = e.target;
+        isDragging = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        
+        draggedElement.classList.add("dragging");
+        draggedElement.addEventListener("pointermove", handlePointerMove, false);
+        draggedElement.addEventListener("pointerup", handlePointerUp, false);
+    }
+
+    function boxPointerDown(e){
+        if (!e.target.textContent.trim()) return;
+        e.preventDefault();
+        e.target.setPointerCapture(e.pointerId);
+        
+        draggedElement = e.target;
+        isDragging = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        
+        draggedElement.classList.add("dragging");
+        draggedElement.addEventListener("pointermove", handlePointerMove, false);
+        draggedElement.addEventListener("pointerup", handlePointerUp, false);
+    }
+
+    function handlePointerMove(e) {
+        if (!isDragging || !draggedElement) return;
+        e.preventDefault();
+        
+        const boxes = document.querySelectorAll(".drop-box");
+        boxes.forEach(b => b.classList.remove("highlight"));
+        
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        if (el && el.classList && el.classList.contains("drop-box")) {
+            el.classList.add("highlight");
+        }
+    }
+
+    function handleDragEnter(e) {
+        if (isDragging) {
+            e.preventDefault();
+            e.currentTarget.classList.add("highlight");
+        }
+    }
+
+    function handleDragLeave(e) {
+        e.currentTarget.classList.remove("highlight");
+    }
+
+    function handlePointerUp(e) {
+        if (!draggedElement) return;
+        
+        e.preventDefault();
+        isDragging = false;
+        draggedElement.classList.remove("dragging");
+        
+        const boxes = document.querySelectorAll(".drop-box");
+        boxes.forEach(b => b.classList.remove("highlight"));
+
+        const letter = draggedElement.textContent;
+        const tiles = document.querySelectorAll(".tile");
+        const tilesRow = document.getElementById("tilesRow");
+        const target = document.elementFromPoint(e.clientX, e.clientY);
+
+        if (target && target.classList && target.classList.contains("drop-box")) {
+            const existing = target.textContent.trim();
+            if (existing && draggedElement.classList.contains("drop-box")) {
+                target.textContent = letter;
+                draggedElement.textContent = existing;
+            } else if (existing && draggedElement.classList.contains("tile")) {
+                draggedElement.textContent = existing;
+                target.textContent = letter;
+            } else if (!existing) {
+                target.textContent = letter;
+                if (draggedElement.classList.contains("tile")) {
+                    draggedElement.textContent = "";
+                    draggedElement.classList.add("empty");
+                } else {
+                    draggedElement.textContent = "";
+                }
+            }
+        } else if (target && target.id === "tilesRow" || (target && target.closest && target.closest("#tilesRow"))) {
+            if (draggedElement.classList.contains("drop-box")) {
+                const emptyTile = Array.from(tiles).find(t => !t.textContent.trim());
+                if (emptyTile) {
+                    emptyTile.textContent = letter;
+                    emptyTile.classList.remove("empty");
+                    draggedElement.textContent = "";
+                } else {
+                    const newTile = document.createElement("div");
+                    newTile.className = "tile";
+                    newTile.textContent = letter;
+                    newTile.dataset.index = String(tiles.length);
+                    newTile.dataset.source = "tile";
+                    newTile.addEventListener("pointerdown", tilePointerDown, false);
+                    tilesRow.appendChild(newTile);
+                    draggedElement.textContent = "";
+                }
+            }
+        }
+
+        draggedElement.removeEventListener("pointermove", handlePointerMove);
+        draggedElement.removeEventListener("pointerup", handlePointerUp);
+        draggedElement = null;
+    }
+
+    function checkAnswer(){
+        const word = gameWords[currentIndex];
+        const exerciseType = exerciseTypes[currentIndex];
+        const boxes = document.querySelectorAll(".drop-box");
+        const feedback = document.getElementById("feedback");
+
+        let allCorrect = true;
+        
+        boxes.forEach(box => {
+            const ch = box.dataset.letter;
+            const isVowel = vowels.includes(ch);
+            const shouldBeFilled = (exerciseType === 'vowels' && isVowel) || 
+                                   (exerciseType === 'consonants' && !isVowel);
+            
+            if (shouldBeFilled && box.textContent.trim() !== ch) {
+                allCorrect = false;
+            }
+        });
+
+        if (!allCorrect) {
+            feedback.textContent = "Not quite. Try again!";
+            feedback.className = "feedback bad";
+            resetLetters();
+            return;
+        }
+
+        feedback.textContent = "Great job! ✔";
+        feedback.className = "feedback ok";
+        score++;
+        updateSmallStars();
+        
+        setTimeout(() => {
+            currentIndex++;
+            if (currentIndex < gameWords.length) {
+                loadWord();
+            } else {
+                showResults();
+            }
+        }, 1500);
+    }
+
+    function resetLetters(){
+        const word = gameWords[currentIndex];
+        const exerciseType = exerciseTypes[currentIndex];
+        const boxes = document.querySelectorAll(".drop-box");
+        const tilesRow = document.getElementById("tilesRow");
+        const letters = [];
+
+        boxes.forEach(b => {
+            const ch = b.dataset.letter;
+            const isVowel = vowels.includes(ch);
+            const shouldBeFilled = (exerciseType === 'vowels' && isVowel) || 
+                                   (exerciseType === 'consonants' && !isVowel);
+            
+            if (shouldBeFilled && b.textContent.trim() && b.textContent.trim() !== ch) {
+                letters.push(b.textContent.trim());
+            }
+            
+            if (shouldBeFilled) {
+                b.textContent = "";
+            }
+        });
+
+        document.querySelectorAll(".tile").forEach(t => {
+            if (t.textContent.trim()) letters.push(t.textContent.trim());
+            t.remove();
+        });
+
+        letters.forEach((ch, i) => {
+            const tile = document.createElement("div");
+            tile.className = "tile";
+            tile.textContent = ch;
+            tile.dataset.index = String(i);
+            tile.dataset.source = "tile";
+            tile.addEventListener("pointerdown", tilePointerDown, false);
+            tilesRow.appendChild(tile);
+        });
+    }
+
+    function showResults(){
+        document.getElementById("scoreText").textContent = String(score);
+        const stars = Math.round((score / 10) * 5);
+        document.getElementById("resultsStars").textContent =
+            stars ? "⭐".repeat(stars) : "💫";
+        showScreen("resultsScreen");
+    }
+
+    function updateSmallStars(){
+        const stars = Math.round((score / 10) * 5);
+        document.getElementById("smallStars").textContent =
+            stars ? "⭐".repeat(stars) : "";
+    }
+
+    function playAgain(){
+        startGame();
+    }
+</script>
+</body>
+</html>
+
