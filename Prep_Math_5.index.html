@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Early Maths Adventure</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f7ff;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+  header {
+    background: #4a90e2;
+    color: white;
+    padding: 10px 5px;
+  }
+  header h1 {
+    margin: 5px 0;
+    font-size: 22px;
+  }
+  #levelTabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: #e0ecff;
+    padding: 5px;
+  }
+  .tab-btn {
+    margin: 3px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    background: #ffffff;
+    color: #333;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .tab-btn.active {
+    background: #4a90e2;
+    color: white;
+    font-weight: bold;
+  }
+  .level {
+    display: none;
+    padding: 10px;
+  }
+  .level.active {
+    display: block;
+  }
+  .task-box {
+    background: #ffffff;
+    margin: 10px auto;
+    padding: 10px;
+    max-width: 520px;
+    border-radius: 8px;
+    box-shadow: 0 0 4px rgba(0,0,0,0.1);
+    position: relative;
+    text-align: center;
+  }
+  .task-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+  .objects-row {
+    font-size: 28px;
+    margin: 6px 0;
+  }
+  .btn {
+    padding: 6px 12px;
+    margin: 4px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .btn-choice {
+    background: #fffbf0;
+  }
+  .btn-small {
+    font-size: 14px;
+    padding: 4px 8px;
+  }
+  .btn-primary {
+    background: #4a90e2;
+    color: white;
+  }
+  .btn-secondary {
+    background: #ffd93b;
+  }
+  .feedback {
+    min-height: 20px;
+    margin-top: 4px;
+    font-weight: bold;
+  }
+  .good {
+    color: #2e7d32;
+  }
+  .bad {
+    color: #c62828;
+  }
+  .shape {
+    display: inline-block;
+    margin: 4px;
+  }
+  .shape.circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ff7675;
+  }
+  .shape.square {
+    width: 40px;
+    height: 40px;
+    background: #74b9ff;
+  }
+  .shape.rectangle {
+    width: 60px;
+    height: 35px;
+    background: #ffeaa7;
+  }
+  .shape.triangle {
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 40px solid #55efc4;
+  }
+  .pattern-item {
+    display: inline-block;
+    padding: 6px 10px;
+    margin: 2px;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+  }
+  .red { background: #e74c3c; }
+  .blue { background: #3498db; }
+  .green { background: #27ae60; }
+  .yellow { background: #f1c40f; color: #333; }
+  input[type="number"], select {
+    font-size: 16px;
+    padding: 4px;
+    margin: 4px;
+  }
+  .new-btn {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+  }
+
+  /* Drag and drop */
+  .drag-source {
+    display: inline-block;
+    padding: 6px 10px;
+    margin: 4px;
+    background: #e0f7fa;
+    border-radius: 6px;
+    cursor: grab;
+  }
+  .drop-box {
+    display: inline-block;
+    min-width: 40px;
+    min-height: 36px;
+    margin: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 2px dashed #bbb;
+    vertical-align: middle;
+  }
+  .drop-box.filled {
+    border-style: solid;
+    border-color: #4a90e2;
+  }
+
+  /* New: group boxes for A/B comparison */
+  .group-box {
+    border: 2px solid #ccccff;
+    border-radius: 8px;
+    padding: 4px 8px;
+    margin: 4px;
+    min-width: 100px;
+    background: #f7f8ff;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Early Maths Adventure</h1>
+  <p>Practice numbers, operations, shapes and patterns!</p>
+</header>
+
+<div id="levelTabs">
+  <button class="tab-btn active" data-target="level-numbers">1. Numbers & Counting</button>
+  <button class="tab-btn" data-target="level-ops">2. Early Operations</button>
+  <button class="tab-btn" data-target="level-shapes">3. Shapes & Space</button>
+  <button class="tab-btn" data-target="level-measure">4. Measure & Patterns</button>
+</div>
+
+<!-- LEVEL 1: Numbers & Counting -->
+<div id="level-numbers" class="level active">
+  <!-- Counts aloud / one-to-one / quantities -->
+  <div class="task-box" id="task-count">
+    <div class="task-title">Count the objects and choose the number</div>
+    <div class="objects-row" id="count-objects-row">🍎🍎🍎</div>
+    <div id="count-options"></div>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newCountTask()">New</button>
+    <div class="feedback" id="count-feedback"></div>
+  </div>
+
+  <!-- Recognises numbers using words -->
+  <div class="task-box" id="task-recognise">
+    <div class="task-title">Tap the number for the word</div>
+    <p>Word: <span id="say-number-word" style="font-size:22px;font-weight:bold;"></span></p>
+    <div id="recognise-options"></div>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newRecogniseTask()">New</button>
+    <div class="feedback" id="recognise-feedback"></div>
+  </div>
+
+  <!-- More / less / same using same object with group boxes -->
+  <div class="task-box" id="task-compare">
+    <div class="task-title">Which group has more, less, or the same?</div>
+    <div style="display:flex;justify-content:space-around;align-items:flex-start;gap:8px;">
+      <div class="group-box">
+        <div><strong>Group A</strong></div>
+        <div class="objects-row" id="groupA">🐻🐻</div>
+      </div>
+      <div class="group-box">
+        <div><strong>Group B</strong></div>
+        <div class="objects-row" id="groupB">🐻🐻🐻</div>
+      </div>
+    </div>
+    <div>
+      <button class="btn btn-choice" onclick="checkCompare('more')">A has more</button>
+      <button class="btn btn-choice" onclick="checkCompare('less')">A has less</button>
+      <button class="btn btn-choice" onclick="checkCompare('same')">Same</button>
+    </div>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newCompareTask()">New</button>
+    <div class="feedback" id="compare-feedback"></div>
+  </div>
+</div>
+
+<!-- LEVEL 2: Early Operations -->
+<div id="level-ops" class="level">
+  <!-- Combining groups with drag to boxes: box + box = total -->
+  <div class="task-box" id="task-add">
+    <div class="task-title">Drag numbers into the boxes</div>
+    <p id="add-formula-text">□ + □ = 8</p>
+    <div>
+      <span class="drop-box" id="add-drop-a"></span>
+      <span style="font-size:20px;">+</span>
+      <span class="drop-box" id="add-drop-b"></span>
+      <span style="font-size:20px;">=</span>
+      <span id="add-total-show" style="font-size:20px;font-weight:bold;">8</span>
+    </div>
+    <p>Numbers:</p>
+    <div id="add-drag-numbers"></div>
+    <button class="btn btn-primary btn-small" onclick="checkAddDrag()">Check</button>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newAddTask()">New</button>
+    <div class="feedback" id="add-feedback"></div>
+  </div>
+
+  <!-- Take away objects (subtraction) with choices -->
+  <div class="task-box" id="task-sub">
+    <div class="task-title">Take away and tell how many left</div>
+    <div class="objects-row" id="sub-row">🧁🧁🧁🧁</div>
+    <p>We take away <span id="sub-takeaway" style="font-weight:bold;">1</span>.</p>
+    <div id="sub-options"></div>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newSubTask()">New</button>
+    <div class="feedback" id="sub-feedback"></div>
+  </div>
+
+  <!-- Simple everyday problem with emojis -->
+  <div class="task-box" id="task-story">
+    <div class="task-title">Everyday story problem</div>
+    <p id="story-text">We have 2 spoons 🥄🥄. We need 3 spoons 🥄. How many more spoons do we need?</p>
+    <div id="story-options"></div>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newStoryTask()">New</button>
+    <div class="feedback" id="story-feedback"></div>
+  </div>
+</div>
+
+<!-- LEVEL 3: Shapes & Spatial -->
+<div id="level-shapes" class="level">
+  <!-- Name shapes -->
+  <div class="task-box" id="task-shape-name">
+    <div class="task-title">What shape is this?</div>
+    <div id="shape-display" style="margin:8px;"></div>
+    <div>
+      <button class="btn btn-choice" onclick="checkShapeName('circle')">circle</button>
+      <button class="btn btn-choice" onclick="checkShapeName('square')">square</button>
+      <button class="btn btn-choice" onclick="checkShapeName('triangle')">triangle</button>
+      <button class="btn btn-choice" onclick="checkShapeName('rectangle')">rectangle</button>
+    </div>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newShapeNameTask()">New</button>
+    <div class="feedback" id="shape-name-feedback"></div>
+  </div>
+
+  <!-- Shapes in real life with emojis -->
+  <div class="task-box" id="task-shape-real">
+    <div class="task-title">Which shape matches the object?</div>
+    <p id="real-object">A plate 🍽️ is usually a...</p>
+    <div>
+      <button class="btn btn-choice" onclick="checkRealShape('circle')">circle</button>
+      <button class="btn btn-choice" onclick="checkRealShape('square')">square</button>
+      <button class="btn btn-choice" onclick="checkRealShape('rectangle')">rectangle</button>
+      <button class="btn btn-choice" onclick="checkRealShape('triangle')">triangle</button>
+    </div>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newRealShapeTask()">New</button>
+    <div class="feedback" id="real-shape-feedback"></div>
+  </div>
+
+  <!-- Explore 3D shapes -->
+  <div class="task-box" id="task-3d">
+    <div class="task-title">Explore 3D shapes</div>
+    <p id="shape3d-question">Which 3D shape is like this object?</p>
+    <p id="shape3d-object" style="font-size:28px;">A dice 🎲 is a...</p>
+    <div>
+      <button class="btn btn-choice" onclick="check3D('cube')">cube</button>
+      <button class="btn btn-choice" onclick="check3D('sphere')">sphere</button>
+      <button class="btn btn-choice" onclick="check3D('cone')">cone</button>
+    </div>
+    <button class="btn btn-small btn-secondary new-btn" onclick="new3DTask()">New</button>
+    <div class="feedback" id="shape3d-feedback"></div>
+  </div>
+</div>
+
+<!-- LEVEL 4: Measurement & Patterns -->
+<div id="level-measure" class="level">
+  <!-- Length compare -->
+  <div class="task-box" id="task-length">
+    <div class="task-title">Which is longer?</div>
+    <pre id="length-a" style="font-size:16px;">======</pre>
+    <pre id="length-b" style="font-size:16px;">====</pre>
+    <button class="btn btn-choice" onclick="checkLength('A')">A is longer</button>
+    <button class="btn btn-choice" onclick="checkLength('B')">B is longer</button>
+    <button class="btn btn-choice" onclick="checkLength('same')">Same length</button>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newLengthTask()">New</button>
+    <div class="feedback" id="length-feedback"></div>
+  </div>
+
+  <!-- Weight compare -->
+  <div class="task-box" id="task-weight">
+    <div class="task-title">Which is heavier?</div>
+    <p id="weight-a">A: 🧱</p>
+    <p id="weight-b">B: 🎈</p>
+    <button class="btn btn-choice" onclick="checkWeight('A')">A is heavier</button>
+    <button class="btn btn-choice" onclick="checkWeight('B')">B is heavier</button>
+    <button class="btn btn-choice" onclick="checkWeight('same')">Same weight</button>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newWeightTask()">New</button>
+    <div class="feedback" id="weight-feedback"></div>
+  </div>
+
+  <!-- Time words: day-of-week task -->
+  <div class="task-box" id="task-time">
+    <div class="task-title">Choose the time word</div>
+    <p id="time-sentence">Today is Monday. Tomorrow is ?</p>
+    <div id="time-options"></div>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newTimeTask()">New</button>
+    <div class="feedback" id="time-feedback"></div>
+  </div>
+
+  <!-- Patterns -->
+  <div class="task-box" id="task-pattern">
+    <div class="task-title">What kind of pattern is this?</div>
+    <div id="pattern-display" style="margin:6px 0;"></div>
+    <button class="btn btn-choice" onclick="checkPatternType('AB')">AB</button>
+    <button class="btn btn-choice" onclick="checkPatternType('AAB')">AAB</button>
+    <button class="btn btn-choice" onclick="checkPatternType('ABC')">ABC</button>
+    <button class="btn btn-small btn-secondary new-btn" onclick="newPatternTask()">New</button>
+    <div class="feedback" id="pattern-feedback"></div>
+  </div>
+</div>
+
+<script>
+  // ------- TAB SWITCHING -------
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const levels = document.querySelectorAll('.level');
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabButtons.forEach(b => b.classList.remove('active'));
+      levels.forEach(l => l.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.target).classList.add('active');
+    });
+  });
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  // ------- LEVEL 1: NUMBERS -------
+
+  let correctCount = 3;
+  function newCountTask() {
+    const min = 1;
+    const max = 10;
+    correctCount = Math.floor(Math.random() * (max - min + 1)) + min;
+    const emojis = ['🍎','⭐','🐶','🦋','🌸'];
+    const emo = emojis[Math.floor(Math.random() * emojis.length)];
+    const row = emo.repeat(correctCount);
+    document.getElementById('count-objects-row').textContent = row;
+    const optionsDiv = document.getElementById('count-options');
+    optionsDiv.innerHTML = '';
+    let options = [correctCount];
+    while (options.length < 3) {
+      let n = Math.floor(Math.random() * (max - min + 1)) + min;
+      if (!options.includes(n)) options.push(n);
+    }
+    shuffle(options);
+    options.forEach(n => {
+      const btn = document.createElement('button');
+      btn.textContent = n;
+      btn.className = 'btn btn-choice';
+      btn.onclick = () => {
+        const fb = document.getElementById('count-feedback');
+        if (n === correctCount) {
+          fb.textContent = 'Yes! You counted ' + n + '!';
+          fb.className = 'feedback good';
+        } else {
+          fb.textContent = 'Try again.';
+          fb.className = 'feedback bad';
+        }
+      };
+      optionsDiv.appendChild(btn);
+    });
+    document.getElementById('count-feedback').textContent = '';
+  }
+
+  const numberWords = [
+    'zero','one','two','three','four','five','six','seven','eight','nine','ten',
+    'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen',
+    'eighteen','nineteen','twenty'
+  ];
+  let recogniseTarget = 5;
+  function newRecogniseTask() {
+    const max = 20;
+    recogniseTarget = Math.floor(Math.random() * (max + 1)); // 0–20
+    document.getElementById('say-number-word').textContent =
+      numberWords[recogniseTarget].charAt(0).toUpperCase() + numberWords[recogniseTarget].slice(1);
+    const optionsDiv = document.getElementById('recognise-options');
+    optionsDiv.innerHTML = '';
+    let options = [recogniseTarget];
+    while (options.length < 4) {
+      let n = Math.floor(Math.random() * (max + 1));
+      if (!options.includes(n)) options.push(n);
+    }
+    shuffle(options);
+    options.forEach(n => {
+      const btn = document.createElement('button');
+      btn.textContent = n;
+      btn.className = 'btn btn-choice';
+      btn.onclick = () => {
+        const fb = document.getElementById('recognise-feedback');
+        if (n === recogniseTarget) {
+          fb.textContent = 'Great! That is ' + n + '.';
+          fb.className = 'feedback good';
+        } else {
+          fb.textContent = 'Listen to the word again.';
+          fb.className = 'feedback bad';
+        }
+      };
+      optionsDiv.appendChild(btn);
+    });
+    document.getElementById('recognise-feedback').textContent = '';
+  }
+
+  let compareRelation = 'more';
+  function newCompareTask() {
+    let a = Math.floor(Math.random() * 9) + 1; // 1–9
+    let b = Math.floor(Math.random() * 9) + 1;
+    const emo = '🐻';
+    document.getElementById('groupA').textContent = emo.repeat(a);
+    document.getElementById('groupB').textContent = emo.repeat(b);
+    if (a > b) compareRelation = 'more';
+    else if (a < b) compareRelation = 'less';
+    else compareRelation = 'same';
+    document.getElementById('compare-feedback').textContent = '';
+  }
+  function checkCompare(choice) {
+    const fb = document.getElementById('compare-feedback');
+    if (choice === compareRelation) {
+      fb.textContent = 'Correct!';
+      fb.className = 'feedback good';
+    } else {
+      fb.textContent = 'Not quite. Look carefully.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  // ------- SIMPLE DRAG & DROP HELPERS -------
+  function makeDraggable(element, value) {
+    element.draggable = true;
+    element.addEventListener('dragstart', ev => {
+      ev.dataTransfer.setData('text/plain', value);
+    });
+  }
+  function makeDropBox(box) {
+    box.addEventListener('dragover', ev => {
+      ev.preventDefault();
+    });
+    box.addEventListener('drop', ev => {
+      ev.preventDefault();
+      const value = ev.dataTransfer.getData('text/plain');
+      box.textContent = value;
+      box.dataset.value = value;
+      box.classList.add('filled');
+    });
+  }
+
+  // ------- LEVEL 2: OPERATIONS -------
+
+  let addTotal = 8;
+  function newAddTask() {
+    addTotal = Math.floor(Math.random() * 6) + 4; // 4–9
+    document.getElementById('add-total-show').textContent = addTotal;
+    document.getElementById('add-formula-text').textContent = '□ + □ = ' + addTotal;
+    const dropA = document.getElementById('add-drop-a');
+    const dropB = document.getElementById('add-drop-b');
+    dropA.textContent = '';
+    dropB.textContent = '';
+    dropA.dataset.value = '';
+    dropB.dataset.value = '';
+    dropA.classList.remove('filled');
+    dropB.classList.remove('filled');
+    const numsDiv = document.getElementById('add-drag-numbers');
+    numsDiv.innerHTML = '';
+    const choices = [1,2,3,4,5,6,7,8,9];
+    choices.forEach(n => {
+      const span = document.createElement('span');
+      span.textContent = n;
+      span.className = 'drag-source';
+      makeDraggable(span, String(n));
+      numsDiv.appendChild(span);
+    });
+    document.getElementById('add-feedback').textContent = '';
+  }
+  function checkAddDrag() {
+    const aVal = parseInt(document.getElementById('add-drop-a').dataset.value || '0', 10);
+    const bVal = parseInt(document.getElementById('add-drop-b').dataset.value || '0', 10);
+    const fb = document.getElementById('add-feedback');
+    if (aVal + bVal === addTotal && aVal >= 0 && bVal >= 0) {
+      fb.textContent = 'Nice! ' + aVal + ' + ' + bVal + ' = ' + addTotal + '.';
+      fb.className = 'feedback good';
+    } else {
+      fb.textContent = 'Move numbers so they add to ' + addTotal + '.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  let subStart = 4, subTake = 1;
+  function newSubTask() {
+    subStart = Math.floor(Math.random() * 5) + 3; // 3–7
+    subTake = Math.floor(Math.random() * (subStart - 1)) + 1;
+    document.getElementById('sub-row').textContent = '🧁'.repeat(subStart);
+    document.getElementById('sub-takeaway').textContent = subTake;
+    const correct = subStart - subTake;
+    const optionsDiv = document.getElementById('sub-options');
+    optionsDiv.innerHTML = '';
+    let options = [correct];
+    while (options.length < 3) {
+      let n = Math.floor(Math.random() * subStart);
+      if (!options.includes(n)) options.push(n);
+    }
+    shuffle(options);
+    options.forEach(n => {
+      const btn = document.createElement('button');
+      btn.textContent = n;
+      btn.className = 'btn btn-choice';
+      btn.onclick = () => {
+        const fb = document.getElementById('sub-feedback');
+        if (n === correct) {
+          fb.textContent = 'Correct, ' + n + ' left.';
+          fb.className = 'feedback good';
+        } else {
+          fb.textContent = 'Count again.';
+          fb.className = 'feedback bad';
+        }
+      };
+      optionsDiv.appendChild(btn);
+    });
+    document.getElementById('sub-feedback').textContent = '';
+  }
+
+  const stories = [
+    {
+      text: 'We have 2 spoons 🥄🥄. We need 3 spoons 🥄. How many more spoons do we need?',
+      answer: 1
+    },
+    {
+      text: 'There are 3 apples 🍎🍎🍎 on the table. Mum puts 2 more 🍎🍎. How many apples now?',
+      answer: 5
+    },
+    {
+      text: 'You have 4 toy cars 🚗🚗🚗🚗. You give 1 to a friend 🤝. How many cars are left?',
+      answer: 3
+    }
+  ];
+  let storyAnswer = 1;
+  function newStoryTask() {
+    const s = stories[Math.floor(Math.random() * stories.length)];
+    document.getElementById('story-text').textContent = s.text;
+    storyAnswer = s.answer;
+    const optionsDiv = document.getElementById('story-options');
+    optionsDiv.innerHTML = '';
+    let options = [storyAnswer];
+    while (options.length < 3) {
+      let n = Math.max(0, storyAnswer + Math.floor(Math.random() * 5) - 2);
+      if (!options.includes(n)) options.push(n);
+    }
+    shuffle(options);
+    options.forEach(n => {
+      const btn = document.createElement('button');
+      btn.textContent = n;
+      btn.className = 'btn btn-choice';
+      btn.onclick = () => {
+        const fb = document.getElementById('story-feedback');
+        if (n === storyAnswer) {
+          fb.textContent = 'Great thinking!';
+          fb.className = 'feedback good';
+        } else {
+          fb.textContent = 'Think again about the story.';
+          fb.className = 'feedback bad';
+        }
+      };
+      optionsDiv.appendChild(btn);
+    });
+    document.getElementById('story-feedback').textContent = '';
+  }
+
+  // ------- LEVEL 3: SHAPES -------
+
+  let currentShape = 'circle';
+  function newShapeNameTask() {
+    const shapes = ['circle','square','triangle','rectangle'];
+    currentShape = shapes[Math.floor(Math.random() * shapes.length)];
+    const display = document.getElementById('shape-display');
+    display.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'shape ' + currentShape;
+    display.appendChild(div);
+    document.getElementById('shape-name-feedback').textContent = '';
+  }
+  function checkShapeName(choice) {
+    const fb = document.getElementById('shape-name-feedback');
+    if (choice === currentShape) {
+      fb.textContent = 'Yes, it is a ' + currentShape + '!';
+      fb.className = 'feedback good';
+    } else {
+      fb.textContent = 'Look again at the sides and corners.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  const realItems = [
+    {text: 'A plate 🍽️ is usually a...', shape: 'circle'},
+    {text: 'A door 🚪 is usually a...', shape: 'rectangle'},
+    {text: 'A slice of pizza 🍕 looks like a...', shape: 'triangle'},
+    {text: 'A window 🪟 can be a...', shape: 'square'}
+  ];
+  let realShapeAnswer = 'circle';
+  function newRealShapeTask() {
+    const item = realItems[Math.floor(Math.random() * realItems.length)];
+    document.getElementById('real-object').textContent = item.text;
+    realShapeAnswer = item.shape;
+    document.getElementById('real-shape-feedback').textContent = '';
+  }
+  function checkRealShape(choice) {
+    const fb = document.getElementById('real-shape-feedback');
+    if (choice === realShapeAnswer) {
+      fb.textContent = 'Yes!';
+      fb.className = 'feedback good';
+    } else {
+      fb.textContent = 'Think about that object in real life.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  // 3D shapes – cube, sphere, cone
+  const shapes3D = [
+    {object: 'A dice 🎲 is a...',            answer: 'cube'},
+    {object: 'A box 📦 is a...',             answer: 'cube'},
+    {object: 'A ball ⚽ is a...',            answer: 'sphere'},
+    {object: 'An orange 🍊 is a...',         answer: 'sphere'},
+    {object: 'An ice cream cone 🍦 is a...', answer: 'cone'},
+    {object: 'A party hat 🎉 is a...',       answer: 'cone'}
+  ];
+  let shape3DAnswer = 'cube';
+  function new3DTask() {
+    const s = shapes3D[Math.floor(Math.random() * shapes3D.length)];
+    document.getElementById('shape3d-object').textContent = s.object;
+    shape3DAnswer = s.answer;
+    document.getElementById('shape3d-feedback').textContent = '';
+  }
+  function check3D(choice) {
+    const fb = document.getElementById('shape3d-feedback');
+    if (choice === shape3DAnswer) {
+      fb.textContent = 'Yes, that is a ' + shape3DAnswer + '!';
+      fb.className = 'feedback good';
+    } else {
+      fb.textContent = 'Think about the real object shape.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  // ------- LEVEL 4: MEASURE & PATTERNS -------
+
+  let lengthRelation = 'A';
+  function newLengthTask() {
+    const lenA = Math.floor(Math.random() * 5) + 3; // 3–7
+    let lenB = Math.floor(Math.random() * 5) + 3;
+    document.getElementById('length-a').textContent = '='.repeat(lenA);
+    document.getElementById('length-b').textContent = '='.repeat(lenB);
+    if (lenA > lenB) lengthRelation = 'A';
+    else if (lenB > lenA) lengthRelation = 'B';
+    else lengthRelation = 'same';
+    document.getElementById('length-feedback').textContent = '';
+  }
+  function checkLength(choice) {
+    const fb = document.getElementById('length-feedback');
+    if (choice === lengthRelation) {
+      fb.textContent = 'Correct!';
+      fb.className = 'feedback good';
+    } else {
+      fb.textContent = 'Look carefully at the lines.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  const weightPairs = [
+    {a: '🧱', b: '🎈', heavier: 'A'},
+    {a: '🍎', b: '🍰', heavier: 'B'},
+    {a: '🐘', b: '🐭', heavier: 'A'},
+    {a: '📕', b: '📄', heavier: 'A'}
+  ];
+  let weightAnswer = 'A';
+  function newWeightTask() {
+    const pair = weightPairs[Math.floor(Math.random() * weightPairs.length)];
+    document.getElementById('weight-a').textContent = 'A: ' + pair.a;
+    document.getElementById('weight-b').textContent = 'B: ' + pair.b;
+    weightAnswer = pair.heavier;
+    document.getElementById('weight-feedback').textContent = '';
+  }
+  function checkWeight(choice) {
+    const fb = document.getElementById('weight-feedback');
+    if (choice === weightAnswer) {
+      fb.textContent = 'Yes!';
+      fb.className = 'feedback good';
+    } else {
+      fb.textContent = 'Think which is heavier in real life.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  let timeAnswer = 'Tuesday';
+  function newTimeTask() {
+    const todayIndex = Math.floor(Math.random() * days.length);
+    const today = days[todayIndex];
+    const tomorrow = days[(todayIndex + 1) % days.length];
+    const yesterday = days[(todayIndex + days.length - 1) % days.length];
+    const type = Math.random() < 0.5 ? 'tomorrow' : 'yesterday';
+    let sentence;
+    let correctDay;
+    if (type === 'tomorrow') {
+      sentence = 'Today is ' + today + '. Tomorrow is ?';
+      correctDay = tomorrow;
+    } else {
+      sentence = 'Today is ' + today + '. Yesterday was ?';
+      correctDay = yesterday;
+    }
+    document.getElementById('time-sentence').textContent = sentence;
+    timeAnswer = correctDay;
+    const optionsDiv = document.getElementById('time-options');
+    optionsDiv.innerHTML = '';
+    let options = [correctDay];
+    while (options.length < 3) {
+      const d = days[Math.floor(Math.random() * days.length)];
+      if (!options.includes(d)) options.push(d);
+    }
+    shuffle(options);
+    options.forEach(day => {
+      const btn = document.createElement('button');
+      btn.textContent = day;
+      btn.className = 'btn btn-choice';
+      btn.onclick = () => {
+        const fb = document.getElementById('time-feedback');
+        if (day === timeAnswer) {
+          fb.textContent = 'Well done!';
+          fb.className = 'feedback good';
+        } else {
+          fb.textContent = 'Think about the order of the days.';
+          fb.className = 'feedback bad';
+        }
+      };
+      optionsDiv.appendChild(btn);
+    });
+    document.getElementById('time-feedback').textContent = '';
+  }
+
+  const patternTypes = ['AB','AAB','ABC'];
+  let patternAnswer = 'AB';
+  function newPatternTask() {
+    const colors = ['red','blue','green','yellow'];
+    patternAnswer = patternTypes[Math.floor(Math.random() * patternTypes.length)];
+    const baseColorA = colors[Math.floor(Math.random() * colors.length)];
+    let baseColorB = colors[Math.floor(Math.random() * colors.length)];
+    while (baseColorB === baseColorA) {
+      baseColorB = colors[Math.floor(Math.random() * colors.length)];
+    }
+    let baseColorC = colors[Math.floor(Math.random() * colors.length)];
+    while (baseColorC === baseColorA || baseColorC === baseColorB) {
+      baseColorC = colors[Math.floor(Math.random() * colors.length)];
+    }
+    const display = document.getElementById('pattern-display');
+    display.innerHTML = '';
+    function addItem(label, color) {
+      const div = document.createElement('div');
+      div.className = 'pattern-item ' + color;
+      div.textContent = label;
+      display.appendChild(div);
+    }
+    if (patternAnswer === 'AB') {
+      for (let i = 0; i < 4; i++) {
+        addItem(i % 2 === 0 ? 'A' : 'B', i % 2 === 0 ? baseColorA : baseColorB);
+      }
+    } else if (patternAnswer === 'AAB') {
+      const seq = ['A','A','B','A','A','B'];
+      seq.forEach(ch => {
+        addItem(ch, ch === 'A' ? baseColorA : baseColorB);
+      });
+    } else if (patternAnswer === 'ABC') {
+      const seq = ['A','B','C','A','B','C'];
+      seq.forEach(ch => {
+        let color = baseColorA;
+        if (ch === 'B') color = baseColorB;
+        if (ch === 'C') color = baseColorC;
+        addItem(ch, color);
+      });
+    }
+    document.getElementById('pattern-feedback').textContent = '';
+  }
+  function checkPatternType(choice) {
+    const fb = document.getElementById('pattern-feedback');
+    if (choice === patternAnswer) {
+      fb.textContent = 'Well done! That is an ' + patternAnswer + ' pattern.';
+      fb.className = 'feedback good';
+    } else {
+      fb.textContent = 'Look at how the colours repeat.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  // ------- INITIALISE ALL TASKS ON LOAD -------
+
+  makeDropBox(document.getElementById('add-drop-a'));
+  makeDropBox(document.getElementById('add-drop-b'));
+
+  newCountTask();
+  newRecogniseTask();
+  newCompareTask();
+  newAddTask();
+  newSubTask();
+  newStoryTask();
+  newShapeNameTask();
+  newRealShapeTask();
+  new3DTask();
+  newLengthTask();
+  newWeightTask();
+  newTimeTask();
+  newPatternTask();
+</script>
+</body>
+</html>
