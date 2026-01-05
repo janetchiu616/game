@@ -30,6 +30,7 @@
             justify-content: center;
             align-items: center;
             padding: 12px;
+            touch-action: manipulation;
         }
 
         .container {
@@ -80,6 +81,9 @@
             background: linear-gradient(135deg, #fbbf24, #f97316);
             box-shadow: 0 8px 20px rgba(251,191,36,0.35);
             transition: transform 0.15s ease, box-shadow 0.15s ease;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
         }
 
         .btn:active {
@@ -112,25 +116,14 @@
             font-size: 1.2rem;
         }
 
-        .tip-bar {
+        .parent-instruction {
             font-size: 0.85rem;
-            background: #020617;
+            background: #065f46;
             border-radius: 12px;
             padding: 8px 10px;
             margin-bottom: 8px;
-            display: flex;
-            justify-content: center;
-            gap: 14px;
-        }
-
-        .tip-red {
-            color: var(--vowel);
-            font-weight: 600;
-        }
-
-        .tip-blue {
-            color: var(--cons);
-            font-weight: 600;
+            text-align: center;
+            color: #86efac;
         }
 
         .emoji-row {
@@ -140,26 +133,8 @@
 
         .word-emoji {
             font-size: 4.2rem;
-        }
-
-        .speak-row {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 8px;
-        }
-
-        .btn-speak {
-            border-radius: 999px;
-            border: none;
-            padding: 8px 18px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            background: #0ea5e9;
-            color: #0b1120;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            pointer-events: none;
+            user-select: none;
         }
 
         .middle-area {
@@ -168,9 +143,12 @@
 
         .instruction {
             text-align: center;
-            font-size: 0.95rem;
-            margin-bottom: 6px;
-            color: #e5e7eb;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #fbbf24;
+            pointer-events: none;
+            user-select: none;
+            font-weight: 600;
         }
 
         .boxes-row {
@@ -193,6 +171,11 @@
             color: #f9fafb;
             background: #020617;
             touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: grab;
+            transition: box-shadow 0.15s ease, transform 0.15s ease;
+            flex-shrink: 0;
         }
 
         .drop-box.vowel {
@@ -207,6 +190,12 @@
 
         .drop-box.highlight {
             box-shadow: 0 0 0 3px rgba(248,250,252,0.7);
+            transform: scale(1.02);
+        }
+
+        .drop-box.dragging {
+            opacity: 0.6;
+            cursor: grabbing;
         }
 
         .feedback {
@@ -214,6 +203,8 @@
             font-size: 0.95rem;
             min-height: 22px;
             margin: 4px 0 4px;
+            pointer-events: none;
+            user-select: none;
         }
 
         .feedback.ok {
@@ -234,6 +225,8 @@
             text-align: center;
             margin-bottom: 6px;
             color: #e5e7eb;
+            pointer-events: none;
+            user-select: none;
         }
 
         .tiles-row {
@@ -258,10 +251,25 @@
             color: #f9fafb;
             cursor: grab;
             touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .tile:active {
+            cursor: grabbing;
         }
 
         .tile.dragging {
             opacity: 0.6;
+            cursor: grabbing;
+            z-index: 1000;
+        }
+
+        .tile.empty {
+            opacity: 0.3;
+            cursor: default;
         }
 
         .bottom-row {
@@ -281,22 +289,12 @@
             font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
         }
 
-        .btn-reset {
-            background: #f97316;
-            color: #111827;
-            border-radius: 999px;
-            border: none;
-            padding: 10px 18px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .btn-check:active,
-        .btn-reset:active,
-        .btn-speak:active {
+        .btn-check:active {
             transform: scale(0.96);
         }
 
@@ -323,6 +321,8 @@
         .results-stars {
             font-size: 2.4rem;
             margin: 4px 0 14px;
+            user-select: none;
+            pointer-events: none;
         }
 
         .btn-play-again {
@@ -334,6 +334,16 @@
             cursor: pointer;
             color: #111827;
             background: linear-gradient(135deg, #a855f7, #ec4899);
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: #9ca3af;
         }
 
         @media (min-width: 640px) {
@@ -362,9 +372,9 @@
     <div class="screen active" id="introScreen">
         <div class="intro-card">
             <h1>Phonics Spelling</h1>
-            <p>Look at the picture. Listen to the word. Drag the letters to spell it.</p>
+            <p>Look at the picture and drag the letters to spell the word.</p>
             <div class="intro-emoji">🐱 🔤 🎉</div>
-            <p style="font-size:0.95rem;opacity:0.9;">Red box = vowel (A E I O U) • Blue box = consonant</p>
+            <p style="font-size:0.95rem;opacity:0.9;">Sometimes fill vowels, sometimes fill consonants! Choose carefully!</p>
             <div style="margin-top:18px;">
                 <button class="btn" onclick="startGame()">Start Game</button>
             </div>
@@ -379,23 +389,16 @@
                 <div class="stars-small" id="smallStars"></div>
             </div>
 
-            <div class="tip-bar">
-                <span class="tip-red">Red = vowel (A E I O U)</span>
-                <span class="tip-blue">Blue = consonant</span>
+            <div class="parent-instruction" id="parentInstruction">
+                👨‍👩‍👧 Parent: Please say the word aloud for your child.
             </div>
 
             <div class="emoji-row">
                 <div class="word-emoji" id="wordEmoji">🐱</div>
             </div>
 
-            <div class="speak-row">
-                <button class="btn-speak" type="button" onclick="speakWord()">
-                    <span>🔊</span><span>Say the word</span>
-                </button>
-            </div>
-
             <div class="middle-area">
-                <div class="instruction">Drag the letters into the boxes.</div>
+                <div class="instruction" id="instruction">Drag the vowels into the boxes.</div>
                 <div class="boxes-row" id="boxesRow"></div>
                 <div class="feedback" id="feedback"></div>
             </div>
@@ -406,8 +409,7 @@
             </div>
 
             <div class="bottom-row">
-                <button class="btn-check" type="button" onclick="checkAnswer()">✅ Check</button>
-                <button class="btn-reset" type="button" onclick="resetLetters()">Reset</button>
+                <button class="btn-check" type="button" onclick="checkAnswer()">✅ Confirm</button>
             </div>
         </div>
     </div>
@@ -434,7 +436,7 @@
         NET: "🥅",
         BUG: "🐛",
         FUN: "🎉",
-        MUD: "🪵",
+        MUD: "🌱",
         BUS: "🚌",
         DOG: "🐕",
         HUG: "🤗",
@@ -446,23 +448,21 @@
         ZIP: "🤐",
         FAN: "🪭",
         MOP: "🧹",
-	PIG: "🐷",
-	FIT: "💪",
+        PIG: "🐷",
+        FIT: "💪",
         CAT: "🐱"
     };
 
     const allWords = Object.keys(wordEmojis);
     const vowels = ["A","E","I","O","U"];
+    const consonants = ["B","C","D","F","G","H","J","K","L","M","N","P","R","S","T","V","W","X","Y","Z"];
 
     let gameWords = [];
+    let exerciseTypes = []; // 'vowels' or 'consonants'
     let currentIndex = 0;
     let score = 0;
-
-    let dragData = {
-        sourceType: null,   // "tile" or "box"
-        sourceIndex: null,
-        letter: null
-    };
+    let isDragging = false;
+    let draggedElement = null;
 
     function shuffle(arr){
         return arr.slice().sort(() => Math.random() - 0.5);
@@ -470,6 +470,13 @@
 
     function startGame(){
         gameWords = shuffle(allWords).slice(0,10);
+        exerciseTypes = [];
+        
+        // Alternate between vowels and consonants
+        for (let i = 0; i < gameWords.length; i++) {
+            exerciseTypes.push(i % 2 === 0 ? 'vowels' : 'consonants');
+        }
+        
         currentIndex = 0;
         score = 0;
         updateSmallStars();
@@ -484,6 +491,15 @@
 
     function loadWord(){
         const word = gameWords[currentIndex];
+        const exerciseType = exerciseTypes[currentIndex];
+        const instructionEl = document.getElementById("instruction");
+        
+        if (exerciseType === 'vowels') {
+            instructionEl.textContent = "Drag the vowels (A E I O U) into the red boxes.";
+        } else {
+            instructionEl.textContent = "Drag the consonants into the blue boxes.";
+        }
+
         document.getElementById("progressText").textContent =
             "Question " + (currentIndex+1) + " / 10";
         document.getElementById("wordEmoji").textContent = wordEmojis[word];
@@ -493,264 +509,206 @@
         boxesRow.innerHTML = "";
         word.split("").forEach((ch, i) => {
             const box = document.createElement("div");
-            box.className = "drop-box " + (vowels.includes(ch) ? "vowel" : "consonant");
+            const isVowel = vowels.includes(ch);
+            const shouldShowEmpty = (exerciseType === 'vowels' && isVowel) || 
+                                    (exerciseType === 'consonants' && !isVowel);
+            
+            box.className = "drop-box " + (isVowel ? "vowel" : "consonant");
             box.dataset.index = String(i);
-            box.textContent = "";
-            box.addEventListener("pointerdown", boxPointerDown);
+            box.dataset.letter = ch;
+            
+            // Pre-fill letters that shouldn't be filled in this exercise
+            if (!shouldShowEmpty) {
+                box.textContent = ch;
+                box.style.opacity = "0.5";
+            }
+            
+            box.addEventListener("pointerdown", boxPointerDown, false);
+            box.addEventListener("pointerenter", handleDragEnter, false);
+            box.addEventListener("pointerleave", handleDragLeave, false);
             boxesRow.appendChild(box);
         });
 
         const tilesRow = document.getElementById("tilesRow");
         tilesRow.innerHTML = "";
-        const correctLetters = word.split("");
-        const lettersPool = Array.from(new Set(allWords.join("").split("")));
-        const distractors = shuffle(
-            lettersPool.filter(l => !correctLetters.includes(l))
-        ).slice(0,2);
-        const tiles = shuffle(correctLetters.concat(distractors));
+        
+        let tilesToShow = [];
+        if (exerciseType === 'vowels') {
+            // Show only the vowels from the word
+            tilesToShow = word.split("").filter(ch => vowels.includes(ch));
+            
+            // Add 4 random distractor vowels
+            const availableVowels = vowels.filter(v => !tilesToShow.includes(v));
+            const distractors = shuffle(availableVowels).slice(0, 4);
+            tilesToShow = tilesToShow.concat(distractors);
+        } else {
+            // Show only the consonants from the word
+            tilesToShow = word.split("").filter(ch => !vowels.includes(ch));
+            
+            // Add 4 random distractor consonants
+            const availableConsonants = consonants.filter(c => !tilesToShow.includes(c));
+            const distractors = shuffle(availableConsonants).slice(0, 4);
+            tilesToShow = tilesToShow.concat(distractors);
+        }
+        
+        tilesToShow = shuffle(tilesToShow);
 
-        tiles.forEach((letter, i) => {
+        tilesToShow.forEach((letter, i) => {
             const tile = document.createElement("div");
             tile.className = "tile";
             tile.textContent = letter;
             tile.dataset.index = String(i);
-            tile.addEventListener("pointerdown", tilePointerDown);
+            tile.dataset.source = "tile";
+            tile.addEventListener("pointerdown", tilePointerDown, false);
             tilesRow.appendChild(tile);
         });
-
-        speakWord();
     }
 
     function tilePointerDown(e){
+        if (!e.target.textContent.trim()) return;
         e.preventDefault();
-        const tile = e.currentTarget;
-        if (!tile.textContent) return;
-        dragData.sourceType = "tile";
-        dragData.sourceIndex = tile.dataset.index;
-        dragData.letter = tile.textContent;
-        tile.classList.add("dragging");
-        startPointerDrag(e);
+        e.target.setPointerCapture(e.pointerId);
+        
+        draggedElement = e.target;
+        isDragging = true;
+        
+        draggedElement.classList.add("dragging");
+        draggedElement.addEventListener("pointermove", handlePointerMove, false);
+        draggedElement.addEventListener("pointerup", handlePointerUp, false);
     }
 
     function boxPointerDown(e){
+        if (!e.target.textContent.trim()) return;
         e.preventDefault();
-        const box = e.currentTarget;
-        if (!box.textContent) return;
-        dragData.sourceType = "box";
-        dragData.sourceIndex = box.dataset.index;
-        dragData.letter = box.textContent;
-        box.classList.add("dragging");
-        startPointerDrag(e);
+        e.target.setPointerCapture(e.pointerId);
+        
+        draggedElement = e.target;
+        isDragging = true;
+        
+        draggedElement.classList.add("dragging");
+        draggedElement.addEventListener("pointermove", handlePointerMove, false);
+        draggedElement.addEventListener("pointerup", handlePointerUp, false);
     }
 
-    function startPointerDrag(e){
-        window.addEventListener("pointermove", pointerMove);
-        window.addEventListener("pointerup", pointerUp, { once:true });
-    }
-
-    function pointerMove(e){
+    function handlePointerMove(e) {
+        if (!isDragging || !draggedElement) return;
         e.preventDefault();
+        
         const boxes = document.querySelectorAll(".drop-box");
         boxes.forEach(b => b.classList.remove("highlight"));
+        
         const el = document.elementFromPoint(e.clientX, e.clientY);
         if (el && el.classList && el.classList.contains("drop-box")) {
             el.classList.add("highlight");
         }
     }
 
-    function pointerUp(e){
-        const tilesRow = document.getElementById("tilesRow");
+    function handleDragEnter(e) {
+        if (isDragging) {
+            e.preventDefault();
+            e.currentTarget.classList.add("highlight");
+        }
+    }
+
+    function handleDragLeave(e) {
+        e.currentTarget.classList.remove("highlight");
+    }
+
+    function handlePointerUp(e) {
+        if (!draggedElement) return;
+        
+        e.preventDefault();
+        isDragging = false;
+        draggedElement.classList.remove("dragging");
+        
         const boxes = document.querySelectorAll(".drop-box");
         boxes.forEach(b => b.classList.remove("highlight"));
-        document.querySelectorAll(".tile, .drop-box").forEach(el => el.classList.remove("dragging"));
 
+        const letter = draggedElement.textContent;
+        const tiles = document.querySelectorAll(".tile");
+        const tilesRow = document.getElementById("tilesRow");
         const target = document.elementFromPoint(e.clientX, e.clientY);
-        if (!dragData.letter) {
-            resetDragData();
-            return;
-        }
 
         if (target && target.classList && target.classList.contains("drop-box")) {
-            const targetIndex = target.dataset.index;
-            placeLetterInBox(targetIndex);
-        } else if (target && (target.id === "tilesRow" || target.closest("#tilesRow"))) {
-            placeLetterBackToTiles();
-        }
-        resetDragData();
-
-        window.removeEventListener("pointermove", pointerMove);
-    }
-
-    function placeLetterInBox(targetIndex){
-        const boxes = document.querySelectorAll(".drop-box");
-        const tiles = document.querySelectorAll(".tile");
-
-        const targetBox = Array.from(boxes).find(b => b.dataset.index === targetIndex);
-        if (!targetBox) return;
-
-        if (dragData.sourceType === "tile") {
-            const tile = Array.from(tiles).find(t => t.dataset.index === dragData.sourceIndex);
-            if (!tile) return;
-            const existing = targetBox.textContent;
-            if (existing) {
-                tile.textContent = existing;
-            } else {
-                tile.textContent = "";
+            const existing = target.textContent.trim();
+            if (existing && draggedElement.classList.contains("drop-box")) {
+                target.textContent = letter;
+                draggedElement.textContent = existing;
+            } else if (existing && draggedElement.classList.contains("tile")) {
+                draggedElement.textContent = existing;
+                target.textContent = letter;
+            } else if (!existing) {
+                target.textContent = letter;
+                if (draggedElement.classList.contains("tile")) {
+                    draggedElement.textContent = "";
+                    draggedElement.classList.add("empty");
+                } else {
+                    draggedElement.textContent = "";
+                }
             }
-            targetBox.textContent = dragData.letter;
-        } else if (dragData.sourceType === "box") {
-            const fromBox = Array.from(boxes).find(b => b.dataset.index === dragData.sourceIndex);
-            if (!fromBox) return;
-            const existing = targetBox.textContent;
-            if (existing) {
-                targetBox.textContent = dragData.letter;
-                fromBox.textContent = existing;
-            } else {
-                targetBox.textContent = dragData.letter;
-                fromBox.textContent = "";
+        } else if (target && (target.id === "tilesRow" || (target.closest && target.closest("#tilesRow")))) {
+            if (draggedElement.classList.contains("drop-box")) {
+                const emptyTile = Array.from(tiles).find(t => !t.textContent.trim());
+                if (emptyTile) {
+                    emptyTile.textContent = letter;
+                    emptyTile.classList.remove("empty");
+                    draggedElement.textContent = "";
+                } else {
+                    const newTile = document.createElement("div");
+                    newTile.className = "tile";
+                    newTile.textContent = letter;
+                    newTile.dataset.index = String(tiles.length);
+                    newTile.dataset.source = "tile";
+                    newTile.addEventListener("pointerdown", tilePointerDown, false);
+                    tilesRow.appendChild(newTile);
+                    draggedElement.textContent = "";
+                }
             }
         }
-    }
 
-    function placeLetterBackToTiles(){
-        const tilesRow = document.getElementById("tilesRow");
-        const boxes = document.querySelectorAll(".drop-box");
-        const tiles = document.querySelectorAll(".tile");
-
-        if (dragData.sourceType === "tile") {
-            return;
-        }
-
-        if (dragData.sourceType === "box") {
-            const fromBox = Array.from(boxes).find(b => b.dataset.index === dragData.sourceIndex);
-            if (!fromBox) return;
-            const emptyTile = Array.from(tiles).find(t => !t.textContent);
-            if (emptyTile) {
-                emptyTile.textContent = dragData.letter;
-            } else {
-                const newTile = document.createElement("div");
-                newTile.className = "tile";
-                newTile.textContent = dragData.letter;
-                newTile.dataset.index = String(tiles.length);
-                newTile.addEventListener("pointerdown", tilePointerDown);
-                tilesRow.appendChild(newTile);
-            }
-            fromBox.textContent = "";
-        }
-    }
-
-    function resetDragData(){
-        dragData.sourceType = null;
-        dragData.sourceIndex = null;
-        dragData.letter = null;
+        draggedElement.removeEventListener("pointermove", handlePointerMove);
+        draggedElement.removeEventListener("pointerup", handlePointerUp);
+        draggedElement = null;
     }
 
     function checkAnswer(){
         const word = gameWords[currentIndex];
+        const exerciseType = exerciseTypes[currentIndex];
         const boxes = document.querySelectorAll(".drop-box");
-        const answer = Array.from(boxes).map(b => b.textContent || "").join("");
         const feedback = document.getElementById("feedback");
 
-        if (answer.length < word.length || Array.from(boxes).some(b => !b.textContent)) {
-            feedback.textContent = "Fill all the boxes.";
+        let allCorrect = true;
+        
+        boxes.forEach(box => {
+            const ch = box.dataset.letter;
+            const isVowel = vowels.includes(ch);
+            const shouldBeFilled = (exerciseType === 'vowels' && isVowel) || 
+                                   (exerciseType === 'consonants' && !isVowel);
+            
+            if (shouldBeFilled && box.textContent.trim() !== ch) {
+                allCorrect = false;
+            }
+        });
+
+        if (!allCorrect) {
+            feedback.textContent = "Not quite. Try again!";
             feedback.className = "feedback bad";
-            playErrorSound(true);
             return;
         }
 
-        if (answer === word) {
-            feedback.textContent = "Great job! ✔";
-            feedback.className = "feedback ok";
-            score++;
-            playSuccessSound();
-            setTimeout(() => {
-                currentIndex++;
-                if (currentIndex < gameWords.length) {
-                    loadWord();
-                } else {
-                    showResults();
-                }
-            }, 1500);
-        } else {
-            feedback.textContent = "Not quite. Try again!";
-            feedback.className = "feedback bad";
-            playErrorSound(false);
-            resetLetters();
-        }
-    }
-
-    function resetLetters(){
-        const boxes = document.querySelectorAll(".drop-box");
-        const tilesRow = document.getElementById("tilesRow");
-        const letters = [];
-
-        boxes.forEach(b => {
-            if (b.textContent) letters.push(b.textContent);
-            b.textContent = "";
-        });
-
-        document.querySelectorAll(".tile").forEach(t => {
-            if (t.textContent) letters.push(t.textContent);
-            t.remove();
-        });
-
-        letters.forEach((ch, i) => {
-            const tile = document.createElement("div");
-            tile.className = "tile";
-            tile.textContent = ch;
-            tile.dataset.index = String(i);
-            tile.addEventListener("pointerdown", tilePointerDown);
-            tilesRow.appendChild(tile);
-        });
-    }
-
-    function speakWord(){
-        const word = gameWords[currentIndex];
-        if (!window.speechSynthesis) return;
-        const u = new SpeechSynthesisUtterance(word);
-        u.rate = 0.9;
-        u.pitch = 1.1;
-        u.volume = 1;
-        const voices = speechSynthesis.getVoices();
-        const preferred = voices.find(v => /child|kids/i.test(v.name)) ||
-                         voices.find(v => /female/i.test(v.name) && /en/i.test(v.lang)) ||
-                         voices[0];
-        if (preferred) u.voice = preferred;
-        speechSynthesis.cancel();
-        speechSynthesis.speak(u);
-    }
-
-    function playSuccessSound(){
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const notes = [700, 900, 1100];
-        notes.forEach((f, i) => {
-            const o = ctx.createOscillator();
-            const g = ctx.createGain();
-            o.frequency.value = f;
-            o.type = "triangle";
-            o.connect(g);
-            g.connect(ctx.destination);
-            const t = ctx.currentTime + i * 0.15;
-            g.gain.setValueAtTime(0.25, t);
-            g.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
-            o.start(t);
-            o.stop(t + 0.25);
-        });
-    }
-
-    function playErrorSound(short){
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = "square";
-        o.frequency.value = 220;
-        o.connect(g);
-        g.connect(ctx.destination);
-        const len = short ? 0.18 : 0.35;
-        g.gain.setValueAtTime(0.25, ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + len);
-        o.start();
-        o.stop(ctx.currentTime + len);
+        feedback.textContent = "Great job! ✔";
+        feedback.className = "feedback ok";
+        score++;
+        updateSmallStars();
+        
+        setTimeout(() => {
+            currentIndex++;
+            if (currentIndex < gameWords.length) {
+                loadWord();
+            } else {
+                showResults();
+            }
+        }, 1500);
     }
 
     function showResults(){
@@ -769,10 +727,6 @@
 
     function playAgain(){
         startGame();
-    }
-
-    if ("speechSynthesis" in window) {
-        speechSynthesis.onvoiceschanged = () => {};
     }
 </script>
 </body>
