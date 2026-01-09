@@ -178,32 +178,6 @@
     bottom: 6px;
   }
 
-  /* Drag and drop */
-  .drag-source {
-    display: inline-block;
-    padding: 6px 10px;
-    margin: 4px;
-    background: #e0f7fa;
-    border-radius: 6px;
-    cursor: grab;
-    font-size: clamp(14px, 2.5vw, 16px);
-  }
-  .drop-box {
-    display: inline-block;
-    min-width: 40px;
-    min-height: 36px;
-    margin: 4px;
-    padding: 4px 8px;
-    border-radius: 6px;
-    border: 2px dashed #bbb;
-    vertical-align: middle;
-    font-size: clamp(14px, 2.5vw, 16px);
-  }
-  .drop-box.filled {
-    border-style: solid;
-    border-color: #4a90e2;
-  }
-
   /* Group boxes for A/B comparison */
   .group-box {
     border: 2px solid #ccccff;
@@ -290,20 +264,11 @@
 
 <!-- LEVEL 2: Early Operations -->
 <div id="level-ops" class="level">
-  <!-- Combining groups with drag to boxes: box + box = total -->
+  <!-- Multiple-choice combinations instead of drag-and-drop -->
   <div class="task-box" id="task-add">
-    <div class="task-title">Drag numbers into the boxes</div>
-    <p id="add-formula-text">□ + □ = 8</p>
-    <div>
-      <span class="drop-box" id="add-drop-a"></span>
-      <span style="font-size:20px;">+</span>
-      <span class="drop-box" id="add-drop-b"></span>
-      <span style="font-size:20px;">=</span>
-      <span id="add-total-show" style="font-size:clamp(18px,3vw,22px);font-weight:bold;">8</span>
-    </div>
-    <p>Numbers:</p>
-    <div id="add-drag-numbers"></div>
-    <button class="btn btn-primary btn-small" onclick="checkAddDrag()">Check</button>
+    <div class="task-title">Choose the number pair that makes the total</div>
+    <p id="add-formula-text">X + Y = <span id="add-total-show">10</span></p>
+    <div id="add-choices"></div>
     <button class="btn btn-small btn-secondary new-btn" onclick="newAddTask()">New</button>
     <div class="feedback" id="add-feedback"></div>
   </div>
@@ -378,8 +343,14 @@
   <!-- Length compare -->
   <div class="task-box" id="task-length">
     <div class="task-title">Which is longer?</div>
-    <pre id="length-a" style="font-size:clamp(16px,3.2vw,18px);">======</pre>
-    <pre id="length-b" style="font-size:clamp(16px,3.2vw,18px);">====</pre>
+    <div>
+      <p><strong>A:</strong></p>
+      <pre id="length-a" style="font-size:clamp(16px,3.2vw,18px);">======</pre>
+    </div>
+    <div>
+      <p><strong>B:</strong></p>
+      <pre id="length-b" style="font-size:clamp(16px,3.2vw,18px);">====</pre>
+    </div>
     <button class="btn btn-choice" onclick="checkLength('A')">A is longer</button>
     <button class="btn btn-choice" onclick="checkLength('B')">B is longer</button>
     <button class="btn btn-choice" onclick="checkLength('same')">Same length</button>
@@ -540,62 +511,65 @@
     }
   }
 
-  // ------- SIMPLE DRAG & DROP HELPERS -------
-  function makeDraggable(element, value) {
-    element.draggable = true;
-    element.addEventListener('dragstart', ev => {
-      ev.dataTransfer.setData('text/plain', value);
-    });
-  }
-  function makeDropBox(box) {
-    box.addEventListener('dragover', ev => {
-      ev.preventDefault();
-    });
-    box.addEventListener('drop', ev => {
-      ev.preventDefault();
-      const value = ev.dataTransfer.getData('text/plain');
-      box.textContent = value;
-      box.dataset.value = value;
-      box.classList.add('filled');
-    });
-  }
+  // ------- LEVEL 2: OPERATIONS (MULTIPLE-CHOICE ADDITION) -------
 
-  // ------- LEVEL 2: OPERATIONS -------
+  let addTotal = 10;
 
-  let addTotal = 8;
   function newAddTask() {
-    addTotal = Math.floor(Math.random() * 6) + 4; // 4–9
+    // Keep total between 5 and 10
+    addTotal = Math.floor(Math.random() * 6) + 5; // 5–10
     document.getElementById('add-total-show').textContent = addTotal;
-    document.getElementById('add-formula-text').textContent = '□ + □ = ' + addTotal;
-    const dropA = document.getElementById('add-drop-a');
-    const dropB = document.getElementById('add-drop-b');
-    dropA.textContent = '';
-    dropB.textContent = '';
-    dropA.dataset.value = '';
-    dropB.dataset.value = '';
-    dropA.classList.remove('filled');
-    dropB.classList.remove('filled');
-    const numsDiv = document.getElementById('add-drag-numbers');
-    numsDiv.innerHTML = '';
-    const choices = [1,2,3,4,5,6,7,8,9];
-    choices.forEach(n => {
-      const span = document.createElement('span');
-      span.textContent = n;
-      span.className = 'drag-source';
-      makeDraggable(span, String(n));
-      numsDiv.appendChild(span);
+    document.getElementById('add-formula-text').innerHTML =
+      'X + Y = <span id="add-total-show">' + addTotal + '</span>';
+
+    const allPairs = [];
+    for (let x = 0; x <= addTotal; x++) {
+      const y = addTotal - x;
+      allPairs.push({ x, y });
+    }
+    const correctPair = allPairs[Math.floor(Math.random() * allPairs.length)];
+    const usedPairs = new Set();
+    usedPairs.add(correctPair.x + ',' + correctPair.y);
+
+    const options = [correctPair];
+
+    // generate 3 incorrect pairs
+    while (options.length < 4) {
+      const maxVal = Math.max(1, addTotal + 3);
+      const x = Math.floor(Math.random() * (maxVal + 1));
+      const y = Math.floor(Math.random() * (maxVal + 1));
+      const key = x + ',' + y;
+      if (usedPairs.has(key)) continue;
+      if (x + y === addTotal) continue; // ensure only one correct
+      usedPairs.add(key);
+      options.push({ x, y });
+    }
+
+    shuffle(options);
+
+    const container = document.getElementById('add-choices');
+    container.innerHTML = '';
+    options.forEach((p, idx) => {
+      const label = String.fromCharCode(65 + idx); // A, B, C, D
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-choice';
+      btn.textContent = label + ') ' + p.x + ' + ' + p.y;
+      btn.onclick = () => checkAddChoice(p);
+      container.appendChild(btn);
     });
-    document.getElementById('add-feedback').textContent = '';
-  }
-  function checkAddDrag() {
-    const aVal = parseInt(document.getElementById('add-drop-a').dataset.value || '0', 10);
-    const bVal = parseInt(document.getElementById('add-drop-b').dataset.value || '0', 10);
+
     const fb = document.getElementById('add-feedback');
-    if (aVal + bVal === addTotal && aVal >= 0 && bVal >= 0) {
-      fb.textContent = 'Nice! ' + aVal + ' + ' + bVal + ' = ' + addTotal + '.';
+    fb.textContent = '';
+    fb.className = 'feedback';
+  }
+
+  function checkAddChoice(pair) {
+    const fb = document.getElementById('add-feedback');
+    if (pair.x + pair.y === addTotal) {
+      fb.textContent = 'Yes! ' + pair.x + ' + ' + pair.y + ' = ' + addTotal + '.';
       fb.className = 'feedback good';
     } else {
-      fb.textContent = 'Move numbers so they add to ' + addTotal + '.';
+      fb.textContent = 'Not this one. Try another pair.';
       fb.className = 'feedback bad';
     }
   }
@@ -903,9 +877,6 @@
   }
 
   // ------- INITIALISE ALL TASKS ON LOAD -------
-
-  makeDropBox(document.getElementById('add-drop-a'));
-  makeDropBox(document.getElementById('add-drop-b'));
 
   newCountTask();
   newRecogniseTask();
