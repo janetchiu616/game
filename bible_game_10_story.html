@@ -22,6 +22,10 @@
 
     * { box-sizing: border-box; }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       font-family: "Arial", "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -100,42 +104,7 @@
 
     .main-card {
       padding: 18px;
-    }
-
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0 0 14px;
-      font-size: 20px;
-    }
-
-    .progress-wrap {
-      margin-bottom: 18px;
-    }
-
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 14px;
-      background: #e7eefc;
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #ffd166, #ff9f43, #ff7eb6);
-      border-radius: 999px;
-      transition: width .4s ease;
+      scroll-margin-top: 16px;
     }
 
     .story-list {
@@ -314,6 +283,12 @@
       transform: translateY(-1px);
     }
 
+    .option-btn.selected {
+      background: #dce9ff;
+      outline: 2px solid #7aa8ff;
+      font-weight: 700;
+    }
+
     .option-btn.correct {
       background: #e8fff0;
       outline: 2px solid #7fd9a4;
@@ -349,6 +324,9 @@
       font-weight: 700;
       cursor: pointer;
       transition: .2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .btn-primary {
@@ -372,9 +350,19 @@
       display: none;
       position: relative;
       overflow: hidden;
+      border: 3px solid rgba(255, 184, 77, 0.45);
+      box-shadow: 0 12px 28px rgba(255, 184, 77, 0.22);
     }
 
-    .reward.show { display: block; }
+    .reward.show {
+      display: block;
+      animation: rewardPop .5s ease;
+    }
+
+    @keyframes rewardPop {
+      0% { transform: scale(.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
 
     .reward h3 {
       margin: 0 0 10px;
@@ -424,13 +412,6 @@
       box-shadow: 0 6px 16px rgba(0,0,0,.08);
     }
 
-    .footer-note {
-      margin-top: 18px;
-      font-size: 13px;
-      line-height: 1.7;
-      color: #6a6763;
-    }
-
     @media (max-width: 900px) {
       .layout {
         grid-template-columns: 1fr;
@@ -460,6 +441,15 @@
       .reward p {
         font-size: 15px;
       }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -474,29 +464,16 @@
 
     <div class="layout">
       <aside class="sidebar">
-        <h2 class="section-title">🌈 故事進度</h2>
-
-        <div class="progress-wrap">
-          <div class="progress-label">
-            <span id="progressText">已完成 0 / 10</span>
-            <span id="starCount">⭐ 0</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-        </div>
-
         <div class="story-list" id="storyList"></div>
+      </aside>
 
-              </aside>
-
-      <main class="main-card">
+      <main class="main-card" id="mainCard">
         <div class="topbar">
           <div class="pill" id="storyBadge">📘 故事 1 / 10</div>
-          <div class="score-box" id="scoreBox">答對：0 / 3</div>
+          <div class="score-box" id="scoreBox">已選：0 / 3</div>
         </div>
 
-        <div class="video-wrap">
+        <div class="video-wrap" id="storyTop">
           <iframe id="videoFrame" src="" title="Bible Story Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
 
@@ -727,8 +704,6 @@
     let completedStories = JSON.parse(localStorage.getItem("bibleGameCompleted") || "[]");
 
     const storyList = document.getElementById("storyList");
-    const progressText = document.getElementById("progressText");
-    const progressFill = document.getElementById("progressFill");
     const storyBadge = document.getElementById("storyBadge");
     const scoreBox = document.getElementById("scoreBox");
     const storyTitle = document.getElementById("storyTitle");
@@ -738,10 +713,10 @@
     const rewardBox = document.getElementById("rewardBox");
     const rewardText = document.getElementById("rewardText");
     const videoFrame = document.getElementById("videoFrame");
-    const starCount = document.getElementById("starCount");
     const checkBtn = document.getElementById("checkBtn");
     const resetBtn = document.getElementById("resetBtn");
     const nextBtn = document.getElementById("nextBtn");
+    const mainCard = document.getElementById("mainCard");
 
     function saveProgress() {
       localStorage.setItem("bibleGameCompleted", JSON.stringify(completedStories));
@@ -751,11 +726,19 @@
       return completedStories.includes(storyId);
     }
 
-    function updateProgress() {
-      const done = completedStories.length;
-      progressText.textContent = `已完成 ${done} / ${stories.length}`;
-      progressFill.style.width = `${(done / stories.length) * 100}%`;
-      starCount.textContent = `⭐ ${done}`;
+    function updateScoreSelection(questionsLength) {
+      const selectedCount = Object.keys(selectedAnswers).length;
+      scoreBox.textContent = `已選：${selectedCount} / ${questionsLength}`;
+    }
+
+    function scrollToStory() {
+      if (!mainCard) return;
+      mainCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function scrollToReward() {
+      if (!rewardBox) return;
+      rewardBox.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
     function renderStoryList() {
@@ -785,6 +768,7 @@
           selectedAnswers = {};
           rewardBox.classList.remove("show");
           render();
+          setTimeout(scrollToStory, 100);
         });
 
         storyList.appendChild(btn);
@@ -805,7 +789,7 @@
         const optionsHTML = item.options.map((option, oIndex) => {
           const isSelected = selectedAnswers[qIndex] === oIndex;
           return `
-            <button class="option-btn ${isSelected ? "selected" : ""}" data-q="${qIndex}" data-o="${oIndex}">
+            <button type="button" class="option-btn ${isSelected ? "selected" : ""}" data-q="${qIndex}" data-o="${oIndex}">
               ${String.fromCharCode(65 + oIndex)}. ${option}
             </button>
           `;
@@ -826,28 +810,41 @@
           const o = Number(btn.dataset.o);
           selectedAnswers[q] = o;
           renderQuiz(questions);
-          scoreBox.textContent = `答對：0 / ${questions.length}`;
+          updateScoreSelection(questions.length);
         });
       });
     }
 
+    function updateNextButton() {
+      if (currentStoryIndex === stories.length - 1) {
+        nextBtn.style.display = "none";
+      } else {
+        nextBtn.style.display = "inline-flex";
+      }
+    }
+
     function render() {
       const story = stories[currentStoryIndex];
+
       storyBadge.textContent = `📘 故事 ${story.id} / ${stories.length}`;
       storyTitle.textContent = `${story.icon} ${story.title}`;
       storySummary.textContent = story.summary;
       rewardText.textContent = story.reward;
-
-      const yt = story.youtubeId && story.youtubeId.startsWith("http")
-        ? story.youtubeId
-        : `https://www.youtube.com/embed/${story.youtubeId}`;
-      videoFrame.src = yt;
+      videoFrame.src = `https://www.youtube.com/embed/${story.youtubeId}`;
 
       renderLessons(story.lessons);
       renderQuiz(story.questions);
       renderStoryList();
-      updateProgress();
-      scoreBox.textContent = `答對：0 / ${story.questions.length}`;
+      updateScoreSelection(story.questions.length);
+      updateNextButton();
+    }
+
+    function showReward(story) {
+      rewardText.textContent = `${story.reward} ⭐`;
+      rewardBox.classList.remove("show");
+      void rewardBox.offsetWidth;
+      rewardBox.classList.add("show");
+      setTimeout(scrollToReward, 150);
     }
 
     function checkAnswers() {
@@ -861,9 +858,11 @@
         optionButtons.forEach(btn => {
           const optIndex = Number(btn.dataset.o);
           btn.classList.remove("correct", "wrong");
+
           if (optIndex === item.answer) {
             btn.classList.add("correct");
           }
+
           if (selectedAnswers[qIndex] === optIndex && optIndex !== item.answer) {
             btn.classList.add("wrong");
           }
@@ -885,13 +884,12 @@
       scoreBox.textContent = `答對：${correctCount} / ${story.questions.length}`;
 
       if (correctCount === story.questions.length) {
-        rewardBox.classList.add("show");
         if (!completedStories.includes(story.id)) {
           completedStories.push(story.id);
           saveProgress();
         }
         renderStoryList();
-        updateProgress();
+        showReward(story);
       } else {
         rewardBox.classList.remove("show");
       }
@@ -901,14 +899,17 @@
       selectedAnswers = {};
       rewardBox.classList.remove("show");
       render();
+      setTimeout(scrollToStory, 100);
     }
 
     function nextStory() {
-      currentStoryIndex = (currentStoryIndex + 1) % stories.length;
-      selectedAnswers = {};
-      rewardBox.classList.remove("show");
-      render();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (currentStoryIndex < stories.length - 1) {
+        currentStoryIndex += 1;
+        selectedAnswers = {};
+        rewardBox.classList.remove("show");
+        render();
+        setTimeout(scrollToStory, 100);
+      }
     }
 
     checkBtn.addEventListener("click", checkAnswers);
