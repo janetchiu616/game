@@ -1,113 +1,400 @@
-<div style="padding: 1rem 0;">
-<h2 class="sr-only">Ten frame making ten game for young children</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Ten Eggs Game - Make Ten Strategy</title>
+  <style>
+    :root {
+      --page-bg: #fff8ec;
+      --card-bg: #fff3d9;
+      --panel-bg: #fffaf0;
+      --text: #333333;
+      --muted: #6b6258;
+      --frame: #5f5e5a;
+      --egg-fixed: #fac775;
+      --egg-added: #9fe1cb;
+      --success: #2f6b12;
+      --button-bg: #ffffff;
+      --button-border: #d7b46a;
+      --button-text: #4a3a18;
+      --next-bg: #dff5ff;
+      --next-border: #75b9d8;
+      --shadow: 0 10px 24px rgba(70, 45, 10, 0.12);
+      --radius-lg: 22px;
+      --radius-md: 14px;
+      --cell-size: clamp(48px, 13vw, 72px);
+      --cell-gap: clamp(4px, 1.2vw, 7px);
+    }
 
-<div style="text-align: center; margin-bottom: 1rem;">
-  <span style="font-size: 14px; color: var(--color-text-secondary);">⭐ <span id="stars" style="font-weight: 500; color: var(--color-text-primary);">0</span> stars</span>
-</div>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-<div style="background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 2rem 1.5rem; text-align: center;">
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--page-bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
 
-  <p id="instruction" style="font-size: 19px; color: var(--color-text-primary); margin: 0 0 0.5rem; font-weight: 500;">
-    Fill the box to make 10! 🥚
-  </p>
-  <p id="subtext" style="font-size: 14px; color: var(--color-text-secondary); margin: 0 0 1.5rem;">
-    There are <span id="start-num" style="font-weight:500; color: var(--color-text-primary); font-size:17px;">7</span> eggs. Tap the empty spots to fill them up.
-  </p>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: max(18px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+      overflow-x: hidden;
+    }
 
-  <!-- The ten-frame -->
-  <div id="ten-frame" style="display: inline-grid; grid-template-columns: repeat(5, 56px); grid-template-rows: repeat(2, 56px); gap: 4px; background: #5F5E5A; padding: 4px; border-radius: var(--border-radius-md); margin-bottom: 1rem;">
-  </div>
+    .game-wrapper {
+      width: min(100%, 760px);
+    }
 
-  <!-- Live count -->
-  <p style="font-size: 15px; color: var(--color-text-secondary); margin: 0.5rem 0 1.2rem;">
-    Full spots: <span id="filled-count" style="font-weight: 500; color: var(--color-text-primary); font-size: 20px;">7</span>
-    &nbsp;·&nbsp; Empty spots: <span id="empty-count" style="font-weight: 500; color: var(--color-text-primary); font-size: 20px;">3</span>
-  </p>
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
 
-  <div id="feedback" style="min-height: 60px; font-size: 17px; font-weight: 500; display:flex; align-items:center; justify-content:center;"></div>
+    .stars {
+      text-align: center;
+      margin-bottom: 14px;
+      font-size: clamp(14px, 2.5vw, 18px);
+      color: var(--muted);
+    }
 
-  <div style="display: flex; gap: 10px; justify-content: center;">
-    <button onclick="newRound()" style="padding: 9px 18px; font-size: 14px;">↺ Try again</button>
-    <button id="next-btn" onclick="newRound()" style="display: none; padding: 9px 20px; font-size: 15px; background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info);">Next egg →</button>
-  </div>
-</div>
+    .stars strong {
+      color: var(--text);
+      font-weight: 700;
+    }
 
-<div style="margin-top: 1rem; padding: 12px 16px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); font-size: 13px; color: var(--color-text-secondary);">
-  <strong style="color: var(--color-text-primary); font-weight: 500;">For parents:</strong> This is the big one. As he fills the empty spots, say it out loud: "7 eggs, and 3 more makes 10!" The empty spots ARE the "friend of 10." Point at them before he fills: "How many empty? That's how many more we need."
-</div>
+    .game-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: clamp(18px, 5vw, 34px) clamp(14px, 4vw, 28px);
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
 
-<script>
-let startCount = 7;
-let stars = 0;
-let cells = [];
-let done = false;
+    #instruction {
+      font-size: clamp(22px, 5vw, 34px);
+      line-height: 1.18;
+      margin: 0 0 8px;
+      font-weight: 800;
+    }
 
-function buildFrame() {
-  const frame = document.getElementById('ten-frame');
-  frame.innerHTML = '';
-  cells = [];
-  for (let i = 0; i < 10; i++) {
-    const cell = document.createElement('div');
-    const filled = i < startCount;
-    cell.dataset.filled = filled ? '1' : '0';
-    cell.dataset.preset = filled ? '1' : '0';
-    cell.style.cssText = `background: ${filled ? '#FAC775' : 'var(--color-background-primary)'}; border-radius: 6px; display:flex; align-items:center; justify-content:center; font-size: 30px; cursor: ${filled ? 'default' : 'pointer'}; line-height:1;`;
-    cell.innerHTML = filled ? '🥚' : '';
-    cell.addEventListener('click', () => tapCell(cell));
-    frame.appendChild(cell);
-    cells.push(cell);
-  }
-}
+    #subtext {
+      font-size: clamp(16px, 3.6vw, 20px);
+      line-height: 1.45;
+      color: var(--muted);
+      margin: 0 auto clamp(18px, 4vw, 28px);
+      max-width: 620px;
+    }
 
-function tapCell(cell) {
-  if (done) return;
-  if (cell.dataset.preset === '1') return; // can't change preset eggs
+    #start-num {
+      font-weight: 800;
+      color: var(--text);
+      font-size: 1.12em;
+    }
 
-  // toggle
-  if (cell.dataset.filled === '1') {
-    cell.dataset.filled = '0';
-    cell.innerHTML = '';
-    cell.style.background = 'var(--color-background-primary)';
-  } else {
-    cell.dataset.filled = '1';
-    cell.innerHTML = '🥚';
-    cell.style.background = '#9FE1CB';
-  }
-  updateCounts();
-}
+    .frame-scroll {
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
 
-function updateCounts() {
-  const filled = cells.filter(c => c.dataset.filled === '1').length;
-  const empty = 10 - filled;
-  document.getElementById('filled-count').textContent = filled;
-  document.getElementById('empty-count').textContent = empty;
+    #ten-frame {
+      display: inline-grid;
+      grid-template-columns: repeat(5, var(--cell-size));
+      grid-template-rows: repeat(2, var(--cell-size));
+      gap: var(--cell-gap);
+      background: var(--frame);
+      padding: var(--cell-gap);
+      border-radius: var(--radius-md);
+      margin: 0 auto 12px;
+      max-width: 100%;
+      touch-action: manipulation;
+    }
 
-  const feedback = document.getElementById('feedback');
+    .cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border: 0;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(28px, 7vw, 42px);
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      transition: transform 0.08s ease, background-color 0.12s ease;
+    }
 
-  if (filled === 10) {
-    done = true;
-    stars++;
-    document.getElementById('stars').textContent = stars;
-    const added = 10 - startCount;
-    feedback.innerHTML = `<span style="color: #3B6D11;">🎉 You did it! ${startCount} + ${added} = 10</span>`;
-    document.getElementById('next-btn').style.display = 'inline-block';
-  } else if (filled > 10) {
-    feedback.innerHTML = `<span style="color: var(--color-text-warning);">Too many! Tap a green egg to take one away.</span>`;
-  } else {
-    feedback.innerHTML = `<span style="color: var(--color-text-secondary);">Keep going — ${10 - filled} more to fill!</span>`;
-  }
-}
+    .cell:active {
+      transform: scale(0.96);
+    }
 
-function newRound() {
-  done = false;
-  startCount = 5 + Math.floor(Math.random() * 4); // 5 to 8
-  document.getElementById('start-num').textContent = startCount;
-  document.getElementById('feedback').innerHTML = '';
-  document.getElementById('next-btn').style.display = 'none';
-  buildFrame();
-  updateCounts();
-}
+    .cell[disabled] {
+      cursor: default;
+      opacity: 1;
+    }
 
-newRound();
-</script>
-</div>
+    .cell-fixed {
+      background: var(--egg-fixed);
+    }
+
+    .cell-empty {
+      background: var(--panel-bg);
+    }
+
+    .cell-added {
+      background: var(--egg-added);
+    }
+
+    .count-row {
+      font-size: clamp(15px, 3.3vw, 18px);
+      color: var(--muted);
+      margin: 10px 0 18px;
+      line-height: 1.5;
+    }
+
+    .count-row strong {
+      font-size: 1.22em;
+      color: var(--text);
+    }
+
+    #feedback {
+      min-height: 58px;
+      padding: 0 8px;
+      font-size: clamp(16px, 3.8vw, 22px);
+      line-height: 1.35;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    button.game-button {
+      min-height: 48px;
+      min-width: 132px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: 2px solid var(--button-border);
+      background: var(--button-bg);
+      color: var(--button-text);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    button.game-button:active {
+      transform: scale(0.98);
+    }
+
+    #next-btn {
+      display: none;
+      background: var(--next-bg);
+      border-color: var(--next-border);
+    }
+
+    .parents-note {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: var(--panel-bg);
+      border-radius: var(--radius-md);
+      font-size: clamp(13px, 3vw, 16px);
+      line-height: 1.55;
+      color: var(--muted);
+      box-shadow: 0 6px 18px rgba(70, 45, 10, 0.08);
+    }
+
+    .parents-note strong {
+      color: var(--text);
+    }
+
+    @media (max-width: 380px) {
+      :root {
+        --cell-size: clamp(42px, 16.8vw, 52px);
+        --cell-gap: 4px;
+      }
+
+      body {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+
+      .game-card {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      button.game-button {
+        width: 100%;
+      }
+    }
+
+    @media (min-width: 768px) {
+      body {
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game-wrapper">
+    <h1 class="sr-only">Ten Eggs Game - Make Ten Strategy</h1>
+
+    <div class="stars" aria-live="polite">⭐ <strong id="stars">0</strong> stars</div>
+
+    <section class="game-card" aria-label="Ten Eggs Game">
+      <p id="instruction">Fill the box to make 10! 🥚</p>
+      <p id="subtext">
+        There are <span id="start-num">7</span> eggs. Tap the empty spots to fill them up.
+      </p>
+
+      <div class="frame-scroll" aria-label="Ten frame area">
+        <div id="ten-frame" role="group" aria-label="Ten frame"></div>
+      </div>
+
+      <p class="count-row">
+        Full spots: <strong id="filled-count">7</strong>
+        <span aria-hidden="true"> · </span>
+        Empty spots: <strong id="empty-count">3</strong>
+      </p>
+
+      <div id="feedback" aria-live="polite"></div>
+
+      <div class="button-row">
+        <button type="button" class="game-button" onclick="newRound()">↺ Try again</button>
+        <button type="button" class="game-button" id="next-btn" onclick="newRound()">Next egg →</button>
+      </div>
+    </section>
+
+    <aside class="parents-note">
+      <strong>For parents:</strong> This is the big one. As he fills the empty spots, say it out loud: “7 eggs, and 3 more makes 10!” The empty spots are the “friend of 10.” Point at them before he fills: “How many empty? That’s how many more we need.”
+    </aside>
+  </main>
+
+  <script>
+    let startCount = 7;
+    let stars = 0;
+    let cells = [];
+    let done = false;
+
+    function buildFrame() {
+      const frame = document.getElementById('ten-frame');
+      frame.innerHTML = '';
+      cells = [];
+
+      for (let i = 0; i < 10; i++) {
+        const cell = document.createElement('button');
+        const filled = i < startCount;
+
+        cell.type = 'button';
+        cell.className = filled ? 'cell cell-fixed' : 'cell cell-empty';
+        cell.dataset.filled = filled ? '1' : '0';
+        cell.dataset.preset = filled ? '1' : '0';
+        cell.setAttribute('aria-label', filled ? 'Fixed egg' : 'Empty spot. Tap to add egg');
+        cell.innerHTML = filled ? '🥚' : '';
+
+        if (filled) {
+          cell.disabled = true;
+        } else {
+          cell.addEventListener('pointerup', function (event) {
+            event.preventDefault();
+            tapCell(cell);
+          });
+        }
+
+        frame.appendChild(cell);
+        cells.push(cell);
+      }
+    }
+
+    function tapCell(cell) {
+      if (done || cell.dataset.preset === '1') return;
+
+      if (cell.dataset.filled === '1') {
+        cell.dataset.filled = '0';
+        cell.innerHTML = '';
+        cell.classList.remove('cell-added');
+        cell.classList.add('cell-empty');
+        cell.setAttribute('aria-label', 'Empty spot. Tap to add egg');
+      } else {
+        cell.dataset.filled = '1';
+        cell.innerHTML = '🥚';
+        cell.classList.remove('cell-empty');
+        cell.classList.add('cell-added');
+        cell.setAttribute('aria-label', 'Added egg. Tap to remove egg');
+      }
+
+      updateCounts();
+    }
+
+    function updateCounts() {
+      const filled = cells.filter(function (cell) {
+        return cell.dataset.filled === '1';
+      }).length;
+      const empty = 10 - filled;
+      const added = filled - startCount;
+      const need = 10 - startCount;
+
+      document.getElementById('filled-count').textContent = filled;
+      document.getElementById('empty-count').textContent = empty;
+
+      const feedback = document.getElementById('feedback');
+
+      if (filled === 10) {
+        done = true;
+        stars += 1;
+        document.getElementById('stars').textContent = stars;
+        feedback.style.color = 'var(--success)';
+        feedback.textContent = `🎉 You did it! ${startCount} + ${need} = 10`;
+        document.getElementById('next-btn').style.display = 'inline-block';
+      } else if (added > 0) {
+        feedback.style.color = 'var(--muted)';
+        feedback.textContent = `Good! Add ${need - added} more egg${need - added === 1 ? '' : 's'}.`;
+      } else {
+        feedback.style.color = 'var(--muted)';
+        feedback.textContent = `How many more eggs do we need?`;
+      }
+    }
+
+    function newRound() {
+      done = false;
+      startCount = 5 + Math.floor(Math.random() * 4); // 5 to 8
+      document.getElementById('start-num').textContent = startCount;
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('next-btn').style.display = 'none';
+      buildFrame();
+      updateCounts();
+    }
+
+    newRound();
+  </script>
+</body>
+</html>
