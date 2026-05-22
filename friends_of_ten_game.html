@@ -1,0 +1,182 @@
+<div style="padding: 1rem 0;">
+<h2 class="sr-only">Friends of Ten game for young children</h2>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+  <div style="display: flex; gap: 16px; font-size: 14px; color: var(--color-text-secondary);">
+    <span>⭐ Stars: <span id="stars" style="font-weight: 500; color: var(--color-text-primary);">0</span></span>
+    <span>🔥 Streak: <span id="streak" style="font-weight: 500; color: var(--color-text-primary);">0</span></span>
+  </div>
+  <button onclick="resetGame()" style="padding: 6px 12px; font-size: 13px;">Reset</button>
+</div>
+
+<div id="game-area" style="background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 2rem 1.5rem; text-align: center;">
+  
+  <p id="instruction" style="font-size: 18px; color: var(--color-text-primary); margin: 0 0 1.5rem; font-weight: 500;">
+    How many fingers are hiding? 🙈
+  </p>
+
+  <div id="hand-display" style="display: flex; justify-content: center; gap: 24px; margin-bottom: 2rem; min-height: 140px; align-items: center;">
+    <!-- Hands populated by JS -->
+  </div>
+
+  <p style="font-size: 14px; color: var(--color-text-secondary); margin: 0 0 1rem;">
+    Showing <span id="showing-count" style="font-weight: 500; color: var(--color-text-primary); font-size: 18px;">3</span> fingers — how many hiding?
+  </p>
+
+  <div id="answer-buttons" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 10px; max-width: 480px; margin: 0 auto 1rem;">
+    <!-- Answer buttons populated by JS -->
+  </div>
+
+  <div id="feedback" style="min-height: 60px; margin-top: 1rem; font-size: 20px; font-weight: 500;">
+  </div>
+
+  <button id="next-btn" onclick="nextRound()" style="display: none; margin-top: 0.5rem; padding: 10px 24px; font-size: 16px; background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info);">
+    Next round →
+  </button>
+</div>
+
+<div style="margin-top: 1rem; padding: 12px 16px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); font-size: 13px; color: var(--color-text-secondary);">
+  <strong style="color: var(--color-text-primary); font-weight: 500;">For parents:</strong> Sit with your child. Ask them to count the visible fingers out loud, then guess how many are hiding. After 10 stars, take a break! 🎉
+</div>
+
+<script>
+let stars = 0;
+let streak = 0;
+let currentShowing = 3;
+let currentAnswer = 7;
+let answered = false;
+
+function renderHands(showing) {
+  const handDisplay = document.getElementById('hand-display');
+  // Two hands of 5 fingers each = 10 total
+  // Show 'showing' fingers up, rest down
+  let html = '';
+  for (let h = 0; h < 2; h++) {
+    html += '<div style="display: flex; gap: 3px; align-items: flex-end;">';
+    for (let f = 0; f < 5; f++) {
+      const fingerIndex = h * 5 + f;
+      const isUp = fingerIndex < showing;
+      if (isUp) {
+        // Finger up - tall rectangle
+        html += `<div style="width: 22px; height: 80px; background: #FAC775; border: 2px solid #BA7517; border-radius: 12px 12px 4px 4px;"></div>`;
+      } else {
+        // Finger hidden - small bump
+        html += `<div style="width: 22px; height: 20px; background: #D3D1C7; border: 2px solid #888780; border-radius: 12px 12px 4px 4px; opacity: 0.5;"></div>`;
+      }
+    }
+    // Palm
+    html += '</div>';
+  }
+  // Add palms underneath
+  handDisplay.innerHTML = `
+    <div style="display: flex; flex-direction: column; align-items: center;">
+      <div style="display: flex; gap: 3px; align-items: flex-end;">
+        ${Array.from({length: 5}, (_, f) => {
+          const isUp = f < Math.min(showing, 5);
+          return isUp 
+            ? `<div style="width: 22px; height: 80px; background: #FAC775; border: 2px solid #BA7517; border-radius: 12px 12px 4px 4px;"></div>`
+            : `<div style="width: 22px; height: 20px; background: #D3D1C7; border: 2px solid #888780; border-radius: 12px 12px 4px 4px; opacity: 0.5;"></div>`;
+        }).join('')}
+      </div>
+      <div style="width: 130px; height: 50px; background: #FAC775; border: 2px solid #BA7517; border-radius: 8px 8px 30px 30px; margin-top: -2px;"></div>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center;">
+      <div style="display: flex; gap: 3px; align-items: flex-end;">
+        ${Array.from({length: 5}, (_, f) => {
+          const fingerIndex = 5 + f;
+          const isUp = fingerIndex < showing;
+          return isUp 
+            ? `<div style="width: 22px; height: 80px; background: #FAC775; border: 2px solid #BA7517; border-radius: 12px 12px 4px 4px;"></div>`
+            : `<div style="width: 22px; height: 20px; background: #D3D1C7; border: 2px solid #888780; border-radius: 12px 12px 4px 4px; opacity: 0.5;"></div>`;
+        }).join('')}
+      </div>
+      <div style="width: 130px; height: 50px; background: #FAC775; border: 2px solid #BA7517; border-radius: 8px 8px 30px 30px; margin-top: -2px;"></div>
+    </div>
+  `;
+}
+
+function renderAnswerButtons() {
+  const container = document.getElementById('answer-buttons');
+  let html = '';
+  for (let i = 0; i <= 10; i++) {
+    html += `<button onclick="checkAnswer(${i})" data-answer="${i}" style="padding: 16px 0; font-size: 22px; font-weight: 500; background: var(--color-background-primary);">${i}</button>`;
+  }
+  container.innerHTML = html;
+}
+
+function nextRound() {
+  answered = false;
+  currentShowing = Math.floor(Math.random() * 11); // 0 to 10
+  currentAnswer = 10 - currentShowing;
+  
+  document.getElementById('showing-count').textContent = currentShowing;
+  document.getElementById('feedback').innerHTML = '';
+  document.getElementById('next-btn').style.display = 'none';
+  
+  // Re-enable all buttons
+  document.querySelectorAll('#answer-buttons button').forEach(btn => {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.background = 'var(--color-background-primary)';
+  });
+  
+  renderHands(currentShowing);
+}
+
+function checkAnswer(guess) {
+  if (answered) return;
+  answered = true;
+  
+  const feedback = document.getElementById('feedback');
+  const btn = document.querySelector(`button[data-answer="${guess}"]`);
+  
+  if (guess === currentAnswer) {
+    stars++;
+    streak++;
+    btn.style.background = '#C0DD97';
+    btn.style.borderColor = '#639922';
+    
+    let message = '🎉 Yes! Great job!';
+    if (streak === 3) message = '🌟 3 in a row! Amazing!';
+    if (streak === 5) message = '🚀 5 in a row! Wow!';
+    if (streak === 10) message = '🏆 10 in a row! Champion!';
+    
+    feedback.innerHTML = `<span style="color: #3B6D11;">${message}</span><br><span style="font-size: 14px; color: var(--color-text-secondary); font-weight: 400;">${currentShowing} + ${currentAnswer} = 10. They are friends of 10! 👫</span>`;
+  } else {
+    streak = 0;
+    btn.style.background = '#F7C1C1';
+    btn.style.borderColor = '#A32D2D';
+    // Highlight correct answer
+    const correctBtn = document.querySelector(`button[data-answer="${currentAnswer}"]`);
+    correctBtn.style.background = '#C0DD97';
+    correctBtn.style.borderColor = '#639922';
+    
+    feedback.innerHTML = `<span style="color: #A32D2D;">Almost! Let's try together 💛</span><br><span style="font-size: 14px; color: var(--color-text-secondary); font-weight: 400;">${currentShowing} fingers showing, ${currentAnswer} hiding. ${currentShowing} + ${currentAnswer} = 10!</span>`;
+  }
+  
+  // Disable all buttons
+  document.querySelectorAll('#answer-buttons button').forEach(b => {
+    b.disabled = true;
+    if (b !== btn && parseInt(b.dataset.answer) !== currentAnswer) {
+      b.style.opacity = '0.4';
+    }
+  });
+  
+  document.getElementById('stars').textContent = stars;
+  document.getElementById('streak').textContent = streak;
+  document.getElementById('next-btn').style.display = 'inline-block';
+}
+
+function resetGame() {
+  stars = 0;
+  streak = 0;
+  document.getElementById('stars').textContent = stars;
+  document.getElementById('streak').textContent = streak;
+  nextRound();
+}
+
+// Initialize
+renderAnswerButtons();
+nextRound();
+</script>
+</div>
