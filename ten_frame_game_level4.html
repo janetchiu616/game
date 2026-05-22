@@ -1,0 +1,113 @@
+<div style="padding: 1rem 0;">
+<h2 class="sr-only">Ten frame making ten game for young children</h2>
+
+<div style="text-align: center; margin-bottom: 1rem;">
+  <span style="font-size: 14px; color: var(--color-text-secondary);">⭐ <span id="stars" style="font-weight: 500; color: var(--color-text-primary);">0</span> stars</span>
+</div>
+
+<div style="background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 2rem 1.5rem; text-align: center;">
+
+  <p id="instruction" style="font-size: 19px; color: var(--color-text-primary); margin: 0 0 0.5rem; font-weight: 500;">
+    Fill the box to make 10! 🥚
+  </p>
+  <p id="subtext" style="font-size: 14px; color: var(--color-text-secondary); margin: 0 0 1.5rem;">
+    There are <span id="start-num" style="font-weight:500; color: var(--color-text-primary); font-size:17px;">7</span> eggs. Tap the empty spots to fill them up.
+  </p>
+
+  <!-- The ten-frame -->
+  <div id="ten-frame" style="display: inline-grid; grid-template-columns: repeat(5, 56px); grid-template-rows: repeat(2, 56px); gap: 4px; background: #5F5E5A; padding: 4px; border-radius: var(--border-radius-md); margin-bottom: 1rem;">
+  </div>
+
+  <!-- Live count -->
+  <p style="font-size: 15px; color: var(--color-text-secondary); margin: 0.5rem 0 1.2rem;">
+    Full spots: <span id="filled-count" style="font-weight: 500; color: var(--color-text-primary); font-size: 20px;">7</span>
+    &nbsp;·&nbsp; Empty spots: <span id="empty-count" style="font-weight: 500; color: var(--color-text-primary); font-size: 20px;">3</span>
+  </p>
+
+  <div id="feedback" style="min-height: 60px; font-size: 17px; font-weight: 500; display:flex; align-items:center; justify-content:center;"></div>
+
+  <div style="display: flex; gap: 10px; justify-content: center;">
+    <button onclick="newRound()" style="padding: 9px 18px; font-size: 14px;">↺ Try again</button>
+    <button id="next-btn" onclick="newRound()" style="display: none; padding: 9px 20px; font-size: 15px; background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info);">Next egg →</button>
+  </div>
+</div>
+
+<div style="margin-top: 1rem; padding: 12px 16px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); font-size: 13px; color: var(--color-text-secondary);">
+  <strong style="color: var(--color-text-primary); font-weight: 500;">For parents:</strong> This is the big one. As he fills the empty spots, say it out loud: "7 eggs, and 3 more makes 10!" The empty spots ARE the "friend of 10." Point at them before he fills: "How many empty? That's how many more we need."
+</div>
+
+<script>
+let startCount = 7;
+let stars = 0;
+let cells = [];
+let done = false;
+
+function buildFrame() {
+  const frame = document.getElementById('ten-frame');
+  frame.innerHTML = '';
+  cells = [];
+  for (let i = 0; i < 10; i++) {
+    const cell = document.createElement('div');
+    const filled = i < startCount;
+    cell.dataset.filled = filled ? '1' : '0';
+    cell.dataset.preset = filled ? '1' : '0';
+    cell.style.cssText = `background: ${filled ? '#FAC775' : 'var(--color-background-primary)'}; border-radius: 6px; display:flex; align-items:center; justify-content:center; font-size: 30px; cursor: ${filled ? 'default' : 'pointer'}; line-height:1;`;
+    cell.innerHTML = filled ? '🥚' : '';
+    cell.addEventListener('click', () => tapCell(cell));
+    frame.appendChild(cell);
+    cells.push(cell);
+  }
+}
+
+function tapCell(cell) {
+  if (done) return;
+  if (cell.dataset.preset === '1') return; // can't change preset eggs
+
+  // toggle
+  if (cell.dataset.filled === '1') {
+    cell.dataset.filled = '0';
+    cell.innerHTML = '';
+    cell.style.background = 'var(--color-background-primary)';
+  } else {
+    cell.dataset.filled = '1';
+    cell.innerHTML = '🥚';
+    cell.style.background = '#9FE1CB';
+  }
+  updateCounts();
+}
+
+function updateCounts() {
+  const filled = cells.filter(c => c.dataset.filled === '1').length;
+  const empty = 10 - filled;
+  document.getElementById('filled-count').textContent = filled;
+  document.getElementById('empty-count').textContent = empty;
+
+  const feedback = document.getElementById('feedback');
+
+  if (filled === 10) {
+    done = true;
+    stars++;
+    document.getElementById('stars').textContent = stars;
+    const added = 10 - startCount;
+    feedback.innerHTML = `<span style="color: #3B6D11;">🎉 You did it! ${startCount} + ${added} = 10</span>`;
+    document.getElementById('next-btn').style.display = 'inline-block';
+  } else if (filled > 10) {
+    feedback.innerHTML = `<span style="color: var(--color-text-warning);">Too many! Tap a green egg to take one away.</span>`;
+  } else {
+    feedback.innerHTML = `<span style="color: var(--color-text-secondary);">Keep going — ${10 - filled} more to fill!</span>`;
+  }
+}
+
+function newRound() {
+  done = false;
+  startCount = 5 + Math.floor(Math.random() * 4); // 5 to 8
+  document.getElementById('start-num').textContent = startCount;
+  document.getElementById('feedback').innerHTML = '';
+  document.getElementById('next-btn').style.display = 'none';
+  buildFrame();
+  updateCounts();
+}
+
+newRound();
+</script>
+</div>
