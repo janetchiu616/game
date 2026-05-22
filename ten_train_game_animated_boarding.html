@@ -1,0 +1,366 @@
+<div style="padding: 1rem 0;">
+<h2 class="sr-only">Illustrated train game where passengers visibly walk from the platform onto the train to make ten</h2>
+
+<style>
+@keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.3)} 100%{transform:scale(1)} }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+@keyframes spinwheel { to{transform:rotate(360deg)} }
+@keyframes waddle { 0%,100%{transform:translateY(0) rotate(-4deg)} 50%{transform:translateY(-4px) rotate(4deg)} }
+.pop{animation:pop .4s ease}
+.bnc{animation:bounce .55s ease}
+.shk{animation:shake .4s ease}
+.choice-btn{transition:transform .12s ease}
+.choice-btn:hover{transform:translateY(-4px) rotate(-2deg)}
+.choice-btn:active{transform:scale(.9)}
+.wheel-spin{animation:spinwheel .6s linear infinite;transform-origin:center}
+.walker{animation:waddle .35s ease infinite}
+.glow{animation:bounce 1.4s ease infinite}
+</style>
+
+<div style="text-align:center;margin-bottom:0.6rem;">
+  <span style="font-size:15px;color:var(--color-text-secondary);">Stations reached: <span id="stars" style="font-weight:500;color:var(--color-text-primary);font-size:18px;">0</span></span>
+</div>
+
+<div style="background:#FAEEDA;border-radius:var(--border-radius-lg);padding:0;overflow:hidden;">
+
+  <svg id="scene" width="100%" viewBox="0 0 680 270" role="img" style="display:block;">
+    <title>A train carriage and passengers on a platform who walk aboard to make ten</title>
+    <desc>Passengers walk from the platform into the carriage so the seats fill to ten.</desc>
+
+    <rect x="0" y="0" width="680" height="270" fill="#BFE4F2"/>
+    <circle cx="600" cy="44" r="24" fill="#FAD24E"/>
+    <g fill="#FFFFFF" opacity="0.9">
+      <ellipse cx="110" cy="46" rx="30" ry="17"/><ellipse cx="136" cy="40" rx="22" ry="14"/>
+      <ellipse cx="430" cy="32" rx="26" ry="15"/>
+    </g>
+    <path d="M0 150 Q170 110 340 150 Q510 190 680 140 L680 270 L0 270 Z" fill="#9ED36A"/>
+    <path d="M0 185 Q160 158 340 188 Q520 215 680 178 L680 270 L0 270 Z" fill="#7CB85A"/>
+    <rect x="0" y="232" width="680" height="9" fill="#9A6A3C"/>
+    <rect x="0" y="227" width="680" height="6" fill="#C68C4E"/>
+
+    <text x="236" y="34" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#1F5E8E">Train carriage — 10 seats</text>
+    <text x="540" y="34" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="500" fill="#993556">Platform</text>
+
+    <g id="smoke-puffs"></g>
+
+    <g id="engine-grp" style="cursor:pointer;">
+      <rect x="26" y="168" width="40" height="46" rx="6" fill="#C0392B"/>
+      <rect x="62" y="148" width="44" height="66" rx="7" fill="#D14536"/>
+      <circle cx="84" cy="180" r="14" fill="#FBE9C8"/>
+      <circle cx="84" cy="180" r="14" fill="none" stroke="#9E2C20" stroke-width="2.5"/>
+      <circle cx="84" cy="180" r="6" fill="#F6B940"/>
+      <rect x="38" y="138" width="14" height="32" rx="4" fill="#7A8A99"/>
+      <rect x="34" y="132" width="22" height="9" rx="4" fill="#5C6B78"/>
+      <rect x="24" y="208" width="90" height="11" rx="5" fill="#34404A"/>
+      <g id="ew1"><circle cx="48" cy="220" r="11" fill="#3A3A3A"/><circle cx="48" cy="220" r="4" fill="#9AA4AC"/><rect x="46" y="210" width="4" height="20" fill="#9AA4AC"/><rect x="38" y="218" width="20" height="4" fill="#9AA4AC"/></g>
+      <g id="ew2"><circle cx="92" cy="220" r="11" fill="#3A3A3A"/><circle cx="92" cy="220" r="4" fill="#9AA4AC"/><rect x="90" y="210" width="4" height="20" fill="#9AA4AC"/><rect x="82" y="218" width="20" height="4" fill="#9AA4AC"/></g>
+    </g>
+
+    <g id="carriage-grp">
+      <rect x="120" y="150" width="232" height="64" rx="9" fill="#2E86C1"/>
+      <rect x="120" y="150" width="232" height="12" rx="6" fill="#2470A8"/>
+      <rect x="114" y="146" width="244" height="9" rx="4" fill="#1F5E8E"/>
+      <g id="seats"></g>
+      <rect x="338" y="170" width="14" height="40" rx="3" fill="#1F5E8E"/>
+      <rect x="110" y="208" width="252" height="11" rx="5" fill="#34404A"/>
+      <g id="cw1"><circle cx="160" cy="220" r="11" fill="#3A3A3A"/><circle cx="160" cy="220" r="4" fill="#9AA4AC"/><rect x="158" y="210" width="4" height="20" fill="#9AA4AC"/><rect x="150" y="218" width="20" height="4" fill="#9AA4AC"/></g>
+      <g id="cw2"><circle cx="236" cy="220" r="11" fill="#3A3A3A"/><circle cx="236" cy="220" r="4" fill="#9AA4AC"/><rect x="234" y="210" width="4" height="20" fill="#9AA4AC"/><rect x="226" y="218" width="20" height="4" fill="#9AA4AC"/></g>
+      <g id="cw3"><circle cx="312" cy="220" r="11" fill="#3A3A3A"/><circle cx="312" cy="220" r="4" fill="#9AA4AC"/><rect x="310" y="210" width="4" height="20" fill="#9AA4AC"/><rect x="302" y="218" width="20" height="4" fill="#9AA4AC"/></g>
+    </g>
+
+    <g id="platform-grp">
+      <rect x="372" y="206" width="290" height="20" rx="4" fill="#D9B98C"/>
+      <rect x="372" y="202" width="290" height="6" rx="3" fill="#C99F6E"/>
+    </g>
+    <g id="waiting"></g>
+    <g id="movers"></g>
+  </svg>
+
+  <div style="background:var(--color-background-secondary);padding:1.1rem 1.25rem 1.4rem;text-align:center;">
+
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:0.7rem;">
+      <span id="dot1" style="width:10px;height:10px;border-radius:50%;background:#378ADD;display:inline-block;"></span>
+      <span id="dot2" style="width:10px;height:10px;border-radius:50%;background:#D3D1C7;display:inline-block;"></span>
+      <span id="dot3" style="width:10px;height:10px;border-radius:50%;background:#D3D1C7;display:inline-block;"></span>
+    </div>
+
+    <p id="conductor-says" style="font-size:15px;color:#1F5E8E;font-weight:500;margin:0 0 0.8rem;min-height:40px;line-height:1.4;">
+      "All aboard! Let's fill the carriage to 10."
+    </p>
+
+    <div style="display:flex;align-items:flex-start;justify-content:center;gap:11px;margin-bottom:0.9rem;">
+      <div id="num-a" style="font-size:44px;font-weight:500;color:#185FA5;line-height:58px;">8</div>
+      <div style="font-size:34px;color:var(--color-text-secondary);line-height:58px;">+</div>
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div id="num-b" style="font-size:44px;font-weight:500;color:#993556;line-height:58px;">5</div>
+        <svg width="74" height="28"><line x1="37" y1="0" x2="19" y2="24" stroke="#888780" stroke-width="2.5"/><line x1="37" y1="0" x2="55" y2="24" stroke="#888780" stroke-width="2.5"/></svg>
+        <div style="display:flex;gap:13px;margin-top:2px;">
+          <div id="cherry-left" style="width:40px;height:40px;border-radius:50%;background:#C0DD97;border:2.5px solid #639922;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;color:#27500A;">?</div>
+          <div id="cherry-right" style="width:40px;height:40px;border-radius:50%;background:#F4C0D1;border:2.5px solid #D4537E;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;color:#72243E;">?</div>
+        </div>
+      </div>
+      <div style="font-size:34px;color:var(--color-text-secondary);line-height:58px;">=</div>
+      <div id="answer-slot" style="font-size:44px;font-weight:500;color:var(--color-text-tertiary);line-height:58px;">?</div>
+    </div>
+
+    <p id="instruction" style="font-size:16px;color:var(--color-text-primary);margin:0 0 0.9rem;font-weight:500;min-height:22px;">
+      Count the glowing empty seats.
+    </p>
+
+    <div id="choices" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:0.4rem;"></div>
+
+    <div id="feedback" style="min-height:40px;font-size:16px;font-weight:500;display:flex;align-items:center;justify-content:center;"></div>
+
+    <button id="next-btn" onclick="newRound()" style="display:none;padding:10px 24px;font-size:16px;background:#B5D4F4;color:#042C53;border-color:#378ADD;font-weight:500;">Next station</button>
+  </div>
+</div>
+
+<div style="margin-top:1rem;padding:12px 16px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-size:13px;color:var(--color-text-secondary);">
+  <strong style="color:var(--color-text-primary);font-weight:500;">For parents:</strong> Watch the passengers walk together. After step 1, say "let's see them get on!" and watch them waddle from the platform into the carriage. Step 2 is just "count who's left on the platform." Step 3: "count everyone — train plus platform."
+</div>
+
+<script>
+let a=8,b=5,need=2,leftover=3,total=13,step=1,stars=0;
+const SVGNS='http://www.w3.org/2000/svg';
+const PCOLS=['#F6B940','#7FB069','#E08A6B','#9B8FD4','#5BB3C9','#E8739A'];
+
+let actx;
+function beep(f,d,t){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=t||'sine';o.frequency.value=f;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(0.16,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.start();o.stop(actx.currentTime+d);}catch(e){}}
+function happy(){beep(523,.12,'square');setTimeout(()=>beep(659,.12,'square'),110);setTimeout(()=>beep(784,.2,'square'),230);}
+function buzz(){beep(150,.2,'sawtooth');}
+function whistle(){beep(880,.18,'sine');setTimeout(()=>beep(1100,.3,'sine'),150);}
+function step1Sound(){beep(440,.1,'square');}
+function win(){[392,523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.16,'square'),i*110));setTimeout(whistle,620);}
+function flash(el,c){el.classList.remove(c);void el.offsetWidth;el.classList.add(c);}
+function say(t){document.getElementById('conductor-says').textContent=t;}
+
+function seatPos(i){
+  const col=i%5,row=Math.floor(i/5);
+  return {x:130+col*45, y:row===0?160:186, row:row};
+}
+
+function drawSeats(fullCount,highlightEmpty){
+  const g=document.getElementById('seats');g.innerHTML='';
+  for(let i=0;i<10;i++){
+    const p=seatPos(i);
+    const full=i<fullCount;
+    const win=document.createElementNS(SVGNS,'rect');
+    win.setAttribute('x',p.x);win.setAttribute('y',p.y);
+    win.setAttribute('width',34);win.setAttribute('height',p.row===0?22:14);
+    win.setAttribute('rx',4);
+    win.setAttribute('fill',full?'#BFE4F2':(highlightEmpty?'#FCEFB4':'#CFE8F0'));
+    win.setAttribute('stroke',full?'#1F5E8E':(highlightEmpty?'#E0A92E':'#9CC4D0'));
+    win.setAttribute('stroke-width',full?1.5:(highlightEmpty?2.5:1));
+    if(!full&&highlightEmpty)win.setAttribute('class','glow');
+    g.appendChild(win);
+    if(full){
+      const h=document.createElementNS(SVGNS,'circle');
+      h.setAttribute('cx',p.x+17);h.setAttribute('cy',p.y+(p.row===0?10:8));
+      h.setAttribute('r',p.row===0?7:5);
+      h.setAttribute('fill',PCOLS[i%PCOLS.length]);
+      g.appendChild(h);
+    }
+  }
+}
+
+function makePerson(x,y,color,scale){
+  const grp=document.createElementNS(SVGNS,'g');
+  grp.setAttribute('transform',`translate(${x},${y})`);
+  const body=document.createElementNS(SVGNS,'rect');
+  body.setAttribute('x',-7*scale);body.setAttribute('y',-6*scale);
+  body.setAttribute('width',14*scale);body.setAttribute('height',16*scale);
+  body.setAttribute('rx',5*scale);body.setAttribute('fill',color);
+  const head=document.createElementNS(SVGNS,'circle');
+  head.setAttribute('cx',0);head.setAttribute('cy',-12*scale);
+  head.setAttribute('r',7*scale);head.setAttribute('fill',color);
+  grp.appendChild(body);grp.appendChild(head);
+  return grp;
+}
+
+function drawWaiting(count){
+  const g=document.getElementById('waiting');g.innerHTML='';
+  for(let i=0;i<count;i++){
+    g.appendChild(makePerson(395+i*36,200,PCOLS[i%PCOLS.length],1));
+  }
+}
+
+function boardPassengers(callback){
+  const movers=document.getElementById('movers');
+  movers.innerHTML='';
+  document.getElementById('waiting').innerHTML='';
+  let arrived=0;
+  for(let i=0;i<need;i++){
+    const startX=395+i*36, startY=200;
+    const seatIdx=a+i;
+    const p=seatPos(seatIdx);
+    const endX=p.x+17, endY=p.y+(p.row===0?10:8);
+    const person=makePerson(startX,startY,PCOLS[i%PCOLS.length],1);
+    person.classList.add('walker');
+    movers.appendChild(person);
+    const delay=i*450;
+    setTimeout(()=>{
+      step1Sound();
+      person.style.transition='transform 1.1s ease-in-out';
+      person.setAttribute('transform',`translate(${endX},${endY}) scale(0.7)`);
+      setTimeout(()=>{
+        person.classList.remove('walker');
+        arrived++;
+        if(arrived===need){
+          movers.innerHTML='';
+          drawSeats(10,false);
+          if(callback)callback();
+        }
+      },1150);
+    },delay);
+  }
+  if(need===0){drawSeats(10,false);if(callback)callback();}
+}
+
+function puff(){
+  const box=document.getElementById('smoke-puffs');
+  for(let i=0;i<6;i++){
+    const c=document.createElementNS(SVGNS,'circle');
+    c.setAttribute('cx',46+i*3);c.setAttribute('cy',126-i*11);
+    c.setAttribute('r',6+i*2.3);
+    c.setAttribute('fill','#FFFFFF');c.setAttribute('opacity',0.8-i*0.12);
+    box.appendChild(c);setTimeout(()=>c.remove(),1400);
+  }
+}
+function spinWheels(on){['ew1','ew2','cw1','cw2','cw3'].forEach(id=>{
+  const el=document.getElementById(id);if(on)el.classList.add('wheel-spin');else el.classList.remove('wheel-spin');});}
+
+function dots(){
+  document.getElementById('dot1').style.background=step>=1?'#378ADD':'#D3D1C7';
+  document.getElementById('dot2').style.background=step>=2?'#378ADD':'#D3D1C7';
+  document.getElementById('dot3').style.background=step>=3?'#378ADD':'#D3D1C7';
+}
+
+function setup(){
+  a=6+Math.floor(Math.random()*4);
+  need=10-a;
+  const minB=need+1;
+  b=minB+Math.floor(Math.random()*(9-minB+1));
+  leftover=b-need;
+  total=a+b;
+  step=1;
+  document.getElementById('num-a').textContent=a;
+  document.getElementById('num-b').textContent=b;
+  const cl=document.getElementById('cherry-left'),cr=document.getElementById('cherry-right');
+  cl.textContent='?';cl.style.background='#C0DD97';
+  cr.textContent='?';cr.style.background='#F4C0D1';
+  const ans=document.getElementById('answer-slot');
+  ans.textContent='?';ans.style.color='var(--color-text-tertiary)';
+  document.getElementById('feedback').innerHTML='';
+  document.getElementById('next-btn').style.display='none';
+  document.getElementById('movers').innerHTML='';
+  spinWheels(false);
+  drawSeats(a,true);
+  drawWaiting(b);
+  dots();
+  renderStep1();
+}
+
+function makeChoices(opts,correct,handler){
+  const uniq=[...new Set(opts)].sort(()=>Math.random()-0.5);
+  const c=document.getElementById('choices');c.innerHTML='';
+  uniq.forEach(v=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.textContent=v;
+    btn.style.cssText='padding:16px 26px;font-size:26px;font-weight:500;background:var(--color-background-primary);border-radius:14px;';
+    btn.onclick=()=>handler(v,btn,correct);
+    c.appendChild(btn);
+  });
+}
+function lock(clicked,correctVal){
+  document.querySelectorAll('#choices button').forEach(b=>{
+    b.disabled=true;
+    if(parseInt(b.textContent)===correctVal){b.style.background='#C0DD97';b.style.borderColor='#639922';}
+    else if(b===clicked){b.style.background='#F7C1C1';b.style.borderColor='#A32D2D';}
+    else b.style.opacity='0.4';
+  });
+}
+function wrong(clicked,correctVal,hint,redraw){
+  buzz();
+  flash(document.getElementById('engine-grp'),'shk');
+  clicked.classList.add('shk');
+  document.getElementById('feedback').innerHTML=`<span style="color:var(--color-text-secondary);">${hint}</span>`;
+  setTimeout(()=>{redraw();document.getElementById('feedback').innerHTML='';},1800);
+}
+
+function renderStep1(){
+  dots();
+  drawSeats(a,true);
+  drawWaiting(b);
+  say(`"The carriage has ${a} passengers. How many seats are still empty?"`);
+  document.getElementById('instruction').textContent='Count the glowing yellow seats.';
+  makeChoices([need,need+1,Math.max(1,need-1)],need,pickNeed);
+}
+
+function pickNeed(v,btn,correct){
+  if(v!==correct){wrong(btn,correct,`Count again — ${a} seats full, ${correct} glowing.`,renderStep1);return;}
+  happy();
+  const cl=document.getElementById('cherry-left');
+  cl.textContent=need;cl.style.background='#9FE1CB';flash(cl,'pop');
+  document.getElementById('choices').innerHTML='';
+  say(`"${need} passengers walk aboard... watch them go!"`);
+  document.getElementById('instruction').textContent='The passengers are boarding the train...';
+  boardPassengers(()=>{
+    step=2;dots();
+    flash(document.getElementById('carriage-grp'),'bnc');
+    say(`"${a} + ${need} = 10. The carriage is full! Now — who is still on the platform?"`);
+    document.getElementById('instruction').textContent='Count the passengers still waiting.';
+    drawWaiting(leftover);
+    makeChoices([leftover,leftover+1,Math.max(1,leftover-1)],leftover,pickLeftover);
+  });
+}
+
+function pickLeftover(v,btn,correct){
+  if(v!==correct){
+    wrong(btn,correct,`${need} got on. From ${b}, that leaves ${correct} on the platform.`,()=>{
+      drawWaiting(leftover);
+      makeChoices([leftover,leftover+1,Math.max(1,leftover-1)],leftover,pickLeftover);
+    });
+    return;
+  }
+  happy();
+  const cr=document.getElementById('cherry-right');
+  cr.textContent=leftover;cr.style.background='#ED93B1';flash(cr,'pop');
+  say(`"Yes! ${leftover} still waiting. So ${b} splits into ${need} and ${leftover}."`);
+  document.getElementById('feedback').innerHTML='<span style="color:#3B6D11;">'+leftover+' on the platform.</span>';
+  step=3;dots();
+  setTimeout(()=>{
+    document.getElementById('feedback').innerHTML='';
+    say(`"Last one! 10 sitting on the train, and ${leftover} on the platform. How many people in total?"`);
+    document.getElementById('instruction').textContent=`Count everyone: 10 on the train + ${leftover} waiting.`;
+    makeChoices([total,total+1,total-1],total,pickTotal);
+  },1500);
+}
+
+function pickTotal(v,btn,correct){
+  if(v!==correct){wrong(btn,correct,`10 on the train and ${leftover} waiting makes ${correct}.`,()=>{
+    makeChoices([total,total+1,total-1],total,pickTotal);
+  });return;}
+  lock(btn,correct);
+  win();
+  const ans=document.getElementById('answer-slot');
+  ans.textContent=total;ans.style.color='#185FA5';flash(ans,'pop');
+  stars++;
+  const sv=document.getElementById('stars');
+  sv.textContent=stars;flash(sv,'bnc');
+  spinWheels(true);puff();setTimeout(puff,500);
+  say(`"Toot toot! 10 and ${leftover} makes ${total}. Off to the next station!"`);
+  document.getElementById('feedback').innerHTML=
+    `<span style="color:#3B6D11;font-size:18px;">${a} + ${b} = ${total}</span>`;
+  document.getElementById('next-btn').style.display='inline-block';
+}
+
+document.getElementById('engine-grp').onclick=()=>{
+  flash(document.getElementById('engine-grp'),'bnc');whistle();puff();
+};
+
+setup();
+function newRound(){setup();}
+</script>
+</div>
