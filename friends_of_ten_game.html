@@ -1,182 +1,502 @@
-<div style="padding: 1rem 0;">
-<h2 class="sr-only">Friends of Ten game for young children</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#fff8e7" />
+  <title>Ten Fingers Game</title>
+  <style>
+    :root {
+      --page-bg: #fff8e7;
+      --card-bg: #ffffff;
+      --panel-bg: #fff0c9;
+      --text: #2f2418;
+      --muted: #6f6255;
+      --primary: #f5a623;
+      --primary-dark: #ba7517;
+      --success-bg: #cce8a8;
+      --success-text: #35670f;
+      --error-bg: #ffd0d0;
+      --error-text: #963030;
+      --shadow: 0 12px 30px rgba(90, 61, 20, 0.14);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-  <div style="display: flex; gap: 16px; font-size: 14px; color: var(--color-text-secondary);">
-    <span>⭐ Stars: <span id="stars" style="font-weight: 500; color: var(--color-text-primary);">0</span></span>
-    <span>🔥 Streak: <span id="streak" style="font-weight: 500; color: var(--color-text-primary);">0</span></span>
-  </div>
-  <button onclick="resetGame()" style="padding: 6px 12px; font-size: 13px;">Reset</button>
-</div>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-<div id="game-area" style="background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 2rem 1.5rem; text-align: center;">
-  
-  <p id="instruction" style="font-size: 18px; color: var(--color-text-primary); margin: 0 0 1.5rem; font-weight: 500;">
-    How many fingers are hiding? 🙈
-  </p>
+    html {
+      min-height: 100%;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
 
-  <div id="hand-display" style="display: flex; justify-content: center; gap: 24px; margin-bottom: 2rem; min-height: 140px; align-items: center;">
-    <!-- Hands populated by JS -->
-  </div>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 218, 126, 0.45), transparent 32rem),
+        var(--page-bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
 
-  <p style="font-size: 14px; color: var(--color-text-secondary); margin: 0 0 1rem;">
-    Showing <span id="showing-count" style="font-weight: 500; color: var(--color-text-primary); font-size: 18px;">3</span> fingers — how many hiding?
-  </p>
+    button {
+      min-height: 44px;
+      border: 2px solid rgba(186, 117, 23, 0.25);
+      border-radius: 14px;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 0.12s ease, background-color 0.12s ease, opacity 0.12s ease;
+    }
 
-  <div id="answer-buttons" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 10px; max-width: 480px; margin: 0 auto 1rem;">
-    <!-- Answer buttons populated by JS -->
-  </div>
+    button:active:not(:disabled) {
+      transform: scale(0.97);
+    }
 
-  <div id="feedback" style="min-height: 60px; margin-top: 1rem; font-size: 20px; font-weight: 500;">
-  </div>
+    button:disabled {
+      cursor: default;
+    }
 
-  <button id="next-btn" onclick="nextRound()" style="display: none; margin-top: 0.5rem; padding: 10px 24px; font-size: 16px; background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info);">
-    Next round →
-  </button>
-</div>
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
 
-<div style="margin-top: 1rem; padding: 12px 16px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); font-size: 13px; color: var(--color-text-secondary);">
-  <strong style="color: var(--color-text-primary); font-weight: 500;">For parents:</strong> Sit with your child. Ask them to count the visible fingers out loud, then guess how many are hiding. After 10 stars, take a break! 🎉
-</div>
+    .game-shell {
+      width: min(100%, 980px);
+      margin: 0 auto;
+      padding: clamp(12px, 3vw, 28px);
+      padding-bottom: calc(clamp(14px, 3vw, 28px) + var(--safe-bottom));
+    }
 
-<script>
-let stars = 0;
-let streak = 0;
-let currentShowing = 3;
-let currentAnswer = 7;
-let answered = false;
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
 
-function renderHands(showing) {
-  const handDisplay = document.getElementById('hand-display');
-  // Two hands of 5 fingers each = 10 total
-  // Show 'showing' fingers up, rest down
-  let html = '';
-  for (let h = 0; h < 2; h++) {
-    html += '<div style="display: flex; gap: 3px; align-items: flex-end;">';
-    for (let f = 0; f < 5; f++) {
-      const fingerIndex = h * 5 + f;
-      const isUp = fingerIndex < showing;
-      if (isUp) {
-        // Finger up - tall rectangle
-        html += `<div style="width: 22px; height: 80px; background: #FAC775; border: 2px solid #BA7517; border-radius: 12px 12px 4px 4px;"></div>`;
-      } else {
-        // Finger hidden - small bump
-        html += `<div style="width: 22px; height: 20px; background: #D3D1C7; border: 2px solid #888780; border-radius: 12px 12px 4px 4px; opacity: 0.5;"></div>`;
+    .score-board {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: clamp(14px, 2.4vw, 17px);
+      color: var(--muted);
+    }
+
+    .score-pill {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(186, 117, 23, 0.16);
+      border-radius: 999px;
+      padding: 8px 12px;
+      box-shadow: 0 4px 12px rgba(90, 61, 20, 0.06);
+      white-space: nowrap;
+    }
+
+    .score-pill strong {
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .reset-button {
+      background: var(--card-bg);
+      padding: 8px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .game-area {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: clamp(18px, 4vw, 34px);
+      text-align: center;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(186, 117, 23, 0.14);
+    }
+
+    .instruction {
+      font-size: clamp(22px, 4.5vw, 34px);
+      line-height: 1.2;
+      margin: 0 0 clamp(14px, 3vw, 24px);
+      font-weight: 850;
+    }
+
+    .hand-display {
+      display: flex;
+      justify-content: center;
+      align-items: end;
+      gap: clamp(14px, 4vw, 34px);
+      min-height: clamp(116px, 25vw, 168px);
+      margin: 0 auto clamp(18px, 4vw, 28px);
+      max-width: 100%;
+      overflow: visible;
+    }
+
+    .hand {
+      --finger-w: clamp(13px, 4vw, 22px);
+      --finger-up-h: clamp(48px, 14vw, 80px);
+      --finger-down-h: clamp(15px, 4vw, 21px);
+      --finger-gap: clamp(2px, 0.8vw, 4px);
+      --palm-w: calc((var(--finger-w) * 5) + (var(--finger-gap) * 4) + 18px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 0 1 auto;
+      max-width: 46%;
+    }
+
+    .fingers {
+      display: flex;
+      gap: var(--finger-gap);
+      align-items: flex-end;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .finger {
+      width: var(--finger-w);
+      border: 2px solid var(--primary-dark);
+      border-radius: 999px 999px 6px 6px;
+      flex: 0 0 auto;
+    }
+
+    .finger.up {
+      height: var(--finger-up-h);
+      background: #fac775;
+    }
+
+    .finger.down {
+      height: var(--finger-down-h);
+      background: #d3d1c7;
+      border-color: #888780;
+      opacity: 0.55;
+    }
+
+    .palm {
+      width: min(var(--palm-w), 100%);
+      height: clamp(36px, 9vw, 52px);
+      background: #fac775;
+      border: 2px solid var(--primary-dark);
+      border-radius: 8px 8px 30px 30px;
+      margin-top: -2px;
+    }
+
+    .count-line {
+      font-size: clamp(15px, 3vw, 18px);
+      color: var(--muted);
+      margin: 0 0 14px;
+    }
+
+    #showing-count {
+      font-weight: 850;
+      color: var(--text);
+      font-size: 1.35em;
+    }
+
+    .answer-buttons {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: clamp(8px, 2vw, 12px);
+      width: min(100%, 560px);
+      margin: 0 auto 8px;
+    }
+
+    .answer-buttons button {
+      aspect-ratio: 1 / 0.82;
+      min-height: 56px;
+      padding: 8px 0;
+      background: var(--panel-bg);
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 850;
+      box-shadow: 0 4px 0 rgba(186, 117, 23, 0.18);
+    }
+
+    .answer-buttons button.correct {
+      background: var(--success-bg) !important;
+      border-color: #639922 !important;
+    }
+
+    .answer-buttons button.wrong {
+      background: var(--error-bg) !important;
+      border-color: #a32d2d !important;
+    }
+
+    .feedback {
+      min-height: 68px;
+      margin-top: 14px;
+      font-size: clamp(19px, 4vw, 26px);
+      font-weight: 850;
+      line-height: 1.28;
+    }
+
+    .feedback small {
+      display: block;
+      margin-top: 6px;
+      font-size: clamp(13px, 2.6vw, 16px);
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .next-button {
+      display: none;
+      margin-top: 10px;
+      padding: 12px 26px;
+      background: #dff0ff;
+      color: #174e78;
+      border-color: #8fc2e6;
+      font-size: clamp(16px, 3.2vw, 20px);
+      font-weight: 800;
+    }
+
+    .parent-note {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(186, 117, 23, 0.12);
+      font-size: clamp(13px, 2.5vw, 15px);
+      line-height: 1.5;
+      color: var(--muted);
+      box-shadow: 0 6px 18px rgba(90, 61, 20, 0.07);
+    }
+
+    .parent-note strong {
+      color: var(--text);
+      font-weight: 850;
+    }
+
+    @media (max-width: 560px) {
+      .game-shell {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .top-bar {
+        align-items: stretch;
+      }
+
+      .score-board {
+        gap: 6px;
+      }
+
+      .score-pill {
+        padding: 7px 9px;
+      }
+
+      .reset-button {
+        padding: 7px 10px;
+      }
+
+      .game-area {
+        padding: 16px 10px 18px;
+      }
+
+      .hand-display {
+        gap: 10px;
+      }
+
+      .answer-buttons {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
       }
     }
-    // Palm
-    html += '</div>';
-  }
-  // Add palms underneath
-  handDisplay.innerHTML = `
-    <div style="display: flex; flex-direction: column; align-items: center;">
-      <div style="display: flex; gap: 3px; align-items: flex-end;">
-        ${Array.from({length: 5}, (_, f) => {
-          const isUp = f < Math.min(showing, 5);
-          return isUp 
-            ? `<div style="width: 22px; height: 80px; background: #FAC775; border: 2px solid #BA7517; border-radius: 12px 12px 4px 4px;"></div>`
-            : `<div style="width: 22px; height: 20px; background: #D3D1C7; border: 2px solid #888780; border-radius: 12px 12px 4px 4px; opacity: 0.5;"></div>`;
-        }).join('')}
-      </div>
-      <div style="width: 130px; height: 50px; background: #FAC775; border: 2px solid #BA7517; border-radius: 8px 8px 30px 30px; margin-top: -2px;"></div>
-    </div>
-    <div style="display: flex; flex-direction: column; align-items: center;">
-      <div style="display: flex; gap: 3px; align-items: flex-end;">
-        ${Array.from({length: 5}, (_, f) => {
-          const fingerIndex = 5 + f;
-          const isUp = fingerIndex < showing;
-          return isUp 
-            ? `<div style="width: 22px; height: 80px; background: #FAC775; border: 2px solid #BA7517; border-radius: 12px 12px 4px 4px;"></div>`
-            : `<div style="width: 22px; height: 20px; background: #D3D1C7; border: 2px solid #888780; border-radius: 12px 12px 4px 4px; opacity: 0.5;"></div>`;
-        }).join('')}
-      </div>
-      <div style="width: 130px; height: 50px; background: #FAC775; border: 2px solid #BA7517; border-radius: 8px 8px 30px 30px; margin-top: -2px;"></div>
-    </div>
-  `;
-}
 
-function renderAnswerButtons() {
-  const container = document.getElementById('answer-buttons');
-  let html = '';
-  for (let i = 0; i <= 10; i++) {
-    html += `<button onclick="checkAnswer(${i})" data-answer="${i}" style="padding: 16px 0; font-size: 22px; font-weight: 500; background: var(--color-background-primary);">${i}</button>`;
-  }
-  container.innerHTML = html;
-}
+    @media (max-width: 360px) {
+      .answer-buttons {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
 
-function nextRound() {
-  answered = false;
-  currentShowing = Math.floor(Math.random() * 11); // 0 to 10
-  currentAnswer = 10 - currentShowing;
-  
-  document.getElementById('showing-count').textContent = currentShowing;
-  document.getElementById('feedback').innerHTML = '';
-  document.getElementById('next-btn').style.display = 'none';
-  
-  // Re-enable all buttons
-  document.querySelectorAll('#answer-buttons button').forEach(btn => {
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.background = 'var(--color-background-primary)';
-  });
-  
-  renderHands(currentShowing);
-}
-
-function checkAnswer(guess) {
-  if (answered) return;
-  answered = true;
-  
-  const feedback = document.getElementById('feedback');
-  const btn = document.querySelector(`button[data-answer="${guess}"]`);
-  
-  if (guess === currentAnswer) {
-    stars++;
-    streak++;
-    btn.style.background = '#C0DD97';
-    btn.style.borderColor = '#639922';
-    
-    let message = '🎉 Yes! Great job!';
-    if (streak === 3) message = '🌟 3 in a row! Amazing!';
-    if (streak === 5) message = '🚀 5 in a row! Wow!';
-    if (streak === 10) message = '🏆 10 in a row! Champion!';
-    
-    feedback.innerHTML = `<span style="color: #3B6D11;">${message}</span><br><span style="font-size: 14px; color: var(--color-text-secondary); font-weight: 400;">${currentShowing} + ${currentAnswer} = 10. They are friends of 10! 👫</span>`;
-  } else {
-    streak = 0;
-    btn.style.background = '#F7C1C1';
-    btn.style.borderColor = '#A32D2D';
-    // Highlight correct answer
-    const correctBtn = document.querySelector(`button[data-answer="${currentAnswer}"]`);
-    correctBtn.style.background = '#C0DD97';
-    correctBtn.style.borderColor = '#639922';
-    
-    feedback.innerHTML = `<span style="color: #A32D2D;">Almost! Let's try together 💛</span><br><span style="font-size: 14px; color: var(--color-text-secondary); font-weight: 400;">${currentShowing} fingers showing, ${currentAnswer} hiding. ${currentShowing} + ${currentAnswer} = 10!</span>`;
-  }
-  
-  // Disable all buttons
-  document.querySelectorAll('#answer-buttons button').forEach(b => {
-    b.disabled = true;
-    if (b !== btn && parseInt(b.dataset.answer) !== currentAnswer) {
-      b.style.opacity = '0.4';
+      .hand-display {
+        gap: 6px;
+      }
     }
-  });
-  
-  document.getElementById('stars').textContent = stars;
-  document.getElementById('streak').textContent = streak;
-  document.getElementById('next-btn').style.display = 'inline-block';
-}
 
-function resetGame() {
-  stars = 0;
-  streak = 0;
-  document.getElementById('stars').textContent = stars;
-  document.getElementById('streak').textContent = streak;
-  nextRound();
-}
+    @media (min-width: 900px) {
+      .answer-buttons {
+        grid-template-columns: repeat(11, minmax(0, 1fr));
+      }
 
-// Initialize
-renderAnswerButtons();
-nextRound();
-</script>
-</div>
+      .answer-buttons button {
+        aspect-ratio: 1 / 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game-shell">
+    <h1 class="sr-only">Ten Fingers Game</h1>
+
+    <div class="top-bar" aria-label="Score and reset controls">
+      <div class="score-board">
+        <span class="score-pill">⭐ Stars: <strong id="stars">0</strong></span>
+        <span class="score-pill">🔥 Streak: <strong id="streak">0</strong></span>
+      </div>
+      <button class="reset-button" type="button" onclick="resetGame()">Reset</button>
+    </div>
+
+    <section class="game-area" aria-labelledby="instruction">
+      <p id="instruction" class="instruction">How many fingers are hiding? 🙈</p>
+
+      <div id="hand-display" class="hand-display" aria-label="Ten fingers display"></div>
+
+      <p class="count-line">
+        Showing <span id="showing-count">3</span> fingers — how many are hiding?
+      </p>
+
+      <div id="answer-buttons" class="answer-buttons" aria-label="Answer choices"></div>
+
+      <div id="feedback" class="feedback" aria-live="polite"></div>
+
+      <button id="next-btn" class="next-button" type="button" onclick="nextRound()">Next round →</button>
+    </section>
+
+    <aside class="parent-note">
+      <strong>For parents:</strong> Sit with your child. Ask them to count the visible fingers out loud, then guess how many are hiding. After 10 stars, take a break! 🎉
+    </aside>
+  </main>
+
+  <script>
+    let stars = 0;
+    let streak = 0;
+    let currentShowing = 3;
+    let currentAnswer = 7;
+    let answered = false;
+
+    function makeFinger(isUp) {
+      const finger = document.createElement('div');
+      finger.className = 'finger ' + (isUp ? 'up' : 'down');
+      return finger;
+    }
+
+    function makeHand(startIndex, showing) {
+      const hand = document.createElement('div');
+      hand.className = 'hand';
+
+      const fingers = document.createElement('div');
+      fingers.className = 'fingers';
+
+      for (let f = 0; f < 5; f++) {
+        const fingerIndex = startIndex + f;
+        fingers.appendChild(makeFinger(fingerIndex < showing));
+      }
+
+      const palm = document.createElement('div');
+      palm.className = 'palm';
+
+      hand.appendChild(fingers);
+      hand.appendChild(palm);
+      return hand;
+    }
+
+    function renderHands(showing) {
+      const handDisplay = document.getElementById('hand-display');
+      handDisplay.replaceChildren(makeHand(0, showing), makeHand(5, showing));
+    }
+
+    function renderAnswerButtons() {
+      const container = document.getElementById('answer-buttons');
+      container.innerHTML = '';
+
+      for (let i = 0; i <= 10; i++) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = i;
+        button.dataset.answer = String(i);
+        button.setAttribute('aria-label', i + ' hiding fingers');
+        button.addEventListener('click', () => checkAnswer(i), { passive: true });
+        container.appendChild(button);
+      }
+    }
+
+    function nextRound() {
+      answered = false;
+      currentShowing = Math.floor(Math.random() * 11);
+      currentAnswer = 10 - currentShowing;
+
+      document.getElementById('showing-count').textContent = currentShowing;
+      document.getElementById('feedback').innerHTML = '';
+      document.getElementById('next-btn').style.display = 'none';
+
+      document.querySelectorAll('#answer-buttons button').forEach(button => {
+        button.disabled = false;
+        button.style.opacity = '1';
+        button.classList.remove('correct', 'wrong');
+      });
+
+      renderHands(currentShowing);
+    }
+
+    function checkAnswer(guess) {
+      if (answered) return;
+      answered = true;
+
+      const feedback = document.getElementById('feedback');
+      const selectedButton = document.querySelector(`#answer-buttons button[data-answer="${guess}"]`);
+      const correctButton = document.querySelector(`#answer-buttons button[data-answer="${currentAnswer}"]`);
+
+      if (guess === currentAnswer) {
+        stars++;
+        streak++;
+        selectedButton.classList.add('correct');
+
+        let message = '🎉 Yes! Great job!';
+        if (streak === 3) message = '🌟 3 in a row! Amazing!';
+        if (streak === 5) message = '🚀 5 in a row! Wow!';
+        if (streak === 10) message = '🏆 10 in a row! Champion!';
+
+        feedback.innerHTML =
+          `<span style="color: var(--success-text);">${message}</span>` +
+          `<small>${currentShowing} + ${currentAnswer} = 10. They are friends of 10! 👫</small>`;
+      } else {
+        streak = 0;
+        selectedButton.classList.add('wrong');
+        correctButton.classList.add('correct');
+
+        feedback.innerHTML =
+          `<span style="color: var(--error-text);">Almost! Let's try together 💛</span>` +
+          `<small>${currentShowing} fingers showing, ${currentAnswer} hiding. ${currentShowing} + ${currentAnswer} = 10!</small>`;
+      }
+
+      document.querySelectorAll('#answer-buttons button').forEach(button => {
+        button.disabled = true;
+        if (button !== selectedButton && Number(button.dataset.answer) !== currentAnswer) {
+          button.style.opacity = '0.42';
+        }
+      });
+
+      document.getElementById('stars').textContent = stars;
+      document.getElementById('streak').textContent = streak;
+      document.getElementById('next-btn').style.display = 'inline-block';
+    }
+
+    function resetGame() {
+      stars = 0;
+      streak = 0;
+      document.getElementById('stars').textContent = stars;
+      document.getElementById('streak').textContent = streak;
+      nextRound();
+    }
+
+    renderAnswerButtons();
+    nextRound();
+  </script>
+</body>
+</html>
