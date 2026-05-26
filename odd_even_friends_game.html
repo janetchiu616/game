@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Even Has Friends, Odd Has No Friend</title>
+  <style>
+    :root {
+      --blue: #43b7ff;
+      --green: #63c83b;
+      --purple: #7b4bd8;
+      --orange: #ffad2f;
+      --cream: #fff8df;
+      --dark: #3d2b23;
+      --card: rgba(255, 255, 255, 0.92);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+      color: var(--dark);
+      background:
+        radial-gradient(circle at 15% 15%, rgba(255,255,255,.8) 0 7%, transparent 8%),
+        radial-gradient(circle at 82% 17%, rgba(255,255,255,.75) 0 6%, transparent 7%),
+        linear-gradient(#53c7ff 0 58%, #8ddb46 58% 100%);
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: min(1180px, 96vw);
+      margin: 0 auto;
+      padding: clamp(10px, 2vw, 24px);
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .round-btn {
+      border: 5px solid white;
+      border-radius: 999px;
+      width: clamp(54px, 8vw, 78px);
+      height: clamp(54px, 8vw, 78px);
+      display: grid;
+      place-items: center;
+      background: linear-gradient(#ffcc3e, #ff9800);
+      box-shadow: 0 5px 0 rgba(0,0,0,.18);
+      font-size: clamp(26px, 4vw, 40px);
+      cursor: pointer;
+    }
+
+    .title-board {
+      flex: 1;
+      text-align: center;
+      background: linear-gradient(#ffe19b, #f5aa43);
+      border: 5px solid #f7941e;
+      border-radius: 22px;
+      box-shadow: 0 6px 0 rgba(0,0,0,.15);
+      padding: 8px 10px;
+      color: white;
+      text-shadow: 3px 3px 0 rgba(0,0,0,.18), -2px -2px 0 rgba(0,0,0,.08);
+      font-size: clamp(30px, 7vw, 76px);
+      font-weight: 900;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .title-board .even { color: #1688f2; }
+    .title-board .odd { color: #7f46d9; }
+    .sound { background: linear-gradient(#7be23b, #40aa1c); color: white; }
+
+    .lesson {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(12px, 2vw, 22px);
+      margin-bottom: 14px;
+    }
+
+    .panel {
+      position: relative;
+      background: var(--card);
+      border-radius: 28px;
+      border: 6px solid var(--green);
+      padding: clamp(58px, 8vw, 72px) clamp(12px, 2vw, 22px) 18px;
+      min-height: 260px;
+      box-shadow: 0 8px 0 rgba(0,0,0,.15);
+    }
+
+    .panel.odd-panel { border-color: #9962df; }
+
+    .ribbon {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      min-width: 76%;
+      text-align: center;
+      color: white;
+      font-weight: 900;
+      font-size: clamp(21px, 3.2vw, 38px);
+      padding: 12px 20px;
+      border-radius: 18px;
+      background: linear-gradient(#78d744, #39a825);
+      box-shadow: 0 5px 0 rgba(0,0,0,.18);
+      text-shadow: 2px 2px 0 rgba(0,0,0,.18);
+      white-space: nowrap;
+    }
+
+    .odd-panel .ribbon { background: linear-gradient(#9c6ce8, #6a3cc9); }
+
+    .examples {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .example {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 170px;
+      border-right: 3px dashed rgba(90, 90, 90, .22);
+    }
+    .example:last-child { border-right: none; }
+
+    .pairs {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      min-height: 78px;
+      max-width: 240px;
+    }
+
+    .pair, .lonely-group { display: flex; align-items: center; gap: 3px; }
+    .lonely-group { margin-right: 10px; }
+
+    .item {
+      font-size: clamp(34px, 5vw, 54px);
+      line-height: 1;
+      filter: drop-shadow(0 5px 1px rgba(0,0,0,.12));
+      animation: bob 1.5s ease-in-out infinite alternate;
+    }
+    .item:nth-child(even) { animation-delay: .15s; }
+
+    .hand { font-size: clamp(18px, 2.4vw, 26px); margin: 0 -2px; }
+
+    @keyframes bob { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+
+    .number {
+      font-size: clamp(42px, 7vw, 72px);
+      font-weight: 900;
+      line-height: 1;
+      margin-top: 4px;
+    }
+    .green { color: #44b62c; }
+    .purple { color: #7b4bd8; }
+
+    .caption {
+      text-align: center;
+      font-size: clamp(18px, 2.3vw, 30px);
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .game-card {
+      background: rgba(255,248,223,.97);
+      border: 5px solid #ffc34e;
+      border-radius: 26px;
+      box-shadow: 0 8px 0 rgba(0,0,0,.14);
+      padding: clamp(14px, 2.4vw, 24px);
+      text-align: center;
+    }
+
+    .teacher {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      font-size: clamp(18px, 2.4vw, 30px);
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+    .owl { font-size: clamp(42px, 6vw, 70px); }
+
+    .question {
+      font-size: clamp(22px, 3vw, 36px);
+      font-weight: 900;
+      margin: 8px 0 14px;
+    }
+
+    .play-area {
+      min-height: 150px;
+      background: white;
+      border: 4px dashed #ffd16d;
+      border-radius: 24px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 0 auto;
+      max-width: 760px;
+    }
+
+    .choice {
+      border: 5px solid white;
+      border-radius: 24px;
+      padding: clamp(14px, 2.2vw, 24px);
+      font-size: clamp(23px, 3vw, 38px);
+      font-weight: 900;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 7px 0 rgba(0,0,0,.18);
+      transition: transform .08s ease, filter .08s ease;
+      min-height: 90px;
+    }
+    .choice:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,.18); }
+    .choice-even { background: linear-gradient(#66d84e, #2ba81f); }
+    .choice-odd { background: linear-gradient(#a678ef, #7441cf); }
+
+    .feedback {
+      min-height: 46px;
+      margin-top: 14px;
+      font-size: clamp(20px, 2.8vw, 36px);
+      font-weight: 900;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .next {
+      background: linear-gradient(#ffbd42, #ff8f0e);
+      color: white;
+      border: 5px solid white;
+      border-radius: 999px;
+      padding: 12px 28px;
+      font-size: clamp(20px, 2.6vw, 32px);
+      font-weight: 900;
+      box-shadow: 0 6px 0 rgba(0,0,0,.18);
+      cursor: pointer;
+    }
+
+    .score {
+      font-size: clamp(18px, 2.3vw, 28px);
+      font-weight: 900;
+      background: white;
+      border-radius: 999px;
+      padding: 12px 20px;
+      border: 4px solid #ffd16d;
+    }
+
+    .confetti {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 10;
+    }
+    .confetti span {
+      position: absolute;
+      top: -30px;
+      font-size: 28px;
+      animation: fall 1.2s linear forwards;
+    }
+    @keyframes fall { to { transform: translateY(105vh) rotate(360deg); opacity: .1; } }
+
+    @media (max-width: 760px) {
+      .app { width: 100%; padding: 10px; }
+      header { gap: 8px; }
+      .lesson { grid-template-columns: 1fr; }
+      .panel { min-height: 230px; padding-top: 56px; }
+      .examples { gap: 6px; }
+      .choices { grid-template-columns: 1fr; }
+      .teacher { align-items: flex-start; }
+    }
+
+    @media (max-width: 440px) {
+      .title-board { letter-spacing: 0; }
+      .ribbon { min-width: 90%; font-size: 20px; }
+      .example { min-height: 145px; }
+      .item { font-size: 38px; }
+      .play-area { min-height: 120px; padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="confetti" id="confetti"></div>
+  <main class="app">
+    <header>
+      <button class="round-btn" onclick="restartGame()" aria-label="Home">🏠</button>
+      <div class="title-board"><span class="even">EVEN</span> & <span class="odd">ODD</span></div>
+      <button class="round-btn sound" onclick="toggleSound()" aria-label="Sound" id="soundBtn">🔊</button>
+    </header>
+
+    <section class="lesson" aria-label="Odd and even lesson">
+      <div class="panel even-panel">
+        <div class="ribbon">EVEN HAS FRIENDS</div>
+        <div class="examples">
+          <div class="example">
+            <div class="pairs" aria-label="2 apples make one pair">
+              <div class="pair"><span class="item">🍎</span><span class="hand">🤝</span><span class="item">🍎</span></div>
+            </div>
+            <div class="number green">2</div>
+            <div class="caption">They all have<br>friends!</div>
+          </div>
+          <div class="example">
+            <div class="pairs" aria-label="4 stars make two pairs">
+              <div class="pair"><span class="item">⭐</span><span class="hand">🤝</span><span class="item">⭐</span></div>
+              <div class="pair"><span class="item">⭐</span><span class="hand">🤝</span><span class="item">⭐</span></div>
+            </div>
+            <div class="number green">4</div>
+            <div class="caption">They all have<br>friends!</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel odd-panel">
+        <div class="ribbon">ODD HAS NO FRIEND</div>
+        <div class="examples">
+          <div class="example">
+            <div class="pairs" aria-label="3 berries have one leftover">
+              <div class="pair"><span class="item">🫐</span><span class="hand">🤝</span><span class="item">🫐</span></div>
+              <div class="lonely-group"><span class="item">🫐</span></div>
+            </div>
+            <div class="number purple">3</div>
+            <div class="caption">One has<br>no friend!</div>
+          </div>
+          <div class="example">
+            <div class="pairs" aria-label="5 carrots have one leftover">
+              <div class="pair"><span class="item">🥕</span><span class="hand">🤝</span><span class="item">🥕</span></div>
+              <div class="pair"><span class="item">🥕</span><span class="hand">🤝</span><span class="item">🥕</span></div>
+              <div class="lonely-group"><span class="item">🥕</span></div>
+            </div>
+            <div class="number purple">5</div>
+            <div class="caption">One has<br>no friend!</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="game-card" aria-label="Play game">
+      <div class="teacher"><span class="owl">🦉</span><span id="teacherText">Look carefully. Can everyone find a friend?</span></div>
+      <div class="question" id="question">Is this group ODD or EVEN?</div>
+      <div class="play-area" id="playArea" aria-live="polite"></div>
+      <div class="choices">
+        <button class="choice choice-even" onclick="checkAnswer('even')">EVEN<br><small>Everyone has a friend</small></button>
+        <button class="choice choice-odd" onclick="checkAnswer('odd')">ODD<br><small>One has no friend</small></button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <div class="controls">
+        <div class="score" id="score">Score: 0 / 0</div>
+        <button class="next" onclick="newRound()">NEXT ➜</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const objects = ['🍎', '⭐', '🫐', '🥕', '🐟', '🚗', '🧸', '🍪', '🌼'];
+    let currentNumber = 2;
+    let currentAnswer = 'even';
+    let score = 0;
+    let total = 0;
+    let soundOn = true;
+
+    function speak(text) {
+      if (!soundOn || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.82;
+      utterance.pitch = 1.25;
+      utterance.lang = 'en-US';
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function renderGroup(number, emoji) {
+      const playArea = document.getElementById('playArea');
+      playArea.innerHTML = '';
+
+      const pairs = Math.floor(number / 2);
+      const leftover = number % 2;
+
+      for (let i = 0; i < pairs; i++) {
+        const pair = document.createElement('div');
+        pair.className = 'pair';
+        pair.innerHTML = `<span class="item">${emoji}</span><span class="hand">🤝</span><span class="item">${emoji}</span>`;
+        playArea.appendChild(pair);
+      }
+
+      if (leftover) {
+        const lonely = document.createElement('div');
+        lonely.className = 'lonely-group';
+        lonely.innerHTML = `<span class="item">${emoji}</span>`;
+        playArea.appendChild(lonely);
+      }
+    }
+
+    function newRound() {
+      currentNumber = Math.floor(Math.random() * 10) + 1;
+      currentAnswer = currentNumber % 2 === 0 ? 'even' : 'odd';
+      const emoji = objects[Math.floor(Math.random() * objects.length)];
+      renderGroup(currentNumber, emoji);
+      document.getElementById('question').textContent = `${currentNumber} friends are here. Is it ODD or EVEN?`;
+      document.getElementById('teacherText').textContent = 'Pair them up. Does everyone have a friend?';
+      document.getElementById('feedback').textContent = '';
+      speak(`${currentNumber}. Pair them up. Does everyone have a friend?`);
+    }
+
+    function checkAnswer(answer) {
+      total++;
+      const feedback = document.getElementById('feedback');
+      if (answer === currentAnswer) {
+        score++;
+        if (currentAnswer === 'even') {
+          feedback.textContent = '✅ Correct! EVEN — everyone has a friend!';
+          speak('Correct! Even. Everyone has a friend.');
+        } else {
+          feedback.textContent = '✅ Correct! ODD — one has no friend!';
+          speak('Correct! Odd. One has no friend.');
+        }
+        celebrate();
+      } else {
+        if (currentAnswer === 'even') {
+          feedback.textContent = 'Try again. This is EVEN because everyone has a friend.';
+          speak('Try again. This is even because everyone has a friend.');
+        } else {
+          feedback.textContent = 'Try again. This is ODD because one has no friend.';
+          speak('Try again. This is odd because one has no friend.');
+        }
+      }
+      updateScore();
+      setTimeout(newRound, answer === currentAnswer ? 1600 : 2400);
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = `Score: ${score} / ${total}`;
+    }
+
+    function restartGame() {
+      score = 0;
+      total = 0;
+      updateScore();
+      newRound();
+    }
+
+    function toggleSound() {
+      soundOn = !soundOn;
+      document.getElementById('soundBtn').textContent = soundOn ? '🔊' : '🔇';
+      if (!soundOn && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
+    function celebrate() {
+      const box = document.getElementById('confetti');
+      const pieces = ['⭐','💛','🎉','🌈','✨'];
+      for (let i = 0; i < 18; i++) {
+        const s = document.createElement('span');
+        s.textContent = pieces[Math.floor(Math.random() * pieces.length)];
+        s.style.left = Math.random() * 100 + 'vw';
+        s.style.animationDelay = Math.random() * .25 + 's';
+        box.appendChild(s);
+        setTimeout(() => s.remove(), 1500);
+      }
+    }
+
+    newRound();
+  </script>
+</body>
+</html>
