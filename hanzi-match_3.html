@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>字圖配對 Hanzi Match</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFF6E9;
+    --ink:#2B2B33;
+    --mango:#FFB100;
+    --melon:#FF5D73;
+    --jade:#2EC4B6;
+    --sky:#3E92CC;
+    --grape:#9B5DE5;
+    --shadow:0 6px 0 rgba(43,43,51,.18);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Noto Sans TC',sans-serif; overflow:hidden;
+    background-image:radial-gradient(rgba(46,196,182,.14) 2px, transparent 2px);
+    background-size:34px 34px;
+    user-select:none; -webkit-user-select:none;
+  }
+  #app{max-width:520px; margin:0 auto; height:100dvh; display:flex; flex-direction:column; padding:12px;}
+
+  header{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 2px;}
+  .brand{font-family:'Baloo 2',cursive; font-weight:800; font-size:1.05rem; display:flex; align-items:center; gap:6px;}
+  .brand .zh{font-family:'Noto Sans TC'; font-weight:900; font-size:1.15rem;}
+  .starbar{font-weight:900; font-size:1.05rem; background:#fff; border-radius:999px; padding:6px 14px; box-shadow:var(--shadow);}
+
+  .btn{
+    border:0; cursor:pointer; font-family:inherit; font-weight:900; color:var(--ink);
+    background:#fff; border-radius:22px; box-shadow:var(--shadow);
+    transition:transform .12s ease;
+  }
+  .btn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(43,43,51,.18);}
+
+  .screen{flex:1; display:none; flex-direction:column; min-height:0;}
+  .screen.on{display:flex;}
+
+  /* ---------- menu ---------- */
+  #menu{justify-content:center;}
+  #menu h1{text-align:center; font-size:1.5rem; font-weight:900; margin:0;}
+  #menu p.sub{text-align:center; margin:4px 0 16px; font-weight:700; color:#7a7466; font-size:.85rem;}
+  #lvlist{display:flex; flex-direction:column; gap:12px;}
+  .lvbtn{
+    display:grid; grid-template-columns:52px 1fr auto; align-items:center; gap:14px;
+    width:100%; padding:12px 16px; font-size:1.1rem; text-align:left;
+  }
+  .lvbtn .badge{
+    width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+    font-size:1.6rem; color:#fff;
+  }
+  .lvbtn .meta{line-height:1.25; min-width:0;}
+  .lvbtn .meta .num{display:block; font-size:.72rem; font-weight:800; color:#b0a892; letter-spacing:.06em;}
+  .lvbtn .stars{font-size:1rem; letter-spacing:2px; white-space:nowrap; text-align:right;}
+  .lvbtn .stars .off{opacity:.25; filter:grayscale(1);}
+  .c1{background:var(--mango);} .c2{background:var(--jade);} .c3{background:var(--melon);} .c4{background:var(--sky);} .c5{background:var(--grape);}
+  .c6{background:#F15BB5;} .c7{background:#8AC926;} .c8{background:#00BBF9;}
+  #lvlist{overflow-y:auto; min-height:0; padding:2px 2px 10px;}
+  #menu{min-height:0;}
+
+  /* compare view (相反詞): two pictures, target ringed */
+  .picrow{display:flex; align-items:center; justify-content:center; gap:14px;}
+  .picrow .p{line-height:1;}
+  .picrow .p.main{
+    font-size:clamp(3rem,17vw,4.4rem);
+    border:4px dashed var(--mango); border-radius:26px; padding:8px 10px;
+    animation:ringpulse 1.4s ease infinite;
+  }
+  .picrow .p.main.long{font-size:clamp(1.7rem,9vw,2.4rem);}
+  .picrow .p.other{font-size:clamp(1.6rem,9vw,2.3rem); opacity:.4;}
+  .picrow .p.other.long{font-size:clamp(1.1rem,6vw,1.5rem);}
+  @keyframes ringpulse{0%,100%{border-color:var(--mango)}50%{border-color:var(--melon)}}
+
+  .card.long{font-size:1.9rem;}
+  .card.xlong{font-size:1.15rem; line-height:1.2; padding:4px;}
+
+  /* ---------- game ---------- */
+  #game{gap:8px;}
+  .hud{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 2px 4px;}
+  .hud .home{padding:10px 16px; font-size:1rem;}
+  .speak{width:56px; height:56px; border-radius:50%; font-size:1.5rem; flex:none; background:var(--jade); color:#fff;}
+  .dots{display:flex; gap:6px;}
+  .dot{width:12px; height:12px; border-radius:50%; background:#e4dccb;}
+  .dot.done{background:var(--jade);}
+  .dot.now{outline:3px solid var(--ink); outline-offset:2px; background:#fff;}
+
+  /* picture stage */
+  .stagewrap{flex:1; display:flex; align-items:center; justify-content:center; min-height:0;}
+  .stage{
+    position:relative;
+    width:min(62vw,250px); aspect-ratio:1;
+    background:#fff; border:5px solid var(--ink); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:2px;
+    box-shadow:var(--shadow);
+  }
+  .stage .pic{font-size:clamp(4rem,24vw,6.2rem); line-height:1;}
+  .stage .won{
+    position:absolute; bottom:-12px; left:50%; transform:translateX(-50%);
+    background:var(--mango); color:#fff; border:4px solid var(--ink); border-radius:16px;
+    min-width:64px; padding:2px 14px; text-align:center;
+    font-size:2.2rem; font-weight:900; display:none;
+    animation:pop .5s cubic-bezier(.2,1.6,.4,1);
+  }
+  .stage .won.on{display:block;}
+  .stage.happy{animation:bounce .6s ease;}
+  @keyframes bounce{0%,100%{transform:scale(1)} 40%{transform:scale(1.12)} 70%{transform:scale(.96)}}
+  @keyframes pop{0%{transform:translateX(-50%) scale(0)}100%{transform:translateX(-50%) scale(1)}}
+
+  /* answer cards */
+  .cards{display:flex; justify-content:center; gap:14px; flex-wrap:wrap; padding:10px 0 14px;}
+  .card{
+    width:96px; height:96px; border-radius:24px; background:#fff;
+    font-size:3rem; font-weight:900; font-family:'Noto Sans TC';
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:var(--shadow); border:0; cursor:pointer; color:var(--ink);
+    transition:transform .12s ease, opacity .25s;
+  }
+  .card:active{transform:scale(.92);}
+  .card.out{opacity:.25; pointer-events:none;}
+  .card.hint{animation:glow 1s ease infinite;}
+  @keyframes glow{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 6px rgba(255,177,0,.65)}}
+  .card.nope{animation:wrongshake .4s ease;}
+  @keyframes wrongshake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}}
+
+  /* celebration */
+  #cele{
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+    background:rgba(255,246,233,.94); z-index:50; text-align:center; padding:20px;
+  }
+  #cele.on{display:flex;}
+  #cele .big{font-size:3.2rem; font-weight:900;}
+  #cele .stars{font-size:2.6rem; letter-spacing:6px;}
+  #cele .btn{padding:16px 30px; font-size:1.3rem; background:var(--melon); color:#fff;}
+
+  .confetti{position:fixed; top:-30px; font-size:1.6rem; z-index:60; pointer-events:none; animation:fall linear forwards;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(540deg);}}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand"><span>🖼️</span><span class="zh">字圖配對</span></div>
+    <div class="starbar">⭐ <span id="totalStars">0</span></div>
+  </header>
+
+  <!-- menu -->
+  <div class="screen on" id="menu">
+    <h1>揀一關開始啦！</h1>
+    <p class="sub">聽一聽，睇圖畫，搵啱嘅字</p>
+    <div id="lvlist"></div>
+  </div>
+
+  <!-- game -->
+  <div class="screen" id="game">
+    <div class="hud">
+      <button class="btn home" id="homeBtn">🏠</button>
+      <div class="dots" id="dots"></div>
+      <button class="btn speak" id="speakBtn" aria-label="再聽一次">🔊</button>
+    </div>
+    <div class="stagewrap">
+      <div class="stage" id="stage">
+        <div class="pic" id="pic">🐱</div>
+        <div class="won" id="won"></div>
+      </div>
+    </div>
+    <div class="cards" id="cards"></div>
+  </div>
+</div>
+
+<div id="cele">
+  <div class="big">🎉 好叻呀！</div>
+  <div class="stars" id="celeStars"></div>
+  <button class="btn" id="celeBtn">繼續 ▶</button>
+</div>
+
+<script>
+/* ============ data: HK K3 high-frequency characters ============ */
+/* choices = number of answer cards shown in that level */
+const LEVELS = [
+  { name:"我的身體", color:"c1", icon:"🙋", choices:3, items:[
+    {char:"口", emoji:"👄", word:"口"},
+    {char:"手", emoji:"🖐️", word:"手"},
+    {char:"耳", emoji:"👂", word:"耳仔"},
+    {char:"目", emoji:"👁️", word:"眼目"},
+    {char:"足", emoji:"🦶", word:"足"},
+    {char:"心", emoji:"❤️", word:"心"},
+  ]},
+  { name:"大自然", color:"c2", icon:"🌈", choices:3, items:[
+    {char:"日", emoji:"🌞", word:"太陽日"},
+    {char:"月", emoji:"🌙", word:"月亮"},
+    {char:"山", emoji:"⛰️", word:"山"},
+    {char:"水", emoji:"💧", word:"水"},
+    {char:"火", emoji:"🔥", word:"火"},
+    {char:"石", emoji:"🪨", word:"石頭"},
+  ]},
+  { name:"小動物", color:"c3", icon:"🐾", choices:3, items:[
+    {char:"貓", emoji:"🐱", word:"貓"},
+    {char:"狗", emoji:"🐶", word:"狗"},
+    {char:"魚", emoji:"🐟", word:"魚"},
+    {char:"鳥", emoji:"🐦", word:"雀鳥"},
+    {char:"馬", emoji:"🐴", word:"馬"},
+    {char:"牛", emoji:"🐮", word:"牛"},
+  ]},
+  { name:"四季天氣", color:"c4", icon:"🍂", choices:4, items:[
+    {char:"春", emoji:"🌸", word:"春天"},
+    {char:"夏", emoji:"🌞", word:"夏天"},
+    {char:"秋", emoji:"🍂", word:"秋天"},
+    {char:"冬", emoji:"⛄", word:"冬天"},
+    {char:"雨", emoji:"🌧️", word:"落雨"},
+    {char:"雪", emoji:"❄️", word:"雪"},
+  ]},
+  { name:"小心情", color:"c6", icon:"😊", choices:4, items:[
+    {char:"笑", emoji:"😄", word:"笑"},
+    {char:"哭", emoji:"😭", word:"哭"},
+    {char:"嬲", emoji:"😠", word:"好嬲"},
+    {char:"驚", emoji:"😱", word:"好驚"},
+    {char:"愛", emoji:"🥰", word:"愛"},
+    {char:"累", emoji:"🥱", word:"好累"},
+  ]},
+  { name:"交通工具", color:"c7", icon:"🚦", choices:4, items:[
+    {char:"車", emoji:"🚗", word:"車"},
+    {char:"船", emoji:"⛵", word:"船"},
+    {char:"飛機", emoji:"✈️", word:"飛機"},
+    {char:"巴士", emoji:"🚌", word:"巴士"},
+    {char:"火車", emoji:"🚂", word:"火車"},
+    {char:"單車", emoji:"🚲", word:"單車"},
+  ]},
+  { name:"相反詞", color:"c5", icon:"⚖️", choices:4, items:[
+    {char:"大", emoji:"🐘", pair:"🐭", word:"大"},
+    {char:"小", emoji:"🐭", pair:"🐘", word:"小"},
+    {char:"上", emoji:"⬆️", pair:"⬇️", word:"上"},
+    {char:"下", emoji:"⬇️", pair:"⬆️", word:"下"},
+    {char:"多", emoji:"🎈🎈🎈", pair:"🎈", word:"多"},
+    {char:"少", emoji:"🎈", pair:"🎈🎈🎈", word:"少"},
+  ]},
+  { name:"顏色", color:"c8", icon:"🎨", choices:4, items:[
+    {char:"紅", emoji:"🔴", word:"紅色"},
+    {char:"黃", emoji:"🟡", word:"黃色"},
+    {char:"藍", emoji:"🔵", word:"藍色"},
+    {char:"綠", emoji:"🟢", word:"綠色"},
+    {char:"黑", emoji:"⚫", word:"黑色"},
+    {char:"白", emoji:"⚪", word:"白色"},
+  ]},
+  { name:"食物", color:"c4", icon:"🍽️", choices:4, items:[
+    {char:"飯", emoji:"🍚", word:"食飯"},
+    {char:"麵", emoji:"🍜", word:"麵"},
+    {char:"蛋", emoji:"🥚", word:"雞蛋"},
+    {char:"包", emoji:"🍞", word:"麵包"},
+    {char:"奶", emoji:"🥛", word:"牛奶"},
+    {char:"糖", emoji:"🍬", word:"糖"},
+  ]},
+  { name:"水果", color:"c6", icon:"🧺", choices:4, items:[
+    {char:"蘋果", emoji:"🍎", word:"蘋果"},
+    {char:"橙", emoji:"🍊", word:"橙"},
+    {char:"香蕉", emoji:"🍌", word:"香蕉"},
+    {char:"西瓜", emoji:"🍉", word:"西瓜"},
+    {char:"提子", emoji:"🍇", word:"提子"},
+    {char:"士多啤梨", emoji:"🍓", word:"士多啤梨"},
+  ]},
+];
+
+/* ============ state ============ */
+let lvIdx = 0, itemIdx = 0, fails = 0, busy = false;
+let order = [];
+let stars = LEVELS.map(()=>0);
+const $ = id => document.getElementById(id);
+
+/* ============ speech ============ */
+let voice = null;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  voice = vs.find(v=>/zh[-_]HK/i.test(v.lang))
+       || vs.find(v=>/yue/i.test(v.lang))
+       || vs.find(v=>/zh[-_]TW/i.test(v.lang))
+       || vs.find(v=>/^zh/i.test(v.lang)) || null;
+}
+speechSynthesis.onvoiceschanged = pickVoice; pickVoice();
+function say(text, rate=0.85){
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    if(voice) u.voice = voice;
+    u.lang = voice ? voice.lang : "zh-HK";
+    u.rate = rate; u.pitch = 1.1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ============ menu ============ */
+function renderMenu(){
+  const box = $("lvlist"); box.innerHTML = "";
+  LEVELS.forEach((lv,i)=>{
+    const b = document.createElement("button");
+    b.className = "btn lvbtn";
+    const s = stars[i];
+    const starHtml = "⭐".repeat(s) + `<span class="off">${"⭐".repeat(3-s)}</span>`;
+    b.innerHTML = `<span class="badge ${lv.color}">${lv.icon}</span>
+      <span class="meta"><span class="num">第 ${i+1} 關</span>${lv.name}</span>
+      <span class="stars">${starHtml}</span>`;
+    b.onclick = ()=> startLevel(i);
+    box.appendChild(b);
+  });
+  $("totalStars").textContent = stars.reduce((a,b)=>a+b,0);
+}
+
+/* ============ game flow ============ */
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); }
+
+function startLevel(i){
+  lvIdx = i; itemIdx = 0;
+  order = shuffle(LEVELS[i].items);
+  show("game");
+  renderRound();
+}
+function currentItem(){ return order[itemIdx]; }
+
+function renderRound(){
+  busy = false; fails = 0;
+  const lv = LEVELS[lvIdx];
+  const it = currentItem();
+
+  const pic = $("pic");
+  if(it.pair){
+    const mainLong = Array.from(it.emoji).length > 2 ? " long" : "";
+    const otherLong = Array.from(it.pair).length > 2 ? " long" : "";
+    pic.innerHTML = `<span class="picrow">
+      <span class="p main${mainLong}">${it.emoji}</span>
+      <span class="p other${otherLong}">${it.pair}</span>
+    </span>`;
+  }else{
+    pic.textContent = it.emoji;
+  }
+  $("won").classList.remove("on");
+  $("won").textContent = "";
+
+  const dots = $("dots"); dots.innerHTML = "";
+  order.forEach((_,k)=>{
+    const d = document.createElement("div");
+    d.className = "dot" + (k<itemIdx?" done":k===itemIdx?" now":"");
+    dots.appendChild(d);
+  });
+
+  // answer cards: correct + distractors from same level (fallback: other levels)
+  let pool = lv.items.filter(x=>x.char!==it.char).map(x=>x.char);
+  const cards = shuffle([it.char, ...shuffle(pool).slice(0, lv.choices-1)]);
+  const box = $("cards"); box.innerHTML = "";
+  cards.forEach(ch=>{
+    const c = document.createElement("button");
+    c.className = "card" + (ch.length>2 ? " xlong" : ch.length>1 ? " long" : "");
+    c.textContent = ch;
+    c.onclick = ()=> answer(ch, c);
+    box.appendChild(c);
+  });
+
+  setTimeout(()=> say(`邊個字係，${it.word}？`), 350);
+}
+
+function answer(ch, cardEl){
+  if(busy) return;
+  const it = currentItem();
+  if(ch === it.char){
+    busy = true;
+    // fly the char down to the stage
+    document.querySelectorAll(".card").forEach(c=>c.classList.add("out"));
+    cardEl.classList.remove("out");
+    const stage = $("stage");
+    const wonEl = $("won");
+    wonEl.textContent = it.char;
+    wonEl.style.fontSize = it.char.length>2 ? "1.3rem" : it.char.length>1 ? "1.7rem" : "";
+    wonEl.classList.add("on");
+    stage.classList.add("happy");
+    burst(12);
+    say(`${it.char}！${it.word}嘅${it.char}！好叻呀！`);
+    setTimeout(()=>{
+      stage.classList.remove("happy");
+      itemIdx++;
+      if(itemIdx >= order.length) finishLevel();
+      else renderRound();
+    }, 2400);
+  }else{
+    fails++;
+    cardEl.classList.add("nope");
+    say("唔係呢個，再試多次啦");
+    setTimeout(()=>{
+      cardEl.classList.remove("nope");
+      cardEl.classList.add("out");   // remove the wrong option
+      if(fails >= 2){
+        document.querySelectorAll(".card").forEach(c=>{
+          if(c.textContent === it.char) c.classList.add("hint");
+        });
+      }
+    }, 450);
+  }
+}
+
+function finishLevel(){
+  stars[lvIdx] = Math.max(stars[lvIdx], 3);
+  $("celeStars").textContent = "⭐⭐⭐";
+  $("cele").classList.add("on");
+  burst(30);
+  say("嘩！全部啱晒！你係認字大師！");
+}
+$("celeBtn").onclick = ()=>{ $("cele").classList.remove("on"); renderMenu(); show("menu"); };
+
+/* ============ confetti ============ */
+const EMO = ["⭐","🎉","✨","🧡","💚","💙","🎈"];
+function burst(n){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  for(let i=0;i<n;i++){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.textContent = EMO[Math.floor(Math.random()*EMO.length)];
+    c.style.left = Math.random()*100 + "vw";
+    c.style.animationDuration = (1.6 + Math.random()*1.6) + "s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 3500);
+  }
+}
+
+/* ============ wiring ============ */
+$("homeBtn").onclick = ()=>{ speechSynthesis.cancel(); renderMenu(); show("menu"); };
+$("speakBtn").onclick = ()=>{ const it = currentItem(); if(it) say(`邊個字係，${it.word}？`); };
+
+renderMenu();
+</script>
+</body>
+</html>
