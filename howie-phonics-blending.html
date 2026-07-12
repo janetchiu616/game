@@ -69,6 +69,7 @@
   .txt-vowel{color:#E53935;}
   .txt-consonant{color:#1E88E5;}
   .txt-special{color:#2EAF62;}
+  .txt-camera{color:#8E44AD;}
 
   .sound-btn{
     margin:14px 0 6px; border:none; cursor:pointer; font-family:inherit;
@@ -314,7 +315,9 @@ function loadQuestion(){
   q.c.forEach(ch=>{
     const d=document.createElement("div");
     d.className="chunk";
-    d.innerHTML = colorizeChunk(ch);
+    d.innerHTML = isCamera
+      ? '<span class="txt-camera">' + escapeHtml(ch) + '</span>'
+      : colorizeChunk(ch);
     row.appendChild(d);
   });
 
@@ -325,7 +328,7 @@ function loadQuestion(){
   opts.forEach(o=>{
     const b=document.createElement("button");
     b.className="choice" + (isCamera ? " word-choice" : "");
-    if(isCamera) b.innerHTML = renderColoredWord(o.e);
+    if(isCamera) b.innerHTML = '<span class="txt-camera">' + escapeHtml(o.e) + '</span>';
     else b.textContent = o.e;
     b.setAttribute("aria-label", o.w);
     b.onclick=()=>pick(b, o.w===q.w, q);
