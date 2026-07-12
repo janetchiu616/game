@@ -66,6 +66,9 @@
   }
   .chunk.pop{transform:translateY(-14px) scale(1.12); background:var(--sun); border-color:#E5A93A; color:#5d4300;}
   .chunk.together{transform:scale(1.06); background:#E7F8F1; border-color:var(--leaf);}
+  .txt-vowel{color:#E53935;}
+  .txt-consonant{color:#1E88E5;}
+  .txt-special{color:#2EAF62;}
 
   .sound-btn{
     margin:14px 0 6px; border:none; cursor:pointer; font-family:inherit;
@@ -202,11 +205,71 @@ const LEVELS = [
 ];
 const ROUND_LEN = 8;
 const CHEERS = ["Great job! ⭐","Well done! 🌟","You read it! 🎉","Super! ⭐","Amazing! 🌟"];
+const SPECIAL_CHUNKS = ["all","ell","ch","sh","th","qu","ng","ck"];
+const VOWELS = "aeiou";
 
 let level=0, queue=[], qIndex=0, stars=0, locked=false, firstTry=true, animTimer=[];
 
 const $ = id => document.getElementById(id);
 const shuffle = a => a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function classifyChunk(part){
+  const lower = String(part).toLowerCase();
+  if(SPECIAL_CHUNKS.includes(lower)) return "special";
+  if(lower && [...lower].every(ch=>VOWELS.includes(ch))) return "vowel";
+  if(lower && [...lower].every(ch=>/[a-z]/.test(ch) && !VOWELS.includes(ch))) return "consonant";
+  return "mixed";
+}
+
+function renderColoredWord(word){
+  const text = String(word);
+  const lower = text.toLowerCase();
+  let i = 0;
+  let html = "";
+
+  while(i < text.length){
+    let matched = null;
+    for(const chunk of SPECIAL_CHUNKS){
+      if(lower.slice(i, i + chunk.length) === chunk){
+        matched = text.slice(i, i + chunk.length);
+        break;
+      }
+    }
+
+    if(matched){
+      html += '<span class="txt-special">' + escapeHtml(matched) + '</span>';
+      i += matched.length;
+      continue;
+    }
+
+    const ch = text[i];
+    if(/[a-z]/i.test(ch)){
+      const cls = VOWELS.includes(ch.toLowerCase()) ? "vowel" : "consonant";
+      html += '<span class="txt-' + cls + '">' + escapeHtml(ch) + '</span>';
+    }else{
+      html += escapeHtml(ch);
+    }
+    i++;
+  }
+  return html;
+}
+
+function colorizeChunk(part){
+  const kind = classifyChunk(part);
+  if(kind !== "mixed"){
+    return '<span class="txt-' + kind + '">' + escapeHtml(part) + '</span>';
+  }
+  return renderColoredWord(part);
+}
 
 function show(screen){
   ["menu","game","end"].forEach(s=>$(s).classList.toggle("hidden", s!==screen));
@@ -250,7 +313,8 @@ function loadQuestion(){
   const row = $("wordRow"); row.innerHTML="";
   q.c.forEach(ch=>{
     const d=document.createElement("div");
-    d.className="chunk"; d.textContent=ch;
+    d.className="chunk";
+    d.innerHTML = colorizeChunk(ch);
     row.appendChild(d);
   });
 
@@ -260,7 +324,9 @@ function loadQuestion(){
   const box = $("choices"); box.innerHTML="";
   opts.forEach(o=>{
     const b=document.createElement("button");
-    b.className="choice" + (isCamera ? " word-choice" : ""); b.textContent=o.e;
+    b.className="choice" + (isCamera ? " word-choice" : "");
+    if(isCamera) b.innerHTML = renderColoredWord(o.e);
+    else b.textContent = o.e;
     b.setAttribute("aria-label", o.w);
     b.onclick=()=>pick(b, o.w===q.w, q);
     box.appendChild(b);
