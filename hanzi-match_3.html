@@ -129,6 +129,15 @@
   .card.nope{animation:wrongshake .4s ease;}
   @keyframes wrongshake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)}}
 
+  /* next button — shown after a correct answer */
+  #nextBtn{
+    position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+    display:none; z-index:40;
+    padding:16px 34px; font-size:1.3rem; background:var(--mango); color:#fff;
+    animation:pop .4s cubic-bezier(.2,1.6,.4,1);
+  }
+  #nextBtn.on{display:block;}
+
   /* celebration */
   #cele{
     position:fixed; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column; gap:14px;
@@ -177,6 +186,8 @@
     <div class="cards" id="cards"></div>
   </div>
 </div>
+
+<button class="btn" id="nextBtn">下一題 ▶</button>
 
 <div id="cele">
   <div class="big">🎉 好叻呀！</div>
@@ -289,11 +300,17 @@ speechSynthesis.onvoiceschanged = pickVoice; pickVoice();
 function say(text, rate=0.85){
   try{
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    if(voice) u.voice = voice;
-    u.lang = voice ? voice.lang : "zh-HK";
-    u.rate = rate; u.pitch = 1.1;
-    speechSynthesis.speak(u);
+    // iOS Safari: speak() right after cancel() gets dropped; queue can also get stuck paused
+    setTimeout(()=>{
+      try{
+        speechSynthesis.resume();
+        const u = new SpeechSynthesisUtterance(text);
+        if(voice) u.voice = voice;
+        u.lang = voice ? voice.lang : "zh-HK";
+        u.rate = rate; u.pitch = 1.1;
+        speechSynthesis.speak(u);
+      }catch(e){}
+    }, 80);
   }catch(e){}
 }
 
@@ -371,8 +388,7 @@ function answer(ch, cardEl){
   if(busy) return;
   const it = currentItem();
   if(ch === it.char){
-    busy = true;
-    // fly the char down to the stage
+    busy = true; advanced = false;
     document.querySelectorAll(".card").forEach(c=>c.classList.add("out"));
     cardEl.classList.remove("out");
     const stage = $("stage");
@@ -383,12 +399,8 @@ function answer(ch, cardEl){
     stage.classList.add("happy");
     burst(12);
     say(`${it.char}！${it.word}嘅${it.char}！好叻呀！`);
-    setTimeout(()=>{
-      stage.classList.remove("happy");
-      itemIdx++;
-      if(itemIdx >= order.length) finishLevel();
-      else renderRound();
-    }, 2400);
+    $("nextBtn").classList.add("on");
+    setTimeout(goNext, 3200); // fallback auto-advance; button works even if this never fires
   }else{
     fails++;
     cardEl.classList.add("nope");
@@ -404,6 +416,18 @@ function answer(ch, cardEl){
     }, 450);
   }
 }
+
+let advanced = false;
+function goNext(){
+  if(advanced) return;
+  advanced = true;
+  $("nextBtn").classList.remove("on");
+  $("stage").classList.remove("happy");
+  itemIdx++;
+  if(itemIdx >= order.length) finishLevel();
+  else renderRound();
+}
+$("nextBtn").onclick = goNext;
 
 function finishLevel(){
   stars[lvIdx] = Math.max(stars[lvIdx], 3);
@@ -430,7 +454,7 @@ function burst(n){
 }
 
 /* ============ wiring ============ */
-$("homeBtn").onclick = ()=>{ speechSynthesis.cancel(); renderMenu(); show("menu"); };
+$("homeBtn").onclick = ()=>{ speechSynthesis.cancel(); advanced = true; $("nextBtn").classList.remove("on"); renderMenu(); show("menu"); };
 $("speakBtn").onclick = ()=>{ const it = currentItem(); if(it) say(`邊個字係，${it.word}？`); };
 
 renderMenu();
