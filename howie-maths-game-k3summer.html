@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Howie's Maths Interview Adventure</title>
+  <style>
+    :root {
+      --ink: #19324d;
+      --muted: #5f7084;
+      --paper: #fffdf8;
+      --panel: #ffffff;
+      --blue: #4b8df8;
+      --blue-dark: #2d67bf;
+      --yellow: #ffd85a;
+      --green: #52c78b;
+      --red: #ff6b6b;
+      --purple: #9a6df0;
+      --orange: #ff9d45;
+      --shadow: 0 12px 30px rgba(31, 61, 96, 0.14);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Trebuchet MS", "Arial Rounded MT Bold", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(255,216,90,.25), transparent 25%),
+        radial-gradient(circle at 90% 15%, rgba(75,141,248,.18), transparent 22%),
+        linear-gradient(180deg, #eaf7ff 0%, #fff8e8 100%);
+    }
+
+    button { font: inherit; }
+
+    .app {
+      width: min(1050px, 100%);
+      margin: 0 auto;
+      padding: 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: clamp(18px, 3vw, 26px);
+    }
+
+    .brand-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: var(--yellow);
+      box-shadow: var(--shadow);
+      font-size: 28px;
+      transform: rotate(-4deg);
+    }
+
+    .mini-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .icon-btn, .small-btn {
+      border: 0;
+      border-radius: 14px;
+      background: rgba(255,255,255,.92);
+      color: var(--ink);
+      padding: 10px 13px;
+      box-shadow: 0 6px 16px rgba(31,61,96,.12);
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .icon-btn:active, .small-btn:active, .choice:active, .primary:active, .level-card:active {
+      transform: translateY(2px) scale(.99);
+    }
+
+    .screen { display: none; animation: pop .28s ease; }
+    .screen.active { display: block; }
+
+    @keyframes pop {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero {
+      background: rgba(255,255,255,.9);
+      border: 4px solid white;
+      border-radius: 34px;
+      box-shadow: var(--shadow);
+      padding: clamp(24px, 5vw, 54px);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before, .hero::after {
+      content: "";
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      opacity: .18;
+    }
+
+    .hero::before { background: var(--yellow); top: -60px; left: -45px; }
+    .hero::after { background: var(--blue); right: -50px; bottom: -70px; }
+
+    .hero-emoji { font-size: clamp(74px, 14vw, 130px); line-height: 1; }
+
+    h1 {
+      font-size: clamp(34px, 7vw, 68px);
+      margin: 10px 0 4px;
+      line-height: 1.05;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: clamp(17px, 3vw, 23px);
+      margin: 0 auto 24px;
+      max-width: 760px;
+      line-height: 1.5;
+    }
+
+    .primary {
+      border: 0;
+      border-radius: 18px;
+      background: linear-gradient(180deg, var(--blue), var(--blue-dark));
+      color: white;
+      font-size: clamp(19px, 3vw, 26px);
+      font-weight: 900;
+      padding: 16px 28px;
+      min-width: 220px;
+      box-shadow: 0 10px 0 #244f92, 0 15px 25px rgba(45,103,191,.24);
+      cursor: pointer;
+    }
+
+    .primary.secondary {
+      background: linear-gradient(180deg, var(--green), #2f9f68);
+      box-shadow: 0 10px 0 #277d56, 0 15px 25px rgba(47,159,104,.22);
+    }
+
+    .tip-box {
+      margin: 28px auto 0;
+      background: #fff8d8;
+      border: 2px dashed #e7bd31;
+      border-radius: 18px;
+      padding: 14px 18px;
+      max-width: 720px;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .level-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .level-card {
+      border: 0;
+      border-radius: var(--radius);
+      background: var(--panel);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      text-align: left;
+      cursor: pointer;
+      position: relative;
+      min-height: 190px;
+      overflow: hidden;
+    }
+
+    .level-card.locked { opacity: .5; filter: grayscale(.25); }
+
+    .level-card::after {
+      content: "";
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      right: -34px;
+      bottom: -46px;
+      border-radius: 50%;
+      background: var(--accent, var(--blue));
+      opacity: .16;
+    }
+
+    .level-number {
+      display: inline-flex;
+      width: 38px;
+      height: 38px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: var(--accent, var(--blue));
+      color: white;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .level-title {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+
+    .level-desc { color: var(--muted); line-height: 1.4; }
+    .level-stars { margin-top: 12px; font-size: 24px; letter-spacing: 3px; }
+
+    .game-shell {
+      background: rgba(255,255,255,.94);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 4px solid white;
+    }
+
+    .game-header {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 18px;
+      background: #f7fbff;
+      border-bottom: 2px solid #e8f0f8;
+    }
+
+    .progress-wrap {
+      min-width: 0;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 900;
+      margin-bottom: 7px;
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      height: 14px;
+      border-radius: 999px;
+      background: #dfe9f3;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--green), var(--yellow));
+      transition: width .3s ease;
+    }
+
+    .score-chip {
+      background: #fff3b3;
+      border-radius: 14px;
+      padding: 10px 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .question-area {
+      padding: clamp(18px, 4vw, 36px);
+      text-align: center;
+      min-height: 570px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .level-pill {
+      display: inline-flex;
+      align-self: center;
+      border-radius: 999px;
+      padding: 7px 14px;
+      background: #ecf4ff;
+      color: var(--blue-dark);
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .question-text {
+      font-size: clamp(25px, 4vw, 40px);
+      margin: 2px auto 4px;
+      line-height: 1.25;
+      max-width: 850px;
+    }
+
+    .question-zh {
+      color: var(--muted);
+      font-size: clamp(16px, 2.5vw, 21px);
+      margin-bottom: 16px;
+      min-height: 1.5em;
+    }
+
+    .visual-stage {
+      min-height: 210px;
+      display: grid;
+      place-items: center;
+      margin: 6px auto 18px;
+      width: 100%;
+    }
+
+    .objects {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      max-width: 800px;
+    }
+
+    .object {
+      font-size: clamp(45px, 8vw, 76px);
+      line-height: 1;
+      filter: drop-shadow(0 5px 4px rgba(0,0,0,.08));
+    }
+
+    .block {
+      width: clamp(44px, 7vw, 68px);
+      height: clamp(44px, 7vw, 68px);
+      border-radius: 14px;
+      display: inline-grid;
+      place-items: center;
+      color: white;
+      font-weight: 900;
+      box-shadow: inset 0 -8px 0 rgba(0,0,0,.12), 0 7px 12px rgba(0,0,0,.12);
+    }
+
+    .group-box {
+      background: #f3f8fc;
+      border: 3px dashed #aac2d8;
+      border-radius: 22px;
+      padding: 18px;
+      min-width: 180px;
+    }
+
+    .group-label { font-weight: 900; color: var(--muted); margin-top: 8px; }
+
+    .shape {
+      display: inline-block;
+      margin: 6px;
+      filter: drop-shadow(0 5px 4px rgba(0,0,0,.12));
+    }
+
+    .circle { width: 70px; height: 70px; border-radius: 50%; }
+    .square { width: 70px; height: 70px; border-radius: 8px; }
+    .rectangle { width: 100px; height: 62px; border-radius: 8px; }
+    .triangle {
+      width: 0; height: 0;
+      border-left: 42px solid transparent;
+      border-right: 42px solid transparent;
+      border-bottom: 76px solid currentColor;
+      background: transparent !important;
+    }
+
+    .big-shape.circle, .big-shape.square { width: 95px; height: 95px; }
+    .small-shape.circle, .small-shape.square { width: 48px; height: 48px; }
+    .big-shape.rectangle { width: 130px; height: 80px; }
+    .small-shape.rectangle { width: 68px; height: 42px; }
+
+    .pattern-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: clamp(42px, 8vw, 72px);
+    }
+
+    .question-mark {
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      display: inline-grid;
+      place-items: center;
+      background: #eef3f8;
+      border: 3px dashed #9eb3c7;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .position-scene {
+      position: relative;
+      width: 300px;
+      height: 190px;
+      margin: 0 auto;
+    }
+
+    .box-art {
+      position: absolute;
+      left: 90px;
+      top: 64px;
+      width: 120px;
+      height: 90px;
+      background: #d89c57;
+      border: 7px solid #a56d31;
+      border-radius: 10px;
+      box-shadow: inset 0 12px 0 rgba(255,255,255,.22);
+    }
+
+    .bear-art {
+      position: absolute;
+      font-size: 68px;
+      line-height: 1;
+      z-index: 2;
+    }
+
+    .answer-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      width: min(760px, 100%);
+      margin: auto auto 0;
+    }
+
+    .answer-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .choice {
+      border: 3px solid #dfeaf4;
+      border-radius: 18px;
+      background: white;
+      min-height: 82px;
+      padding: 12px;
+      font-size: clamp(19px, 3vw, 28px);
+      font-weight: 900;
+      color: var(--ink);
+      cursor: pointer;
+      box-shadow: 0 7px 0 #dfe8f0;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    }
+
+    .choice:hover { border-color: var(--blue); }
+    .choice.correct { background: #dff8ea; border-color: var(--green); box-shadow: 0 7px 0 #aadfc3; }
+    .choice.wrong { background: #ffe5e5; border-color: var(--red); box-shadow: 0 7px 0 #f2baba; }
+    .choice:disabled { cursor: default; }
+
+    .feedback {
+      min-height: 76px;
+      margin: 16px auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: min(760px, 100%);
+      border-radius: 18px;
+      font-size: clamp(18px, 2.7vw, 24px);
+      font-weight: 900;
+      padding: 12px 16px;
+      visibility: hidden;
+    }
+
+    .feedback.show { visibility: visible; }
+    .feedback.good { background: #dff8ea; color: #176a45; }
+    .feedback.try { background: #fff2d9; color: #9b5a00; }
+
+    .next-row { margin-top: 12px; min-height: 62px; }
+    .next-btn { display: none; }
+    .next-btn.show { display: inline-block; }
+
+    .celebration {
+      text-align: center;
+      background: rgba(255,255,255,.94);
+      border-radius: 34px;
+      padding: clamp(25px, 5vw, 52px);
+      box-shadow: var(--shadow);
+      border: 4px solid white;
+    }
+
+    .trophy { font-size: clamp(90px, 18vw, 160px); }
+    .result-stars { font-size: clamp(40px, 8vw, 72px); letter-spacing: 10px; }
+    .result-score { font-size: clamp(30px, 5vw, 48px); font-weight: 900; margin: 10px 0; }
+    .result-message { color: var(--muted); font-size: 21px; line-height: 1.5; max-width: 680px; margin: 0 auto 25px; }
+
+    .certificate {
+      background: #fffaf0;
+      border: 5px double #e4b83e;
+      border-radius: 24px;
+      padding: 24px;
+      margin: 24px auto;
+      max-width: 680px;
+    }
+
+    .certificate h2 { margin: 0; font-size: clamp(28px, 5vw, 44px); }
+    .certificate .name { color: var(--blue-dark); font-size: clamp(30px, 6vw, 52px); margin: 10px 0; font-weight: 900; }
+
+    .hidden { display: none !important; }
+
+    .confetti {
+      position: fixed;
+      pointer-events: none;
+      inset: 0;
+      overflow: hidden;
+      z-index: 999;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: -30px;
+      font-size: 26px;
+      animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(720deg); opacity: .8; }
+    }
+
+    @media (max-width: 700px) {
+      .app { padding: 10px; }
+      .topbar { align-items: flex-start; }
+      .level-grid { grid-template-columns: 1fr; }
+      .game-header { grid-template-columns: 1fr auto; }
+      .game-header .small-btn { grid-column: 1 / -1; }
+      .question-area { min-height: 610px; padding: 18px 13px; }
+      .answer-grid.three { grid-template-columns: 1fr; }
+      .choice { min-height: 70px; }
+      .position-scene { transform: scale(.92); }
+    }
+
+    @media print {
+      .topbar, .primary, .mini-controls { display: none !important; }
+      body { background: white; }
+      .celebration { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge">🧠</div>
+        <span>Howie's Maths Adventure</span>
+      </div>
+      <div class="mini-controls">
+        <button class="icon-btn" id="soundBtn" aria-label="Toggle sound">🔊 Sound</button>
+        <button class="icon-btn" id="hintBtn" aria-label="Toggle Chinese hints">中 Hint</button>
+        <button class="icon-btn" id="homeBtn" aria-label="Go to home">🏠 Home</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="welcomeScreen" class="screen active">
+        <div class="hero">
+          <div class="hero-emoji">🚀🔢</div>
+          <h1>Maths Interview Adventure</h1>
+          <p class="subtitle">Listen carefully, think aloud and try your best! Complete five playful interview levels and collect stars.</p>
+          <button class="primary" id="startBtn">Start Adventure</button>
+          <div class="tip-box">
+            💬 Useful sentence: <strong>“I am not sure, but I can try.”</strong><br>
+            唔肯定都唔緊要，最重要係願意嘗試！
+          </div>
+        </div>
+      </section>
+
+      <section id="levelScreen" class="screen">
+        <div class="hero" style="padding:24px; margin-bottom:16px;">
+          <h1 style="font-size:clamp(30px,5vw,48px);">Choose a Level</h1>
+          <p class="subtitle" style="margin-bottom:0;">Each level has six short interview questions.</p>
+        </div>
+        <div id="levelGrid" class="level-grid"></div>
+      </section>
+
+      <section id="gameScreen" class="screen">
+        <div class="game-shell">
+          <div class="game-header">
+            <div class="progress-wrap">
+              <div class="progress-label">
+                <span id="progressText">Question 1 of 6</span>
+                <span id="levelNameTop">Counting</span>
+              </div>
+              <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+            </div>
+            <div class="score-chip">⭐ <span id="scoreText">0</span></div>
+            <button class="small-btn" id="repeatBtn">🔊 Repeat question</button>
+          </div>
+
+          <div class="question-area">
+            <div id="levelPill" class="level-pill">Level 1</div>
+            <h2 id="questionText" class="question-text"></h2>
+            <div id="questionZh" class="question-zh"></div>
+            <div id="visualStage" class="visual-stage"></div>
+            <div id="answerGrid" class="answer-grid"></div>
+            <div id="feedback" class="feedback"></div>
+            <div class="next-row">
+              <button id="nextBtn" class="primary secondary next-btn">Next Question ➜</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="resultScreen" class="screen">
+        <div class="celebration">
+          <div class="trophy">🏆</div>
+          <div id="resultStars" class="result-stars">⭐⭐⭐</div>
+          <div id="resultScore" class="result-score"></div>
+          <p id="resultMessage" class="result-message"></p>
+          <div class="certificate">
+            <h2>Maths Interview Star</h2>
+            <div class="name">Howie</div>
+            <p>completed a maths interview practice level with courage, careful listening and great effort!</p>
+          </div>
+          <button id="playAgainBtn" class="primary">Choose Another Level</button>
+          <button id="printBtn" class="small-btn" style="margin-left:10px;">🖨️ Print Certificate</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="confetti" class="confetti"></div>
+
+  <script>
+    const LEVELS = [
+      { id: 1, title: "Counting", zh: "數數及加減", icon: "🔢", desc: "Count objects, compare groups and solve simple take-away questions.", accent: "#4b8df8" },
+      { id: 2, title: "Shapes", zh: "圖形及分類", icon: "🔺", desc: "Recognise shapes, colours, sizes and find the odd one out.", accent: "#ff6b6b" },
+      { id: 3, title: "Patterns", zh: "規律及邏輯", icon: "🧩", desc: "Continue colour, shape, action and number patterns.", accent: "#9a6df0" },
+      { id: 4, title: "Positions", zh: "方位及空間", icon: "🧸", desc: "Practise inside, outside, on, under, next to, left and right.", accent: "#ff9d45" },
+      { id: 5, title: "Life Maths", zh: "生活數學", icon: "🛒", desc: "Compare size, length, weight, money and equal sharing.", accent: "#52c78b" },
+      { id: 6, title: "Mock Interview", zh: "模擬面試", icon: "🎓", desc: "Try a mixed set of questions from all five maths topics.", accent: "#19324d" }
+    ];
+
+    const state = {
+      currentLevel: 1,
+      questionIndex: 0,
+      score: 0,
+      answered: false,
+      soundOn: true,
+      chineseHint: true,
+      questions: [],
+      results: JSON.parse(localStorage.getItem("howieMathsResults") || "{}")
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const screens = ["welcomeScreen", "levelScreen", "gameScreen", "resultScreen"];
+
+    function showScreen(id) {
+      screens.forEach(s => $(s).classList.toggle("active", s === id));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function speak(text) {
+      if (!state.soundOn || !("speechSynthesis" in window)) return;
+      speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "en-GB";
+      utter.rate = 0.82;
+      utter.pitch = 1.08;
+      speechSynthesis.speak(utter);
+    }
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function uniqueChoices(correct, min = 0, max = 20, count = 4) {
+      const set = new Set([correct]);
+      while (set.size < count) {
+        let n = rand(min, max);
+        if (n !== correct) set.add(n);
+      }
+      return shuffle([...set]).map(String);
+    }
+
+    function blockHTML(color, text = "") {
+      const colors = { blue: "#4b8df8", red: "#ff6b6b", green: "#52c78b", yellow: "#f5c934", purple: "#9a6df0" };
+      return `<span class="block" style="background:${colors[color] || color}">${text}</span>`;
+    }
+
+    function blocksHTML(count, color = "blue") {
+      return `<div class="objects">${Array.from({ length: count }, () => blockHTML(color)).join("")}</div>`;
+    }
+
+    function shapeHTML(shape, color, size = "") {
+      const sizeClass = size ? `${size}-shape` : "";
+      const style = shape === "triangle" ? `color:${color}` : `background:${color}`;
+      return `<span class="shape ${shape} ${sizeClass}" style="${style}"></span>`;
+    }
+
+    function makeCountingQuestions() {
+      const q = [];
+      let n = rand(4, 9);
+      q.push({
+        text: `Can you count how many blue blocks are here?`,
+        zh: `數一數有多少粒藍色積木。`,
+        speech: `Can you count how many blue blocks are here?`,
+        visual: blocksHTML(n, "blue"),
+        choices: uniqueChoices(n, 1, 12), answer: String(n),
+        explain: `There are ${n} blue blocks. I counted them one by one.`
+      });
+
+      n = rand(5, 10); const take = rand(1, Math.min(3, n - 2)); const left = n - take;
+      q.push({
+        text: `There are ${n} blocks. If I take away ${take}, how many are left?`,
+        zh: `有${n}粒積木，拿走${take}粒，還剩多少粒？`,
+        speech: `There are ${n} blocks. If I take away ${take}, how many are left?`,
+        visual: `<div>${blocksHTML(n, "red")}<div style="margin-top:14px;font-weight:900;font-size:24px;">${n} − ${take} = ?</div></div>`,
+        choices: uniqueChoices(left, 0, 12), answer: String(left),
+        explain: `${n} take away ${take} is ${left}.`
+      });
+
+      const a = rand(2, 6); const b = rand(a + 1, 9);
+      q.push({
+        text: `Which group has more blocks?`,
+        zh: `哪一組積木比較多？`,
+        speech: `Which group has more blocks?`,
+        visual: `<div class="objects"><div class="group-box">${blocksHTML(a, "yellow")}<div class="group-label">Group A</div></div><div class="group-box">${blocksHTML(b, "green")}<div class="group-label">Group B</div></div></div>`,
+        choices: ["Group A", "Group B"], answer: "Group B",
+        explain: `Group B has ${b} blocks, so it has more.`
+      });
+
+      const start = rand(2, 8);
+      q.push({
+        text: `What number is missing?`,
+        zh: `哪一個數字不見了？`,
+        speech: `What number is missing?`,
+        visual: `<div class="pattern-row"><span>${start}</span><span>${start + 1}</span><span class="question-mark">?</span><span>${start + 3}</span><span>${start + 4}</span></div>`,
+        choices: uniqueChoices(start + 2, Math.max(0, start - 1), start + 7), answer: String(start + 2),
+        explain: `The numbers go up by one, so the missing number is ${start + 2}.`
+      });
+
+      n = rand(3, 7); const add = rand(1, 3); const total = n + add;
+      q.push({
+        text: `You have ${n} buttons. I give you ${add} more. How many do you have now?`,
+        zh: `你有${n}粒鈕扣，再給你${add}粒，現在共有多少粒？`,
+        speech: `You have ${n} buttons. I give you ${add} more. How many do you have now?`,
+        visual: `<div class="objects"><div>${"🔵".repeat(n)}</div><div style="font-size:50px">＋</div><div>${"🟡".repeat(add)}</div></div>`,
+        choices: uniqueChoices(total, 1, 12), answer: String(total),
+        explain: `${n} plus ${add} is ${total}.`
+      });
+
+      const c1 = rand(3, 7); const c2 = c1 + rand(1, 3);
+      q.push({
+        text: `How many more blocks are in Group B?`,
+        zh: `B組比A組多多少粒積木？`,
+        speech: `How many more blocks are in Group B?`,
+        visual: `<div class="objects"><div class="group-box">${blocksHTML(c1, "purple")}<div class="group-label">A: ${c1}</div></div><div class="group-box">${blocksHTML(c2, "blue")}<div class="group-label">B: ${c2}</div></div></div>`,
+        choices: uniqueChoices(c2 - c1, 0, 6), answer: String(c2 - c1),
+        explain: `${c2} minus ${c1} is ${c2 - c1}.`
+      });
+      return shuffle(q);
+    }
+
+    function makeShapeQuestions() {
+      const colors = { red: "#ff6b6b", blue: "#4b8df8", green: "#52c78b", yellow: "#f5c934" };
+      const q = [
+        {
+          text: `What shape is this?`, zh: `這是甚麼形狀？`, speech: `What shape is this?`,
+          visual: shapeHTML("triangle", colors.red, "big"),
+          choices: ["Circle", "Triangle", "Square", "Rectangle"], answer: "Triangle",
+          explain: `It is a triangle. A triangle has three sides.`
+        },
+        {
+          text: `Which shape has no corners?`, zh: `哪個形狀沒有角？`, speech: `Which shape has no corners?`,
+          visual: `<div class="objects">${shapeHTML("circle", colors.blue)}${shapeHTML("square", colors.red)}${shapeHTML("triangle", colors.green)}${shapeHTML("rectangle", colors.yellow)}</div>`,
+          choices: ["Circle", "Square", "Triangle", "Rectangle"], answer: "Circle",
+          explain: `A circle has no corners.`
+        },
+        {
+          text: `Find the small blue circle.`, zh: `找出細小的藍色圓形。`, speech: `Find the small blue circle.`,
+          visual: `<div class="objects">${shapeHTML("circle", colors.blue, "big")}${shapeHTML("circle", colors.red, "small")}${shapeHTML("square", colors.blue, "small")}${shapeHTML("circle", colors.blue, "small")}</div>`,
+          choices: ["Big blue circle", "Small red circle", "Small blue square", "Small blue circle"], answer: "Small blue circle",
+          explain: `It is small, blue and round.`
+        },
+        {
+          text: `Which one is different?`, zh: `哪一個不同？`, speech: `Which one is different?`,
+          visual: `<div class="objects">${shapeHTML("triangle", colors.red)}${shapeHTML("triangle", colors.red)}${shapeHTML("square", colors.blue)}${shapeHTML("triangle", colors.red)}</div>`,
+          choices: ["First triangle", "Second triangle", "Blue square", "Last triangle"], answer: "Blue square",
+          explain: `The blue square is different because the others are red triangles.`
+        },
+        {
+          text: `How many sides does a square have?`, zh: `正方形有多少條邊？`, speech: `How many sides does a square have?`,
+          visual: shapeHTML("square", colors.green, "big"),
+          choices: ["2", "3", "4", "5"], answer: "4",
+          explain: `A square has four sides.`
+        },
+        {
+          text: `Which object is shaped like a rectangle?`, zh: `哪件物件是長方形？`, speech: `Which object is shaped like a rectangle?`,
+          visual: `<div class="objects"><span class="object">⚽</span><span class="object">🚪</span><span class="object">🍕</span><span class="object">🪙</span></div>`,
+          choices: ["Ball", "Door", "Pizza slice", "Coin"], answer: "Door",
+          explain: `A door is usually shaped like a rectangle.`
+        }
+      ];
+      return shuffle(q);
+    }
+
+    function makePatternQuestions() {
+      const q = [
+        {
+          text: `What colour comes next?`, zh: `下一個是甚麼顏色？`, speech: `What colour comes next?`,
+          visual: `<div class="pattern-row">${blockHTML("red")}${blockHTML("blue")}${blockHTML("red")}${blockHTML("blue")}${blockHTML("red")}<span class="question-mark">?</span></div>`,
+          choices: ["Red", "Blue", "Green", "Yellow"], answer: "Blue",
+          explain: `The pattern is red, blue, red, blue. Blue comes next.`
+        },
+        {
+          text: `Which shape comes next?`, zh: `下一個是甚麼形狀？`, speech: `Which shape comes next?`,
+          visual: `<div class="pattern-row"><span>⚪</span><span>🔺</span><span>⚪</span><span>🔺</span><span>⚪</span><span class="question-mark">?</span></div>`,
+          choices: ["Circle", "Triangle", "Square", "Star"], answer: "Triangle",
+          explain: `The pattern alternates between a circle and a triangle.`
+        },
+        {
+          text: `What comes next: big, small, small, big, small…?`, zh: `大、細、細、大、細……下一個是甚麼？`, speech: `What comes next? Big, small, small, big, small.`,
+          visual: `<div class="pattern-row"><span style="font-size:86px">●</span><span style="font-size:38px">●</span><span style="font-size:38px">●</span><span style="font-size:86px">●</span><span style="font-size:38px">●</span><span class="question-mark">?</span></div>`,
+          choices: ["Big", "Small", "Triangle", "Nothing"], answer: "Small",
+          explain: `The pattern is one big, then two small. So small comes next.`
+        },
+        {
+          text: `What number comes next?`, zh: `下一個數字是甚麼？`, speech: `What number comes next? Two, four, two, four, two.`,
+          visual: `<div class="pattern-row"><span>2</span><span>4</span><span>2</span><span>4</span><span>2</span><span class="question-mark">?</span></div>`,
+          choices: ["1", "2", "3", "4"], answer: "4",
+          explain: `The numbers repeat: two, four, two, four.`
+        },
+        {
+          text: `What action comes next?`, zh: `下一個動作是甚麼？`, speech: `Clap, stomp, clap, stomp, clap. What comes next?`,
+          visual: `<div class="pattern-row"><span>👏</span><span>🦶</span><span>👏</span><span>🦶</span><span>👏</span><span class="question-mark">?</span></div>`,
+          choices: ["Clap", "Stomp", "Jump", "Sit"], answer: "Stomp",
+          explain: `The actions alternate between clap and stomp.`
+        },
+        {
+          text: `Which picture completes the pattern?`, zh: `哪幅圖可以完成規律？`, speech: `Which picture completes the pattern?`,
+          visual: `<div class="pattern-row"><span>🍎</span><span>🍎</span><span>🍌</span><span>🍎</span><span>🍎</span><span class="question-mark">?</span></div>`,
+          choices: ["🍎 Apple", "🍌 Banana", "🍊 Orange", "🍇 Grapes"], answer: "🍌 Banana",
+          explain: `The pattern is two apples, then one banana.`
+        }
+      ];
+      return shuffle(q);
+    }
+
+    function positionScene(position) {
+      const coords = {
+        inside: { left: 116, top: 81 },
+        outside: { left: 10, top: 84 },
+        on: { left: 116, top: 3 },
+        under: { left: 116, top: 128 },
+        next: { left: 222, top: 82 }
+      }[position];
+      return `<div class="position-scene"><div class="box-art"></div><div class="bear-art" style="left:${coords.left}px;top:${coords.top}px">🧸</div></div>`;
+    }
+
+    function makePositionQuestions() {
+      const q = [
+        {
+          text: `Where is the bear?`, zh: `小熊在哪裏？`, speech: `Where is the bear?`,
+          visual: positionScene("inside"), choices: ["Inside the box", "Outside the box", "On the box", "Under the box"], answer: "Inside the box",
+          explain: `The bear is inside the box.`
+        },
+        {
+          text: `Where is the bear?`, zh: `小熊在哪裏？`, speech: `Where is the bear?`,
+          visual: positionScene("under"), choices: ["On the box", "Under the box", "Next to the box", "Inside the box"], answer: "Under the box",
+          explain: `The bear is under the box.`
+        },
+        {
+          text: `Where is the bear?`, zh: `小熊在哪裏？`, speech: `Where is the bear?`,
+          visual: positionScene("next"), choices: ["Inside the box", "Under the box", "Next to the box", "On the box"], answer: "Next to the box",
+          explain: `The bear is next to the box.`
+        },
+        {
+          text: `Which fruit is on the left?`, zh: `哪種水果在左邊？`, speech: `Which fruit is on the left?`,
+          visual: `<div class="objects" style="gap:70px"><div><span class="object">🍎</span><div class="group-label">Left</div></div><div><span class="object">🍌</span><div class="group-label">Right</div></div></div>`,
+          choices: ["Apple", "Banana", "Both", "Neither"], answer: "Apple",
+          explain: `The apple is on the left.`
+        },
+        {
+          text: `Which object is above the chair?`, zh: `哪件物件在椅子上面？`, speech: `Which object is above the chair?`,
+          visual: `<div style="font-size:70px;line-height:1.05"><div>🎈</div><div>🪑</div></div>`,
+          choices: ["Balloon", "Chair", "Table", "Bear"], answer: "Balloon",
+          explain: `The balloon is above the chair.`
+        },
+        {
+          text: `Choose the correct instruction for this picture.`, zh: `選出最適合這幅圖的句子。`, speech: `Choose the correct instruction for this picture.`,
+          visual: `<div style="font-size:70px;line-height:1.05"><div>📚</div><div>🪑</div></div>`,
+          choices: ["The books are under the chair.", "The books are on the chair.", "The books are inside the chair.", "The books are next to the chair."], answer: "The books are on the chair.",
+          explain: `The books are on the chair.`
+        }
+      ];
+      return shuffle(q);
+    }
+
+    function makeLifeQuestions() {
+      const q = [
+        {
+          text: `Which animal is bigger?`, zh: `哪隻動物比較大？`, speech: `Which animal is bigger?`,
+          visual: `<div class="objects" style="gap:60px"><span class="object">🐘</span><span class="object" style="font-size:35px">🐜</span></div>`,
+          choices: ["Elephant", "Ant", "They are the same", "I cannot tell"], answer: "Elephant",
+          explain: `The elephant is bigger than the ant.`
+        },
+        {
+          text: `Which pencil is longer?`, zh: `哪支鉛筆比較長？`, speech: `Which pencil is longer?`,
+          visual: `<div style="display:flex;flex-direction:column;gap:25px;align-items:center"><div style="width:260px;height:28px;border-radius:14px;background:#ffd85a;border-right:22px solid #19324d"></div><div style="width:150px;height:28px;border-radius:14px;background:#ff9d45;border-right:22px solid #19324d"></div></div>`,
+          choices: ["Top pencil", "Bottom pencil", "They are the same", "Neither"], answer: "Top pencil",
+          explain: `The top pencil is longer.`
+        },
+        {
+          text: `Which box is heavier?`, zh: `哪個盒子比較重？`, speech: `Which box is heavier?`,
+          visual: `<div class="objects"><div class="group-box"><span class="object">📦</span><div>Empty</div></div><div class="group-box"><span class="object">📦</span><div>🧸 🚗 ⚽</div></div></div>`,
+          choices: ["Empty box", "Box with toys", "They are the same", "Cannot tell"], answer: "Box with toys",
+          explain: `The box with toys is heavier.`
+        },
+        {
+          text: `Four sweets are shared equally between two bears. How many sweets does each bear get?`, zh: `4粒糖平均分給2隻小熊，每隻有多少粒？`, speech: `Four sweets are shared equally between two bears. How many sweets does each bear get?`,
+          visual: `<div class="objects"><div class="group-box">🧸<div style="font-size:42px">🍬🍬</div></div><div class="group-box">🧸<div style="font-size:42px">🍬🍬</div></div></div>`,
+          choices: ["1", "2", "3", "4"], answer: "2",
+          explain: `Each bear gets two sweets.`
+        },
+        {
+          text: `Which item is the cheapest?`, zh: `哪件物品最便宜？`, speech: `Which item is the cheapest?`,
+          visual: `<div class="objects"><div class="group-box"><span class="object">🍎</span><div>$3</div></div><div class="group-box"><span class="object">🍌</span><div>$2</div></div><div class="group-box"><span class="object">🍰</span><div>$5</div></div></div>`,
+          choices: ["Apple", "Banana", "Cake"], answer: "Banana",
+          explain: `The banana costs two dollars, so it is the cheapest.`
+        },
+        {
+          text: `You have five dollars. What can you buy exactly?`, zh: `你有5元，剛好可以買甚麼？`, speech: `You have five dollars. What can you buy exactly?`,
+          visual: `<div class="objects"><div class="group-box"><span class="object">🧃</span><div>$4</div></div><div class="group-box"><span class="object">🍰</span><div>$5</div></div><div class="group-box"><span class="object">🧸</span><div>$7</div></div></div>`,
+          choices: ["Juice", "Cake", "Bear", "Nothing"], answer: "Cake",
+          explain: `The cake costs exactly five dollars.`
+        }
+      ];
+      return shuffle(q);
+    }
+
+    function makeMockQuestions() {
+      const pools = [
+        makeCountingQuestions(),
+        makeShapeQuestions(),
+        makePatternQuestions(),
+        makePositionQuestions(),
+        makeLifeQuestions()
+      ];
+      const mixed = pools.map(pool => shuffle(pool)[0]);
+      const extraPool = pools[rand(0, pools.length - 1)];
+      mixed.push(shuffle(extraPool)[0]);
+      return shuffle(mixed);
+    }
+
+    function makeQuestions(level) {
+      return ({
+        1: makeCountingQuestions,
+        2: makeShapeQuestions,
+        3: makePatternQuestions,
+        4: makePositionQuestions,
+        5: makeLifeQuestions,
+        6: makeMockQuestions
+      })[level]();
+    }
+
+    function renderLevels() {
+      const grid = $("levelGrid");
+      grid.innerHTML = "";
+      LEVELS.forEach(level => {
+        const best = state.results[level.id]?.best || 0;
+        const stars = best >= 6 ? 3 : best >= 4 ? 2 : best >= 2 ? 1 : 0;
+        const btn = document.createElement("button");
+        btn.className = "level-card";
+        btn.style.setProperty("--accent", level.accent);
+        btn.innerHTML = `
+          <div class="level-number">${level.id}</div>
+          <div style="font-size:46px;position:absolute;right:20px;top:18px">${level.icon}</div>
+          <h3 class="level-title">${level.title}</h3>
+          <div style="font-weight:900;color:${level.accent};margin-bottom:6px">${level.zh}</div>
+          <div class="level-desc">${level.desc}</div>
+          <div class="level-stars">${"⭐".repeat(stars)}${"☆".repeat(3 - stars)}</div>
+        `;
+        btn.addEventListener("click", () => startLevel(level.id));
+        grid.appendChild(btn);
+      });
+    }
+
+    function startLevel(levelId) {
+      state.currentLevel = levelId;
+      state.questionIndex = 0;
+      state.score = 0;
+      state.questions = makeQuestions(levelId);
+      showScreen("gameScreen");
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      state.answered = false;
+      const q = state.questions[state.questionIndex];
+      const level = LEVELS.find(l => l.id === state.currentLevel);
+
+      $("progressText").textContent = `Question ${state.questionIndex + 1} of ${state.questions.length}`;
+      $("levelNameTop").textContent = level.title;
+      $("progressFill").style.width = `${(state.questionIndex / state.questions.length) * 100}%`;
+      $("scoreText").textContent = state.score;
+      $("levelPill").textContent = `Level ${level.id}: ${level.title}`;
+      $("questionText").textContent = q.text;
+      $("questionZh").textContent = state.chineseHint ? q.zh : "";
+      $("visualStage").innerHTML = q.visual;
+      $("feedback").className = "feedback";
+      $("feedback").textContent = "";
+      $("nextBtn").classList.remove("show");
+
+      const grid = $("answerGrid");
+      grid.className = `answer-grid ${q.choices.length === 3 ? "three" : ""}`;
+      grid.innerHTML = "";
+      q.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.className = "choice";
+        btn.textContent = choice;
+        btn.addEventListener("click", () => selectAnswer(choice, btn));
+        grid.appendChild(btn);
+      });
+
+      setTimeout(() => speak(q.speech || q.text), 320);
+    }
+
+    function selectAnswer(choice, button) {
+      if (state.answered) return;
+      const q = state.questions[state.questionIndex];
+      const correct = choice === q.answer;
+      const feedback = $("feedback");
+      const all = [...document.querySelectorAll(".choice")];
+
+      if (correct) {
+        state.answered = true;
+        state.score += 1;
+        button.classList.add("correct");
+        all.forEach(b => b.disabled = true);
+        feedback.className = "feedback show good";
+        feedback.textContent = `🌟 Well done! ${q.explain}`;
+        speak(`Well done! ${q.explain}`);
+        burst(12);
+        $("scoreText").textContent = state.score;
+        $("nextBtn").classList.add("show");
+      } else {
+        button.classList.add("wrong");
+        button.disabled = true;
+        feedback.className = "feedback show try";
+        feedback.textContent = `Good try! Look carefully and try one more time.`;
+        speak(`Good try. Look carefully and try one more time.`);
+      }
+    }
+
+    function nextQuestion() {
+      state.questionIndex += 1;
+      if (state.questionIndex >= state.questions.length) {
+        finishLevel();
+      } else {
+        renderQuestion();
+      }
+    }
+
+    function finishLevel() {
+      const total = state.questions.length;
+      const oldBest = state.results[state.currentLevel]?.best || 0;
+      state.results[state.currentLevel] = { best: Math.max(oldBest, state.score) };
+      localStorage.setItem("howieMathsResults", JSON.stringify(state.results));
+
+      const stars = state.score >= 6 ? 3 : state.score >= 4 ? 2 : 1;
+      $("resultStars").textContent = "⭐".repeat(stars) + "☆".repeat(3 - stars);
+      $("resultScore").textContent = `${state.score} out of ${total}`;
+      $("resultMessage").textContent = state.score === total
+        ? "Amazing listening and thinking! You answered every question correctly."
+        : state.score >= 4
+          ? "Great work! You listened carefully and kept trying."
+          : "Good effort! Every try makes your maths brain stronger.";
+      showScreen("resultScreen");
+      burst(40);
+      speak(`Congratulations Howie! You scored ${state.score} out of ${total}.`);
+    }
+
+    function burst(count) {
+      const wrap = $("confetti");
+      const icons = ["⭐", "✨", "🎉", "🔵", "🟡", "🔺"];
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti-piece";
+        piece.textContent = icons[rand(0, icons.length - 1)];
+        piece.style.left = `${rand(0, 100)}vw`;
+        piece.style.animationDuration = `${rand(18, 35) / 10}s`;
+        piece.style.animationDelay = `${rand(0, 8) / 10}s`;
+        wrap.appendChild(piece);
+        setTimeout(() => piece.remove(), 4500);
+      }
+    }
+
+    $("startBtn").addEventListener("click", () => { renderLevels(); showScreen("levelScreen"); });
+    $("homeBtn").addEventListener("click", () => { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); renderLevels(); showScreen("levelScreen"); });
+    $("nextBtn").addEventListener("click", nextQuestion);
+    $("repeatBtn").addEventListener("click", () => {
+      const q = state.questions[state.questionIndex];
+      if (q) speak(q.speech || q.text);
+    });
+    $("playAgainBtn").addEventListener("click", () => { renderLevels(); showScreen("levelScreen"); });
+    $("printBtn").addEventListener("click", () => window.print());
+
+    $("soundBtn").addEventListener("click", () => {
+      state.soundOn = !state.soundOn;
+      $("soundBtn").textContent = state.soundOn ? "🔊 Sound" : "🔇 Muted";
+      if (!state.soundOn && "speechSynthesis" in window) speechSynthesis.cancel();
+    });
+
+    $("hintBtn").addEventListener("click", () => {
+      state.chineseHint = !state.chineseHint;
+      $("hintBtn").textContent = state.chineseHint ? "中 Hint" : "EN Only";
+      const q = state.questions[state.questionIndex];
+      if (q && $("gameScreen").classList.contains("active")) {
+        $("questionZh").textContent = state.chineseHint ? q.zh : "";
+      }
+    });
+
+    renderLevels();
+  </script>
+</body>
+</html>
