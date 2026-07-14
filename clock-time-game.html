@@ -19,7 +19,7 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;}
   body{
-    font-family:'Baloo 2','Comic Sans MS',ui-rounded,sans-serif;
+    font-family:'Baloo 2','Comic Sans MS','PingFang HK','Microsoft JhengHei',ui-rounded,sans-serif;
     background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 100%);
     color:var(--ink);
     display:flex;flex-direction:column;align-items:center;
@@ -51,6 +51,10 @@
   .clock-wrap{margin:6px 0 2px;}
   svg.clock{width:min(60vw,260px);height:min(60vw,260px);display:block;}
   .hand{transition:transform 1s cubic-bezier(.34,1.4,.5,1);transform-origin:100px 100px;}
+  @keyframes pulseMin{0%,100%{stroke:#FB8500}50%{stroke:#FF2D55}}
+  @keyframes pulseHour{0%,100%{stroke:#1B2A4A}50%{stroke:#FF2D55}}
+  #minuteHand.hint{animation:pulseMin .7s ease 4;}
+  #hourHand.hint{animation:pulseHour .7s ease 4;}
 
   .choices{
     display:flex;flex-wrap:wrap;gap:14px;justify-content:center;
@@ -79,7 +83,6 @@
     text-align:center;padding:24px;z-index:20;overflow-y:auto;
   }
   .screen h2{font-size:38px;margin:8px 0;font-weight:800;}
-  /* safe centering: centers when there's room, scrolls instead of clipping when there isn't */
   #homeScreen{justify-content:flex-start;}
   #homeScreen .big-emoji{margin-top:auto;}
   #homeScreen .level-cards{margin-bottom:auto;padding-bottom:24px;}
@@ -100,9 +103,20 @@
   .big-emoji{font-size:72px;margin-bottom:2px;}
   .hidden{display:none !important;}
 
+  /* language toggle */
+  .lang-row{display:flex;gap:10px;margin:0 0 18px;}
+  .lang-btn{
+    font-family:inherit;font-size:18px;font-weight:800;cursor:pointer;
+    background:var(--white);color:var(--ink);border:3px solid #B9C6DD;
+    border-radius:999px;padding:8px 22px;box-shadow:0 4px 0 #D8E2F2;transition:transform .1s;
+  }
+  .lang-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #D8E2F2;}
+  .lang-btn.on{background:var(--yellow);border-color:var(--orange);box-shadow:0 4px 0 var(--orange);}
+  .voice-note{font-size:14px;font-weight:700;color:#8A5A00;margin:-6px 0 12px;min-height:18px;max-width:340px;}
+
   /* homepage level cards */
   .home-title{font-size:44px;margin:4px 0 0;font-weight:800;}
-  .home-sub{font-size:19px;margin:4px 0 20px;color:#41537A;}
+  .home-sub{font-size:19px;margin:4px 0 14px;color:#41537A;}
   .level-cards{display:flex;flex-direction:column;gap:16px;width:100%;max-width:380px;}
   .level-card{
     display:flex;align-items:center;gap:16px;text-align:left;
@@ -138,7 +152,12 @@
 <div class="screen" id="homeScreen">
   <div class="big-emoji">🕐</div>
   <h2 class="home-title">Clock Time Game</h2>
-  <p class="home-sub">Pick a level and listen carefully!</p>
+  <p class="home-sub" id="homeSub">Pick a level and listen carefully!</p>
+  <div class="lang-row">
+    <button class="lang-btn on" id="langEn" onclick="setLang('en')">English</button>
+    <button class="lang-btn" id="langZh" onclick="setLang('zh')">廣東話</button>
+  </div>
+  <p class="voice-note" id="voiceNote"></p>
   <div class="level-cards">
     <button class="level-card" onclick="startGame(0)">
       <svg class="mini-clock" viewBox="0 0 200 200"><use href="#miniface"/>
@@ -147,8 +166,8 @@
         <circle cx="100" cy="100" r="9" fill="#FFB703" stroke="#1B2A4A" stroke-width="4"/>
       </svg>
       <span class="info">
-        <span class="lv">LEVEL 1</span><br>
-        <span class="name">O'Clock</span><br>
+        <span class="lv" id="lv0">LEVEL 1</span><br>
+        <span class="name" id="name0">O'Clock</span><br>
         <span class="fmt">3:00 · 7:00 · 11:00</span>
       </span>
       <span class="done" id="done0"></span>
@@ -160,8 +179,8 @@
         <circle cx="100" cy="100" r="9" fill="#FFB703" stroke="#1B2A4A" stroke-width="4"/>
       </svg>
       <span class="info">
-        <span class="lv">LEVEL 2</span><br>
-        <span class="name">Half Past</span><br>
+        <span class="lv" id="lv1">LEVEL 2</span><br>
+        <span class="name" id="name1">Half Past</span><br>
         <span class="fmt">3:30 · 7:30 · 11:30</span>
       </span>
       <span class="done" id="done1"></span>
@@ -173,8 +192,8 @@
         <circle cx="100" cy="100" r="9" fill="#FFB703" stroke="#1B2A4A" stroke-width="4"/>
       </svg>
       <span class="info">
-        <span class="lv">LEVEL 3</span><br>
-        <span class="name">Quarter Past</span><br>
+        <span class="lv" id="lv2">LEVEL 3</span><br>
+        <span class="name" id="name2">Quarter Past</span><br>
         <span class="fmt">3:15 · 7:15 · 11:15</span>
       </span>
       <span class="done" id="done2"></span>
@@ -186,14 +205,13 @@
         <circle cx="100" cy="100" r="9" fill="#FFB703" stroke="#1B2A4A" stroke-width="4"/>
       </svg>
       <span class="info">
-        <span class="lv">LEVEL 4</span><br>
-        <span class="name">Quarter To</span><br>
+        <span class="lv" id="lv3">LEVEL 4</span><br>
+        <span class="name" id="name3">Quarter To</span><br>
         <span class="fmt">3:45 · 7:45 · 11:45</span>
       </span>
       <span class="done" id="done3"></span>
     </button>
   </div>
-  <!-- shared mini clock face -->
   <svg width="0" height="0" style="position:absolute">
     <defs>
       <g id="miniface">
@@ -215,7 +233,7 @@
   <p id="levelText"></p>
   <div>
     <button class="big-btn" id="levelBtn" onclick="nextLevel()">Next Level ➜</button>
-    <button class="big-btn alt" onclick="goHome()">🏠 Home</button>
+    <button class="big-btn alt" id="homeBtn" onclick="goHome()">🏠 Home</button>
   </div>
 </div>
 
@@ -227,7 +245,7 @@
   <button class="round-btn" onclick="askQuestion()" aria-label="Hear the question again">🔊</button>
 </div>
 
-<h1 class="question">What time is it now?</h1>
+<h1 class="question" id="questionText">What time is it now?</h1>
 
 <div class="clock-wrap">
   <svg class="clock" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -273,25 +291,150 @@
   }
 })();
 
+/* ---------- language ---------- */
+let lang = 'en';
+const hourEn = ['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
+const hourZh = ['','一','兩','三','四','五','六','七','八','九','十','十一','十二'];
+
+function timeSpeech(h,m){
+  if(lang==='en'){
+    if(m===0)  return hourEn[h] + " o'clock";
+    if(m===30) return 'half past ' + hourEn[h] + '. ' + hourEn[h] + ' thirty';
+    if(m===15) return 'quarter past ' + hourEn[h] + '. ' + hourEn[h] + ' fifteen';
+    const next = h===12 ? 1 : h+1;
+    return 'quarter to ' + hourEn[next] + '. ' + hourEn[h] + ' forty five';
+  }else{
+    if(m===0)  return hourZh[h] + '點正';
+    if(m===30) return hourZh[h] + '點半';
+    if(m===15) return hourZh[h] + '點三個字，即係' + hourZh[h] + '點十五分';
+    return hourZh[h] + '點九個字，即係' + hourZh[h] + '點四十五分';
+  }
+}
+
+const T = {
+  en: {
+    sub: 'Pick a level and listen carefully!',
+    names: ["O'Clock","Half Past","Quarter Past","Quarter To"],
+    lv: n => 'LEVEL ' + n,
+    pill: n => 'Level ' + n,
+    question: 'What time is it now?',
+    correct: (h,m) => 'Yes! It is ' + timeSpeech(h,m) + '. Well done!',
+    hint1: {
+      0:  "Not yet! Look at the long hand. It points straight up to twelve. That means o'clock! Now find the short hand. Which number does it point to?",
+      30: "Not yet! Look at the long hand. It points down to six. That means half past! The short hand is between two numbers. The hour is the number it has passed.",
+      15: "Not yet! Look at the long hand. It points to three. That means fifteen minutes! Now find the short hand. Which number does it point to?",
+      45: "Not yet! Look at the long hand. It points to nine. That means forty five minutes! The short hand looks close to the next number, but the hour is the number it has passed."
+    },
+    hint2: (h,m) => m===0
+      ? 'Here is a big hint! The short hand points right at the number ' + h + '. Try again!'
+      : 'Here is a big hint! The short hand has passed the number ' + h + '. Try again!',
+    lvlDone: n => 'Level ' + n + ' complete!',
+    lvlDoneText: 'You earned 5 stars! ⭐⭐⭐⭐⭐',
+    lvlDoneSpeak: n => 'Amazing! Level ' + n + ' complete!',
+    champ: 'You did it!',
+    champText: 'All levels complete! You are a Clock Champion! 🎉',
+    champSpeak: 'Hooray! You finished all the levels! You are a clock champion!',
+    next: 'Next Level ➜', home: '🏠 Home', again: '↻ Play Again',
+    voiceLang: 'en-US'
+  },
+  zh: {
+    sub: '揀一關，留心聽啦！',
+    names: ['正點','點半','三個字','九個字'],
+    lv: n => '第' + n + '關',
+    pill: n => '第' + n + '關',
+    question: '而家幾多點呀？',
+    correct: (h,m) => '啱喇！而家係' + timeSpeech(h,m) + '。叻仔！',
+    hint1: {
+      0:  '唔啱呀！睇下長針，佢指住十二，即係正點！再睇下短針，佢指住邊個數字呀？',
+      30: '唔啱呀！睇下長針，佢指住六，即係半！短針喺兩個數字中間，要睇佢行過咗邊個數字。',
+      15: '唔啱呀！睇下長針，佢指住三，即係三個字，十五分鐘！再睇下短針，佢指住邊個數字呀？',
+      45: '唔啱呀！睇下長針，佢指住九，即係九個字，四十五分鐘！短針就快到下一個數字，但係要睇佢行過咗邊個數字。'
+    },
+    hint2: (h,m) => m===0
+      ? '大提示！短針指正數字' + h + '。再試下啦！'
+      : '大提示！短針行過咗數字' + h + '。再試下啦！',
+    lvlDone: n => '完成' + T.zh.pill(n) + '喇！',
+    lvlDoneText: '攞到五粒星！⭐⭐⭐⭐⭐',
+    lvlDoneSpeak: n => '好叻呀！完成咗第' + n + '關喇！',
+    champ: '你做到喇！',
+    champText: '全部關卡完成！你係時鐘小冠軍！🎉',
+    champSpeak: '好嘢！你完成晒所有關卡喇！你係時鐘小冠軍！',
+    next: '下一關 ➜', home: '🏠 主頁', again: '↻ 再玩一次',
+    voiceLang: 'zh-HK'
+  }
+};
+
+function setLang(l){
+  lang = l;
+  document.getElementById('langEn').classList.toggle('on', l==='en');
+  document.getElementById('langZh').classList.toggle('on', l==='zh');
+  const t = T[l];
+  document.getElementById('homeSub').textContent = t.sub;
+  document.getElementById('questionText').textContent = t.question;
+  for(let i=0;i<4;i++){
+    document.getElementById('lv'+i).textContent = t.lv(i+1);
+    document.getElementById('name'+i).textContent = t.names[i];
+  }
+  document.getElementById('homeBtn').textContent = t.home;
+  checkVoiceAndGreet();
+}
+
 /* ---------- speech ---------- */
-let voice = null;
-function pickVoice(){
-  const vs = speechSynthesis.getVoices();
-  voice = vs.find(v=>/en[-_](US|GB)/i.test(v.lang) && /google|samantha|karen|daniel/i.test(v.name))
-       || vs.find(v=>/^en/i.test(v.lang)) || null;
+let voices = [];
+function loadVoices(){
+  const v = speechSynthesis.getVoices();
+  if(v.length) voices = v;
 }
 if('speechSynthesis' in window){
-  pickVoice();
-  speechSynthesis.onvoiceschanged = pickVoice;
+  loadVoices();
+  speechSynthesis.onvoiceschanged = ()=>{ loadVoices(); updateVoiceNote(); };
 }
+function pickVoice(){
+  loadVoices(); // voices can arrive late on iOS/Android
+  if(lang==='en'){
+    return voices.find(v=>/en[-_](US|GB)/i.test(v.lang) && /google|samantha|karen|daniel/i.test(v.name))
+        || voices.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  // Cantonese: match by lang code OR by name across platforms
+  // iOS: "Sin-ji" (zh-HK) · Chrome: "Google 粤語（香港）" · Windows: "HiuGaai/HiuMaan (zh-HK)"
+  return voices.find(v=>/zh[-_]HK|yue/i.test(v.lang))
+      || voices.find(v=>/cantonese|粵|粤|hiugaai|hiumaan|sin-?ji|hong\s?kong/i.test(v.name))
+      || voices.find(v=>/^zh/i.test(v.lang)) || null;
+}
+function updateVoiceNote(){
+  const note = document.getElementById('voiceNote');
+  if(!note) return;
+  if(lang==='en'){ note.textContent=''; return; }
+  if(!('speechSynthesis' in window)){ note.textContent='⚠️ 此瀏覽器不支援語音'; return; }
+  const v = pickVoice();
+  if(!v){
+    note.textContent = '⚠️ 未偵測到中文語音，請喺系統設定安裝廣東話語音（例如 iOS 嘅「善怡 Sin-ji」）';
+  }else if(/zh[-_]HK|yue/i.test(v.lang) || /cantonese|粵|粤|hiugaai|hiumaan|sin-?ji/i.test(v.name)){
+    note.textContent = '✓ 廣東話語音：' + v.name;
+  }else{
+    note.textContent = '⚠️ 未有廣東話語音，會用「' + v.name + '」（普通話）讀出。可喺系統設定安裝粵語語音。';
+  }
+}
+function checkVoiceAndGreet(){
+  updateVoiceNote();
+  if(lang==='zh') speak('你好！我哋一齊學睇時鐘啦！');
+  else speak('Hello! Let us learn the clock!');
+}
+let speakTimer = null;
 function speak(text, cb){
   if(!('speechSynthesis' in window)){ if(cb) cb(); return; }
+  clearTimeout(speakTimer);
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  if(voice) u.voice = voice;
-  u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1.1;
-  if(cb) u.onend = cb;
-  speechSynthesis.speak(u);
+  // small delay after cancel(): Chrome silently drops utterances queued immediately after cancel
+  speakTimer = setTimeout(()=>{
+    const u = new SpeechSynthesisUtterance(text);
+    const v = pickVoice();
+    if(v){ u.voice = v; u.lang = v.lang; }
+    else { u.lang = T[lang].voiceLang; }
+    u.rate = 0.85; u.pitch = 1.1;
+    if(cb) u.onend = cb;
+    speechSynthesis.speak(u);
+  }, 100);
 }
 
 /* ---------- game state ---------- */
@@ -299,21 +442,10 @@ const QUESTIONS_PER_LEVEL = 5;
 const LEVELS = [ {minute:0}, {minute:30}, {minute:15}, {minute:45} ];
 const completed = [false,false,false,false];
 let level = 0, qIndex = 0, correctHour = 3, locked = false, lastHour = -1;
+let wrongCount = 0;
 let pendingTimer = null;
 
-const hourWords = ['','one','two','three','four','five','six','seven','eight',
-                   'nine','ten','eleven','twelve'];
-
 function timeLabel(h,m){ return h + ':' + String(m).padStart(2,'0'); }
-function timeSpeech(h,m){
-  if(m===0)  return hourWords[h] + " o'clock";
-  if(m===30) return 'half past ' + hourWords[h] + '. ' + hourWords[h] + ' thirty';
-  if(m===15) return 'quarter past ' + hourWords[h] + '. ' + hourWords[h] + ' fifteen';
-  if(m===45){
-    const next = h===12 ? 1 : h+1;
-    return 'quarter to ' + hourWords[next] + '. ' + hourWords[h] + ' forty five';
-  }
-}
 
 function setHands(h,m){
   const minDeg  = m*6;
@@ -322,8 +454,15 @@ function setHands(h,m){
   document.getElementById('hourHand').style.transform   = 'rotate('+hourDeg+'deg)';
 }
 
+function pulseHand(id){
+  const el = document.getElementById(id);
+  el.classList.remove('hint');
+  void el.offsetWidth; /* restart animation */
+  el.classList.add('hint');
+}
+
 function updateHUD(){
-  document.getElementById('levelPill').textContent = 'Level ' + (level+1);
+  document.getElementById('levelPill').textContent = T[lang].pill(level+1);
   let s='';
   for(let i=0;i<QUESTIONS_PER_LEVEL;i++) s += i<qIndex ? '⭐' : '☆';
   document.getElementById('stars').textContent = s;
@@ -332,6 +471,7 @@ function updateHUD(){
 /* ---------- questions ---------- */
 function newQuestion(){
   locked = false;
+  wrongCount = 0;
   const m = LEVELS[level].minute;
   do{ correctHour = 1 + Math.floor(Math.random()*12); } while(correctHour===lastHour);
   lastHour = correctHour;
@@ -355,7 +495,7 @@ function newQuestion(){
   pendingTimer = setTimeout(()=>askQuestion(), 900);
 }
 
-function askQuestion(){ speak('What time is it now?'); }
+function askQuestion(){ speak(T[lang].question); }
 
 function choose(btn,h){
   if(locked) return;
@@ -367,7 +507,7 @@ function choose(btn,h){
     confetti();
     qIndex++;
     updateHUD();
-    speak('Yes! It is ' + timeSpeech(correctHour,m) + '. Well done!', ()=>{
+    speak(T[lang].correct(correctHour,m), ()=>{
       pendingTimer = setTimeout(()=>{
         if(qIndex >= QUESTIONS_PER_LEVEL) showLevelScreen();
         else newQuestion();
@@ -376,7 +516,17 @@ function choose(btn,h){
   }else{
     btn.classList.add('wrong');
     btn.disabled = true;
-    speak('Oops! Try again!');
+    wrongCount++;
+    if(wrongCount===1){
+      /* first miss: teach the method — long hand tells the minutes */
+      pulseHand('minuteHand');
+      setTimeout(()=>pulseHand('hourHand'), 1400);
+      speak(T[lang].hint1[m]);
+    }else{
+      /* second miss onwards: point straight at the hour */
+      pulseHand('hourHand');
+      speak(T[lang].hint2(correctHour,m));
+    }
     setTimeout(()=>btn.classList.remove('wrong'), 500);
   }
 }
@@ -384,33 +534,36 @@ function choose(btn,h){
 /* ---------- level flow ---------- */
 function showLevelScreen(){
   completed[level] = true;
+  const t = T[lang];
   const scr   = document.getElementById('levelScreen');
   const title = document.getElementById('levelTitle');
   const text  = document.getElementById('levelText');
   const btn   = document.getElementById('levelBtn');
   const emoji = document.getElementById('levelEmoji');
+  document.getElementById('homeBtn').textContent = t.home;
   scr.classList.remove('hidden');
   const allDone = completed.every(Boolean);
   if(allDone){
     emoji.textContent = '🏆';
-    title.textContent = 'You did it!';
-    text.textContent  = 'All levels complete! You are a Clock Champion! 🎉';
-    btn.textContent   = '↻ Play Again';
+    title.textContent = t.champ;
+    text.textContent  = t.champText;
+    btn.textContent   = t.again;
+    btn.classList.remove('hidden');
     btn.onclick = ()=>{ completed.fill(false); goHome(); };
-    speak('Hooray! You finished all the levels! You are a clock champion!');
+    speak(t.champSpeak);
     for(let i=0;i<3;i++) setTimeout(confetti, i*600);
   }else{
     emoji.textContent = '🌟';
-    title.textContent = 'Level ' + (level+1) + ' complete!';
-    text.textContent  = 'You earned 5 stars! ⭐⭐⭐⭐⭐';
+    title.textContent = t.lvlDone(level+1);
+    text.textContent  = t.lvlDoneText;
     if(level < LEVELS.length-1){
-      btn.textContent = 'Next Level ➜';
+      btn.textContent = t.next;
       btn.classList.remove('hidden');
       btn.onclick = nextLevel;
     }else{
       btn.classList.add('hidden');
     }
-    speak('Amazing! Level ' + (level+1) + ' complete!');
+    speak(t.lvlDoneSpeak(level+1));
   }
 }
 function nextLevel(){
