@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Clock Time Game 🕐</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#DFF1FF; --bg2:#FFF6DC;
+    --ink:#1B2A4A;
+    --blue:#2B59C3;
+    --yellow:#FFB703;
+    --orange:#FB8500;
+    --green:#2EC27E;
+    --red:#FF6B6B;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'Baloo 2','Comic Sans MS',ui-rounded,sans-serif;
+    background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 100%);
+    color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+    min-height:100vh; overflow-x:hidden;
+    user-select:none;
+  }
+  .top{
+    width:100%;max-width:520px;display:flex;align-items:center;
+    justify-content:space-between;padding:12px 16px 0;gap:10px;
+  }
+  .level-pill{
+    background:var(--white);border:3px solid var(--blue);color:var(--blue);
+    border-radius:999px;padding:4px 16px;font-weight:800;font-size:18px;white-space:nowrap;
+  }
+  .stars{font-size:20px;letter-spacing:2px;min-height:28px;flex:1;text-align:center;}
+  .round-btn{
+    background:var(--yellow);border:none;border-radius:50%;
+    width:50px;height:50px;font-size:24px;cursor:pointer;flex-shrink:0;
+    box-shadow:0 4px 0 var(--orange);transition:transform .1s;
+  }
+  .round-btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--orange);}
+  .round-btn.home{background:#CFE3FF;box-shadow:0 4px 0 #8FB4E8;}
+  .round-btn.home:active{box-shadow:0 1px 0 #8FB4E8;}
+
+  h1.question{
+    font-size:26px;font-weight:800;margin:10px 16px 4px;text-align:center;
+  }
+
+  .clock-wrap{margin:6px 0 2px;}
+  svg.clock{width:min(60vw,260px);height:min(60vw,260px);display:block;}
+  .hand{transition:transform 1s cubic-bezier(.34,1.4,.5,1);transform-origin:100px 100px;}
+
+  .choices{
+    display:flex;flex-wrap:wrap;gap:14px;justify-content:center;
+    padding:14px 16px 30px;max-width:520px;width:100%;
+  }
+  .choice{
+    flex:1 1 130px;max-width:160px;
+    background:var(--white);border:4px solid var(--blue);color:var(--ink);
+    border-radius:22px;padding:16px 8px;font-family:inherit;
+    font-size:34px;font-weight:800;cursor:pointer;
+    box-shadow:0 6px 0 #BCD3F7;transition:transform .1s;
+  }
+  .choice:active{transform:translateY(4px);box-shadow:0 2px 0 #BCD3F7;}
+  .choice.correct{background:var(--green);border-color:#1F9964;color:#fff;box-shadow:0 6px 0 #1F9964;}
+  .choice.wrong{background:#FFE3E3;border-color:var(--red);color:var(--red);animation:shake .4s;}
+  .choice:disabled{cursor:default;opacity:.9;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)}
+    50%{transform:translateX(8px)} 75%{transform:translateX(-5px)}
+  }
+
+  /* overlay screens */
+  .screen{
+    position:fixed;inset:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;z-index:20;overflow-y:auto;
+  }
+  .screen h2{font-size:38px;margin:8px 0;font-weight:800;}
+  /* safe centering: centers when there's room, scrolls instead of clipping when there isn't */
+  #homeScreen{justify-content:flex-start;}
+  #homeScreen .big-emoji{margin-top:auto;}
+  #homeScreen .level-cards{margin-bottom:auto;padding-bottom:24px;}
+  @media (max-width:380px){
+    .home-title{font-size:36px;}
+    .level-card .name{font-size:21px;}
+    .level-card .mini-clock{width:54px;height:54px;}
+  }
+  .screen p{font-size:20px;margin:6px 0 18px;}
+  .big-btn{
+    background:var(--green);color:#fff;border:none;border-radius:999px;
+    font-family:inherit;font-size:26px;font-weight:800;padding:14px 42px;
+    cursor:pointer;box-shadow:0 6px 0 #1F9964;transition:transform .1s;margin:6px;
+  }
+  .big-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #1F9964;}
+  .big-btn.alt{background:var(--white);color:var(--blue);box-shadow:0 6px 0 #BCD3F7;border:3px solid var(--blue);}
+  .big-btn.alt:active{box-shadow:0 2px 0 #BCD3F7;}
+  .big-emoji{font-size:72px;margin-bottom:2px;}
+  .hidden{display:none !important;}
+
+  /* homepage level cards */
+  .home-title{font-size:44px;margin:4px 0 0;font-weight:800;}
+  .home-sub{font-size:19px;margin:4px 0 20px;color:#41537A;}
+  .level-cards{display:flex;flex-direction:column;gap:16px;width:100%;max-width:380px;}
+  .level-card{
+    display:flex;align-items:center;gap:16px;text-align:left;
+    background:var(--white);border:4px solid var(--blue);border-radius:26px;
+    padding:14px 18px;cursor:pointer;font-family:inherit;color:var(--ink);
+    box-shadow:0 6px 0 #BCD3F7;transition:transform .1s;
+  }
+  .level-card:active{transform:translateY(4px);box-shadow:0 2px 0 #BCD3F7;}
+  .level-card .mini-clock{width:64px;height:64px;flex-shrink:0;}
+  .level-card .info{flex:1;}
+  .level-card .lv{font-size:14px;font-weight:800;color:var(--orange);letter-spacing:1px;}
+  .level-card .name{font-size:24px;font-weight:800;line-height:1.1;}
+  .level-card .fmt{font-size:16px;color:#41537A;font-weight:700;}
+  .level-card .done{font-size:26px;}
+  .level-card:nth-child(2){border-color:var(--orange);box-shadow:0 6px 0 #FFD9A8;}
+  .level-card:nth-child(2):active{box-shadow:0 2px 0 #FFD9A8;}
+  .level-card:nth-child(2) .lv{color:var(--blue);}
+  .level-card:nth-child(3){border-color:var(--green);box-shadow:0 6px 0 #BDEBD5;}
+  .level-card:nth-child(3):active{box-shadow:0 2px 0 #BDEBD5;}
+  .level-card:nth-child(4){border-color:var(--red);box-shadow:0 6px 0 #FFCDCD;}
+  .level-card:nth-child(4):active{box-shadow:0 2px 0 #FFCDCD;}
+  .level-card:nth-child(4) .lv{color:var(--red);}
+
+  /* confetti */
+  .confetti{position:fixed;top:-20px;font-size:26px;z-index:30;pointer-events:none;
+    animation:fall linear forwards;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg);}}
+</style>
+</head>
+<body>
+
+<!-- HOMEPAGE / LEVEL SELECT -->
+<div class="screen" id="homeScreen">
+  <div class="big-emoji">🕐</div>
+  <h2 class="home-title">Clock Time Game</h2>
+  <p class="home-sub">Pick a level and listen carefully!</p>
+  <div class="level-cards">
+    <button class="level-card" onclick="startGame(0)">
+      <svg class="mini-clock" viewBox="0 0 200 200"><use href="#miniface"/>
+        <line x1="100" y1="100" x2="100" y2="55" stroke="#1B2A4A" stroke-width="12" stroke-linecap="round" transform="rotate(90 100 100)"/>
+        <line x1="100" y1="100" x2="100" y2="32" stroke="#FB8500" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="100" cy="100" r="9" fill="#FFB703" stroke="#1B2A4A" stroke-width="4"/>
+      </svg>
+      <span class="info">
+        <span class="lv">LEVEL 1</span><br>
+        <span class="name">O'Clock</span><br>
+        <span class="fmt">3:00 · 7:00 · 11:00</span>
+      </span>
+      <span class="done" id="done0"></span>
+    </button>
+    <button class="level-card" onclick="startGame(1)">
+      <svg class="mini-clock" viewBox="0 0 200 200"><use href="#miniface"/>
+        <line x1="100" y1="100" x2="100" y2="55" stroke="#1B2A4A" stroke-width="12" stroke-linecap="round" transform="rotate(105 100 100)"/>
+        <line x1="100" y1="100" x2="100" y2="32" stroke="#FB8500" stroke-width="8" stroke-linecap="round" transform="rotate(180 100 100)"/>
+        <circle cx="100" cy="100" r="9" fill="#FFB703" stroke="#1B2A4A" stroke-width="4"/>
+      </svg>
+      <span class="info">
+        <span class="lv">LEVEL 2</span><br>
+        <span class="name">Half Past</span><br>
+        <span class="fmt">3:30 · 7:30 · 11:30</span>
+      </span>
+      <span class="done" id="done1"></span>
+    </button>
+    <button class="level-card" onclick="startGame(2)">
+      <svg class="mini-clock" viewBox="0 0 200 200"><use href="#miniface"/>
+        <line x1="100" y1="100" x2="100" y2="55" stroke="#1B2A4A" stroke-width="12" stroke-linecap="round" transform="rotate(97.5 100 100)"/>
+        <line x1="100" y1="100" x2="100" y2="32" stroke="#FB8500" stroke-width="8" stroke-linecap="round" transform="rotate(90 100 100)"/>
+        <circle cx="100" cy="100" r="9" fill="#FFB703" stroke="#1B2A4A" stroke-width="4"/>
+      </svg>
+      <span class="info">
+        <span class="lv">LEVEL 3</span><br>
+        <span class="name">Quarter Past</span><br>
+        <span class="fmt">3:15 · 7:15 · 11:15</span>
+      </span>
+      <span class="done" id="done2"></span>
+    </button>
+    <button class="level-card" onclick="startGame(3)">
+      <svg class="mini-clock" viewBox="0 0 200 200"><use href="#miniface"/>
+        <line x1="100" y1="100" x2="100" y2="55" stroke="#1B2A4A" stroke-width="12" stroke-linecap="round" transform="rotate(112.5 100 100)"/>
+        <line x1="100" y1="100" x2="100" y2="32" stroke="#FB8500" stroke-width="8" stroke-linecap="round" transform="rotate(270 100 100)"/>
+        <circle cx="100" cy="100" r="9" fill="#FFB703" stroke="#1B2A4A" stroke-width="4"/>
+      </svg>
+      <span class="info">
+        <span class="lv">LEVEL 4</span><br>
+        <span class="name">Quarter To</span><br>
+        <span class="fmt">3:45 · 7:45 · 11:45</span>
+      </span>
+      <span class="done" id="done3"></span>
+    </button>
+  </div>
+  <!-- shared mini clock face -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <g id="miniface">
+        <circle cx="100" cy="100" r="96" fill="#2B59C3"/>
+        <circle cx="100" cy="100" r="84" fill="#FFFFFF"/>
+        <circle cx="100" cy="25" r="6" fill="#B9C6DD"/>
+        <circle cx="100" cy="175" r="6" fill="#B9C6DD"/>
+        <circle cx="25" cy="100" r="6" fill="#B9C6DD"/>
+        <circle cx="175" cy="100" r="6" fill="#B9C6DD"/>
+      </g>
+    </defs>
+  </svg>
+</div>
+
+<!-- LEVEL COMPLETE SCREEN -->
+<div class="screen hidden" id="levelScreen">
+  <div class="big-emoji" id="levelEmoji">🌟</div>
+  <h2 id="levelTitle">Great job!</h2>
+  <p id="levelText"></p>
+  <div>
+    <button class="big-btn" id="levelBtn" onclick="nextLevel()">Next Level ➜</button>
+    <button class="big-btn alt" onclick="goHome()">🏠 Home</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="top">
+  <button class="round-btn home" onclick="goHome()" aria-label="Back to homepage">🏠</button>
+  <div class="level-pill" id="levelPill">Level 1</div>
+  <div class="stars" id="stars"></div>
+  <button class="round-btn" onclick="askQuestion()" aria-label="Hear the question again">🔊</button>
+</div>
+
+<h1 class="question">What time is it now?</h1>
+
+<div class="clock-wrap">
+  <svg class="clock" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="96" fill="#2B59C3"/>
+    <circle cx="100" cy="100" r="86" fill="#FFFFFF"/>
+    <g id="ticks"></g>
+    <g id="numbers" font-family="'Baloo 2','Comic Sans MS',sans-serif" font-weight="800"
+       font-size="16" fill="#1B2A4A" text-anchor="middle" dominant-baseline="central"></g>
+    <line id="hourHand" class="hand" x1="100" y1="100" x2="100" y2="58"
+          stroke="#1B2A4A" stroke-width="9" stroke-linecap="round"/>
+    <line id="minuteHand" class="hand" x1="100" y1="100" x2="100" y2="34"
+          stroke="#FB8500" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="100" cy="100" r="7" fill="#FFB703" stroke="#1B2A4A" stroke-width="3"/>
+  </svg>
+</div>
+
+<div class="choices" id="choices"></div>
+
+<script>
+/* ---------- build clock face ---------- */
+(function buildFace(){
+  const ticks = document.getElementById('ticks');
+  const nums  = document.getElementById('numbers');
+  for(let i=0;i<60;i++){
+    const a = i*6*Math.PI/180;
+    const big = i%5===0;
+    const r1 = big?76:80, r2 = 84;
+    const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+    l.setAttribute('x1',100+r1*Math.sin(a)); l.setAttribute('y1',100-r1*Math.cos(a));
+    l.setAttribute('x2',100+r2*Math.sin(a)); l.setAttribute('y2',100-r2*Math.cos(a));
+    l.setAttribute('stroke', big?'#1B2A4A':'#B9C6DD');
+    l.setAttribute('stroke-width', big?3:1.5);
+    l.setAttribute('stroke-linecap','round');
+    ticks.appendChild(l);
+  }
+  for(let n=1;n<=12;n++){
+    const a = n*30*Math.PI/180, r=64;
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',100+r*Math.sin(a));
+    t.setAttribute('y',100-r*Math.cos(a));
+    t.textContent = n;
+    nums.appendChild(t);
+  }
+})();
+
+/* ---------- speech ---------- */
+let voice = null;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  voice = vs.find(v=>/en[-_](US|GB)/i.test(v.lang) && /google|samantha|karen|daniel/i.test(v.name))
+       || vs.find(v=>/^en/i.test(v.lang)) || null;
+}
+if('speechSynthesis' in window){
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
+function speak(text, cb){
+  if(!('speechSynthesis' in window)){ if(cb) cb(); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  if(voice) u.voice = voice;
+  u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1.1;
+  if(cb) u.onend = cb;
+  speechSynthesis.speak(u);
+}
+
+/* ---------- game state ---------- */
+const QUESTIONS_PER_LEVEL = 5;
+const LEVELS = [ {minute:0}, {minute:30}, {minute:15}, {minute:45} ];
+const completed = [false,false,false,false];
+let level = 0, qIndex = 0, correctHour = 3, locked = false, lastHour = -1;
+let pendingTimer = null;
+
+const hourWords = ['','one','two','three','four','five','six','seven','eight',
+                   'nine','ten','eleven','twelve'];
+
+function timeLabel(h,m){ return h + ':' + String(m).padStart(2,'0'); }
+function timeSpeech(h,m){
+  if(m===0)  return hourWords[h] + " o'clock";
+  if(m===30) return 'half past ' + hourWords[h] + '. ' + hourWords[h] + ' thirty';
+  if(m===15) return 'quarter past ' + hourWords[h] + '. ' + hourWords[h] + ' fifteen';
+  if(m===45){
+    const next = h===12 ? 1 : h+1;
+    return 'quarter to ' + hourWords[next] + '. ' + hourWords[h] + ' forty five';
+  }
+}
+
+function setHands(h,m){
+  const minDeg  = m*6;
+  const hourDeg = (h%12)*30 + m*0.5;
+  document.getElementById('minuteHand').style.transform = 'rotate('+minDeg+'deg)';
+  document.getElementById('hourHand').style.transform   = 'rotate('+hourDeg+'deg)';
+}
+
+function updateHUD(){
+  document.getElementById('levelPill').textContent = 'Level ' + (level+1);
+  let s='';
+  for(let i=0;i<QUESTIONS_PER_LEVEL;i++) s += i<qIndex ? '⭐' : '☆';
+  document.getElementById('stars').textContent = s;
+}
+
+/* ---------- questions ---------- */
+function newQuestion(){
+  locked = false;
+  const m = LEVELS[level].minute;
+  do{ correctHour = 1 + Math.floor(Math.random()*12); } while(correctHour===lastHour);
+  lastHour = correctHour;
+  setHands(correctHour, m);
+  updateHUD();
+
+  const opts = new Set([correctHour]);
+  while(opts.size<3){
+    opts.add(1 + Math.floor(Math.random()*12));
+  }
+  const arr = [...opts].sort(()=>Math.random()-0.5);
+  const box = document.getElementById('choices');
+  box.innerHTML = '';
+  arr.forEach(h=>{
+    const b = document.createElement('button');
+    b.className = 'choice';
+    b.textContent = timeLabel(h,m);
+    b.onclick = ()=>choose(b,h);
+    box.appendChild(b);
+  });
+  pendingTimer = setTimeout(()=>askQuestion(), 900);
+}
+
+function askQuestion(){ speak('What time is it now?'); }
+
+function choose(btn,h){
+  if(locked) return;
+  const m = LEVELS[level].minute;
+  if(h===correctHour){
+    locked = true;
+    btn.classList.add('correct');
+    document.querySelectorAll('.choice').forEach(b=>b.disabled=true);
+    confetti();
+    qIndex++;
+    updateHUD();
+    speak('Yes! It is ' + timeSpeech(correctHour,m) + '. Well done!', ()=>{
+      pendingTimer = setTimeout(()=>{
+        if(qIndex >= QUESTIONS_PER_LEVEL) showLevelScreen();
+        else newQuestion();
+      }, 400);
+    });
+  }else{
+    btn.classList.add('wrong');
+    btn.disabled = true;
+    speak('Oops! Try again!');
+    setTimeout(()=>btn.classList.remove('wrong'), 500);
+  }
+}
+
+/* ---------- level flow ---------- */
+function showLevelScreen(){
+  completed[level] = true;
+  const scr   = document.getElementById('levelScreen');
+  const title = document.getElementById('levelTitle');
+  const text  = document.getElementById('levelText');
+  const btn   = document.getElementById('levelBtn');
+  const emoji = document.getElementById('levelEmoji');
+  scr.classList.remove('hidden');
+  const allDone = completed.every(Boolean);
+  if(allDone){
+    emoji.textContent = '🏆';
+    title.textContent = 'You did it!';
+    text.textContent  = 'All levels complete! You are a Clock Champion! 🎉';
+    btn.textContent   = '↻ Play Again';
+    btn.onclick = ()=>{ completed.fill(false); goHome(); };
+    speak('Hooray! You finished all the levels! You are a clock champion!');
+    for(let i=0;i<3;i++) setTimeout(confetti, i*600);
+  }else{
+    emoji.textContent = '🌟';
+    title.textContent = 'Level ' + (level+1) + ' complete!';
+    text.textContent  = 'You earned 5 stars! ⭐⭐⭐⭐⭐';
+    if(level < LEVELS.length-1){
+      btn.textContent = 'Next Level ➜';
+      btn.classList.remove('hidden');
+      btn.onclick = nextLevel;
+    }else{
+      btn.classList.add('hidden');
+    }
+    speak('Amazing! Level ' + (level+1) + ' complete!');
+  }
+}
+function nextLevel(){
+  level++; qIndex=0;
+  document.getElementById('levelScreen').classList.add('hidden');
+  document.getElementById('levelBtn').classList.remove('hidden');
+  newQuestion();
+}
+function goHome(){
+  clearTimeout(pendingTimer);
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  document.getElementById('levelScreen').classList.add('hidden');
+  document.getElementById('levelBtn').classList.remove('hidden');
+  for(let i=0;i<LEVELS.length;i++){
+    document.getElementById('done'+i).textContent = completed[i] ? '⭐' : '';
+  }
+  document.getElementById('homeScreen').classList.remove('hidden');
+}
+function startGame(lv){
+  level = lv; qIndex = 0; lastHour = -1;
+  document.getElementById('homeScreen').classList.add('hidden');
+  newQuestion();
+}
+
+/* ---------- confetti ---------- */
+const pieces = ['🎉','⭐','🌟','🎈','✨'];
+function confetti(){
+  for(let i=0;i<14;i++){
+    const s = document.createElement('div');
+    s.className = 'confetti';
+    s.textContent = pieces[Math.floor(Math.random()*pieces.length)];
+    s.style.left = Math.random()*100 + 'vw';
+    s.style.animationDuration = (1.6 + Math.random()*1.4) + 's';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(), 3200);
+  }
+}
+</script>
+</body>
+</html>
