@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Howie's Make 10 Adventure</title>
+  <style>
+    :root{
+      --ink:#24324a;
+      --paper:#fffdf7;
+      --blue:#4f8cff;
+      --blue2:#79b8ff;
+      --yellow:#ffd85e;
+      --green:#59c98b;
+      --red:#ff6b6b;
+      --purple:#9a79ff;
+      --shadow:0 10px 24px rgba(36,50,74,.14);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:"Trebuchet MS","Arial Rounded MT Bold",Arial,sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 12% 12%, rgba(255,216,94,.28) 0 7%, transparent 8%),
+        radial-gradient(circle at 86% 14%, rgba(79,140,255,.18) 0 8%, transparent 9%),
+        linear-gradient(160deg,#eaf6ff 0%,#fff9df 55%,#f5edff 100%);
+      overflow-x:hidden;
+    }
+    button{font:inherit}
+    .app{width:min(1080px,100%);margin:auto;padding:18px}
+    header{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      background:rgba(255,255,255,.82);backdrop-filter:blur(8px);
+      padding:12px 16px;border-radius:24px;box-shadow:var(--shadow);margin-bottom:16px;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:56px;height:56px;border-radius:18px;display:grid;place-items:center;
+      background:linear-gradient(145deg,var(--blue),var(--purple));color:white;
+      font-size:29px;box-shadow:0 8px 18px rgba(79,140,255,.3)
+    }
+    h1{font-size:clamp(22px,4vw,36px);line-height:1;margin:0}
+    .subtitle{font-size:14px;margin-top:5px;color:#64718a}
+    .top-actions{display:flex;gap:8px}
+    .icon-btn{
+      border:0;background:white;border-radius:15px;padding:10px 12px;cursor:pointer;
+      box-shadow:0 4px 10px rgba(36,50,74,.12);min-width:46px
+    }
+    .screen{display:none}
+    .screen.active{display:block}
+    .panel{
+      background:rgba(255,255,255,.9);border:3px solid white;border-radius:30px;
+      box-shadow:var(--shadow);padding:clamp(18px,4vw,34px);
+    }
+    .hero{text-align:center;padding:28px 18px}
+    .hero-emoji{font-size:70px;animation:float 2.4s ease-in-out infinite}
+    @keyframes float{50%{transform:translateY(-9px)}}
+    .hero h2{font-size:clamp(28px,6vw,52px);margin:10px 0 5px}
+    .hero p{font-size:clamp(16px,2.6vw,21px);color:#5b6880;margin:0 auto 22px;max-width:640px}
+    .level-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .level-card{
+      position:relative;border:0;border-radius:25px;padding:22px 17px;text-align:left;cursor:pointer;
+      min-height:210px;color:var(--ink);box-shadow:var(--shadow);transition:.18s transform,.18s box-shadow;
+      overflow:hidden
+    }
+    .level-card:hover,.level-card:focus{transform:translateY(-4px);box-shadow:0 16px 30px rgba(36,50,74,.18)}
+    .level-card:nth-child(1){background:linear-gradient(145deg,#fff6bd,#ffe28a)}
+    .level-card:nth-child(2){background:linear-gradient(145deg,#cde7ff,#8fc5ff)}
+    .level-card:nth-child(3){background:linear-gradient(145deg,#e1d5ff,#b69cff)}
+    .level-no{font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    .level-icon{font-size:48px;margin:12px 0}
+    .level-card h3{font-size:25px;margin:0 0 8px}
+    .level-card p{margin:0;line-height:1.35}
+    .badge{
+      position:absolute;right:12px;top:12px;background:white;border-radius:999px;
+      padding:6px 10px;font-weight:800;font-size:13px
+    }
+    .game-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    .back-btn{
+      border:0;border-radius:15px;background:#eef3fb;padding:10px 14px;cursor:pointer;font-weight:800
+    }
+    .game-title{flex:1}
+    .game-title h2{margin:0;font-size:clamp(23px,4vw,34px)}
+    .game-title p{margin:4px 0 0;color:#65718a}
+    .scorebox{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{background:#f3f6fb;border-radius:999px;padding:8px 12px;font-weight:800;white-space:nowrap}
+    .progress{height:16px;background:#e8edf5;border-radius:999px;overflow:hidden;margin-bottom:20px}
+    .progress > div{height:100%;width:0;background:linear-gradient(90deg,var(--green),#90e3a7);transition:width .3s}
+    .prompt{
+      font-size:clamp(24px,5vw,40px);font-weight:900;text-align:center;margin:12px 0 18px
+    }
+    .ten-frame{
+      display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
+      width:min(520px,100%);margin:0 auto 24px;padding:15px;
+      background:#f5f8fc;border:4px solid #bdd0e8;border-radius:22px
+    }
+    .ten-cell{
+      aspect-ratio:1;border:3px solid #b4c5db;border-radius:50%;background:white;
+      display:grid;place-items:center;font-size:clamp(21px,5vw,38px)
+    }
+    .ten-cell.filled{background:#ffef9b;border-color:#f0bd3d}
+    .answer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:650px;margin:auto}
+    .answer-btn{
+      border:0;border-radius:22px;background:white;min-height:82px;font-size:34px;font-weight:900;
+      cursor:pointer;box-shadow:0 7px 16px rgba(36,50,74,.13);transition:.15s transform
+    }
+    .answer-btn:hover{transform:scale(1.04)}
+    .answer-btn.correct{background:#c8f4d8}
+    .answer-btn.wrong{background:#ffd0d0;animation:shake .25s}
+    @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+    .equation-board{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+      max-width:720px;margin:auto
+    }
+    .equation-card{
+      border:4px solid transparent;border-radius:24px;background:#fff;min-height:130px;padding:12px;
+      box-shadow:0 7px 16px rgba(36,50,74,.12);font-size:clamp(38px,7vw,64px);font-weight:900;
+      cursor:pointer;position:relative;transition:.18s transform,.18s border-color,.18s background
+    }
+    .equation-card:hover{transform:translateY(-3px)}
+    .equation-card.selected{
+      border-color:var(--blue);background:#e7f1ff;transform:scale(.96)
+    }
+    .equation-card.selected-good{border-color:var(--green);background:#c8f4d8;transform:scale(.96)}
+    .equation-card.selected-bad{border-color:var(--red);background:#ffd0d0;animation:shake .25s}
+    .round-note{text-align:center;color:#65718a;font-weight:700;margin:12px 0 0}
+    .memory-grid{
+      display:grid;grid-template-columns:repeat(6,1fr);gap:10px;max-width:900px;margin:auto
+    }
+    .memory-card{
+      border:0;background:transparent;aspect-ratio:3/4;perspective:800px;cursor:pointer;padding:0
+    }
+    .memory-inner{
+      width:100%;height:100%;position:relative;transform-style:preserve-3d;
+      transition:transform .35s
+    }
+    .memory-card.flipped .memory-inner,.memory-card.matched .memory-inner{transform:rotateY(180deg)}
+    .memory-front,.memory-back{
+      position:absolute;inset:0;display:grid;place-items:center;border-radius:18px;
+      backface-visibility:hidden;box-shadow:0 7px 15px rgba(36,50,74,.14)
+    }
+    .memory-front{
+      background:linear-gradient(145deg,var(--blue),var(--purple));color:white;
+      font-size:clamp(26px,5vw,44px);border:4px solid rgba(255,255,255,.55)
+    }
+    .memory-back{
+      transform:rotateY(180deg);background:white;font-size:clamp(26px,5vw,46px);font-weight:900;
+      border:4px solid #dbe6f4
+    }
+    .memory-card.matched{
+      pointer-events:none;opacity:0;transform:scale(.15);
+      transition:opacity .35s,transform .35s
+    }
+    .feedback{
+      min-height:50px;text-align:center;font-size:clamp(18px,3vw,24px);font-weight:900;
+      margin-top:14px
+    }
+    .celebrate{text-align:center;padding:25px 10px}
+    .celebrate .big{font-size:80px}
+    .celebrate h2{font-size:clamp(30px,6vw,52px);margin:6px}
+    .primary{
+      border:0;border-radius:18px;background:linear-gradient(145deg,var(--blue),var(--purple));
+      color:white;padding:14px 24px;font-size:20px;font-weight:900;cursor:pointer;
+      box-shadow:0 8px 18px rgba(79,140,255,.3)
+    }
+    .secondary{
+      border:0;border-radius:18px;background:#edf2f8;color:var(--ink);
+      padding:14px 24px;font-size:18px;font-weight:900;cursor:pointer;margin-left:8px
+    }
+    .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:99}
+    .confetti i{
+      position:absolute;top:-20px;width:12px;height:18px;border-radius:3px;
+      animation:fall 2.8s linear forwards
+    }
+    @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+    .footer-note{text-align:center;color:#748097;font-size:13px;margin:14px}
+    @media (max-width:760px){
+      .level-grid{grid-template-columns:1fr}
+      .level-card{min-height:150px}
+      .equation-board{grid-template-columns:repeat(2,1fr)}
+      .memory-grid{grid-template-columns:repeat(4,1fr)}
+      .answer-grid{grid-template-columns:repeat(2,1fr)}
+      header{align-items:flex-start}
+      .subtitle{display:none}
+      .game-head{align-items:flex-start;flex-wrap:wrap}
+      .scorebox{width:100%;justify-content:center}
+    }
+    @media (max-width:420px){
+      .app{padding:9px}
+      .panel{border-radius:23px;padding:15px}
+      .memory-grid{gap:7px}
+      .memory-front,.memory-back{border-radius:13px}
+      .top-actions{gap:4px}
+      .icon-btn{padding:9px;min-width:40px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">🔟</div>
+        <div>
+          <h1>Howie's Make 10 Adventure</h1>
+          <div class="subtitle">Learn number bonds to 10 through play</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="speakBtn" aria-label="Read instructions aloud" title="Read instructions">🗣️</button>
+        <button class="icon-btn" id="soundBtn" aria-label="Turn sound on or off" title="Sound">🔊</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="home" class="screen active">
+        <div class="panel hero">
+          <div class="hero-emoji">🚀</div>
+          <h2>Let’s make 10!</h2>
+          <p>Start with pictures, choose number pairs, then win the memory challenge by clearing all 10 cards.</p>
+          <div class="level-grid">
+            <button class="level-card" onclick="startLevel1()">
+              <span class="badge" id="badge1">Start</span>
+              <div class="level-no">Level 1</div>
+              <div class="level-icon">🍎</div>
+              <h3>Fill the Ten Frame</h3>
+              <p>Count the objects and choose how many more are needed to make 10.</p>
+            </button>
+            <button class="level-card" onclick="startLevel2()">
+              <span class="badge" id="badge2">Start</span>
+              <div class="level-no">Level 2</div>
+              <div class="level-icon">🎯</div>
+              <h3>Find the Make-10 Pairs</h3>
+              <p>Four number cards are open. Complete all six special pairs that make 10.</p>
+            </button>
+            <button class="level-card" onclick="startLevel3()">
+              <span class="badge" id="badge3">Start</span>
+              <div class="level-no">Level 3</div>
+              <div class="level-icon">🧠</div>
+              <h3>Memory Match</h3>
+              <p>Turn over 12 cards. Find all six number pairs that make 10. Correct pairs disappear!</p>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="level1" class="screen">
+        <div class="panel">
+          <div class="game-head">
+            <button class="back-btn" onclick="goHome()">← Home</button>
+            <div class="game-title">
+              <h2>Level 1 · Fill the Ten Frame</h2>
+              <p>How many more make 10?</p>
+            </div>
+            <div class="scorebox">
+              <span class="pill">⭐ <span id="l1stars">0</span></span>
+              <span class="pill"><span id="l1round">1</span>/10</span>
+            </div>
+          </div>
+          <div class="progress"><div id="l1progress"></div></div>
+          <div class="prompt" id="l1prompt"></div>
+          <div class="ten-frame" id="tenFrame"></div>
+          <div class="answer-grid" id="l1answers"></div>
+          <div class="feedback" id="l1feedback"></div>
+        </div>
+      </section>
+
+      <section id="level2" class="screen">
+        <div class="panel">
+          <div class="game-head">
+            <button class="back-btn" onclick="goHome()">← Home</button>
+            <div class="game-title">
+              <h2>Level 2 · Pick the Make-10 Pair</h2>
+              <p>Choose two of the four open number cards.</p>
+            </div>
+            <div class="scorebox">
+              <span class="pill">⭐ <span id="l2stars">0</span></span>
+              <span class="pill">Round <span id="l2round">1</span>/6</span>
+            </div>
+          </div>
+          <div class="progress"><div id="l2progress"></div></div>
+          <div class="prompt">Pick 2 numbers that make 10</div>
+          <div class="equation-board" id="equationBoard"></div>
+          <div class="round-note">Tap one card, then tap its partner.</div>
+          <div class="feedback" id="l2feedback"></div>
+        </div>
+      </section>
+
+      <section id="level3" class="screen">
+        <div class="panel">
+          <div class="game-head">
+            <button class="back-btn" onclick="goHome()">← Home</button>
+            <div class="game-title">
+              <h2>Level 3 · Memory Match</h2>
+              <p>Turn over two cards. A make-10 pair will disappear.</p>
+            </div>
+            <div class="scorebox">
+              <span class="pill">🏆 <span id="matches">0</span>/6 pairs</span>
+              <span class="pill">👣 <span id="moves">0</span> moves</span>
+            </div>
+          </div>
+          <div class="progress"><div id="l3progress"></div></div>
+          <div class="memory-grid" id="memoryGrid"></div>
+          <div class="feedback" id="l3feedback">Clear all 12 cards!</div>
+        </div>
+      </section>
+
+      <section id="win" class="screen">
+        <div class="panel celebrate">
+          <div class="big" id="winEmoji">🏆</div>
+          <h2 id="winTitle">Fantastic!</h2>
+          <p id="winText" style="font-size:20px;color:#65718a"></p>
+          <button class="primary" id="nextBtn">Next Level</button>
+          <button class="secondary" onclick="goHome()">Level Menu</button>
+        </div>
+      </section>
+    </main>
+    <div class="footer-note">Tip for grown-ups: say each number bond aloud, for example “3 and 7 make 10.”</div>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+<script>
+  const screens = [...document.querySelectorAll('.screen')];
+  let soundOn = true;
+  let audioCtx = null;
+
+  function showScreen(id){
+    screens.forEach(s => s.classList.toggle('active', s.id === id));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function goHome(){
+    showScreen('home');
+    updateBadges();
+  }
+
+  function updateBadges(){
+    for(let i=1;i<=3;i++){
+      const done = localStorage.getItem('make10-level-'+i) === 'done';
+      document.getElementById('badge'+i).textContent = done ? '✓ Done' : 'Start';
+    }
+  }
+
+  function tone(freq=520,duration=.12,type='sine'){
+    if(!soundOn) return;
+    try{
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type; osc.frequency.value = freq;
+      gain.gain.setValueAtTime(.08,audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime+duration);
+    }catch(e){}
+  }
+  function goodSound(){ tone(660,.10); setTimeout(()=>tone(880,.18),95); }
+  function badSound(){ tone(180,.18,'square'); }
+  function winSound(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.22),i*120)); }
+
+  let englishVoice = null;
+
+  function chooseEnglishVoice(){
+    if(!('speechSynthesis' in window)) return null;
+    const voices = speechSynthesis.getVoices();
+
+    const preferredNames = [
+      'Google UK English Female',
+      'Microsoft Sonia Online (Natural) - English (United Kingdom)',
+      'Microsoft Libby Online (Natural) - English (United Kingdom)',
+      'Samantha',
+      'Karen',
+      'Daniel',
+      'Google US English'
+    ];
+
+    for(const name of preferredNames){
+      const match = voices.find(v => v.name === name);
+      if(match) return match;
+    }
+
+    return voices.find(v => /^en-GB$/i.test(v.lang))
+      || voices.find(v => /^en-US$/i.test(v.lang))
+      || voices.find(v => /^en[-_]/i.test(v.lang))
+      || null;
+  }
+
+  if('speechSynthesis' in window){
+    englishVoice = chooseEnglishVoice();
+    speechSynthesis.onvoiceschanged = () => {
+      englishVoice = chooseEnglishVoice();
+    };
+  }
+
+  function speak(text){
+    if(!soundOn || !('speechSynthesis' in window) || !text) return;
+    try{
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      englishVoice = englishVoice || chooseEnglishVoice();
+      if(englishVoice) u.voice = englishVoice;
+      u.lang = englishVoice?.lang || 'en-GB';
+      u.rate = 0.78;
+      u.pitch = 1.0;
+      u.volume = 1;
+      speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  document.getElementById('soundBtn').onclick = () => {
+    soundOn = !soundOn;
+    document.getElementById('soundBtn').textContent = soundOn ? '🔊' : '🔇';
+  };
+
+  document.getElementById('speakBtn').onclick = () => {
+    const active = document.querySelector('.screen.active').id;
+    const words = {
+      home:'Choose a level. Let us learn number pairs that make ten.',
+      level1:'Count the objects. Choose how many more are needed to make ten.',
+      level2:'Choose two of the four number cards that add up to ten.',
+      level3:'There are ten hidden cards. Turn over two cards. A pair that adds up to ten will disappear. Find all six pairs.',
+      win:'Great job! You completed the level.'
+    };
+    speak(words[active]);
+  };
+
+  const shuffle = arr => {
+    const a=[...arr];
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  };
+
+  function celebrate(){
+    const box=document.getElementById('confetti');
+    box.innerHTML='';
+    const colors=['#ff6b6b','#ffd85e','#59c98b','#4f8cff','#9a79ff'];
+    for(let i=0;i<70;i++){
+      const bit=document.createElement('i');
+      bit.style.left=Math.random()*100+'vw';
+      bit.style.background=colors[Math.floor(Math.random()*colors.length)];
+      bit.style.animationDelay=Math.random()*.8+'s';
+      bit.style.transform=`rotate(${Math.random()*180}deg)`;
+      box.appendChild(bit);
+    }
+    setTimeout(()=>box.innerHTML='',3800);
+  }
+
+  function showWin(level, title, text, nextLabel, nextAction){
+    localStorage.setItem('make10-level-'+level,'done');
+    document.getElementById('winTitle').textContent=title;
+    document.getElementById('winText').textContent=text;
+    const btn=document.getElementById('nextBtn');
+    btn.textContent=nextLabel;
+    btn.onclick=nextAction;
+    showScreen('win');
+    celebrate(); winSound();
+    setTimeout(()=>speak(`${title} ${text}`),350);
+  }
+
+  // LEVEL 1
+  let l1Round=1,l1Stars=0,l1Current=0,l1Locked=false;
+
+  function startLevel1(){
+    l1Round=1;l1Stars=0;l1Locked=false;
+    document.getElementById('l1stars').textContent=0;
+    showScreen('level1');
+    newL1Question();
+  }
+
+  function newL1Question(){
+    l1Locked=false;
+    l1Current = Math.floor(Math.random()*10); // 0-9
+    document.getElementById('l1round').textContent=l1Round;
+    document.getElementById('l1progress').style.width=((l1Round-1)*10)+'%';
+    document.getElementById('l1prompt').textContent=`${l1Current} + ? = 10`;
+    document.getElementById('l1feedback').textContent='';
+
+    const frame=document.getElementById('tenFrame');
+    frame.innerHTML='';
+    for(let i=0;i<10;i++){
+      const c=document.createElement('div');
+      c.className='ten-cell '+(i<l1Current?'filled':'');
+      c.textContent=i<l1Current?'🍎':'';
+      frame.appendChild(c);
+    }
+
+    const correct=10-l1Current;
+    const set=new Set([correct]);
+    while(set.size<4){
+      let n=Math.max(0,Math.min(10,correct+(Math.floor(Math.random()*7)-3)));
+      set.add(n);
+    }
+    const answers=document.getElementById('l1answers');
+    answers.innerHTML='';
+    shuffle([...set]).forEach(n=>{
+      const b=document.createElement('button');
+      b.className='answer-btn';
+      b.textContent=n;
+      b.onclick=()=>answerL1(n,b,correct);
+      answers.appendChild(b);
+    });
+  }
+
+  function answerL1(n,btn,correct){
+    if(l1Locked)return;
+    if(n===correct){
+      l1Locked=true;btn.classList.add('correct');goodSound();l1Stars++;
+      document.getElementById('l1stars').textContent=l1Stars;
+      document.getElementById('l1feedback').textContent=`Yes! ${l1Current} and ${correct} make 10! 🎉`;
+      document.getElementById('l1progress').style.width=(l1Round*10)+'%';
+      setTimeout(()=>{
+        if(l1Round>=10){
+          showWin(1,'Ten-Frame Star!','You solved 10 number bonds to 10.','Play Level 2',startLevel2);
+        }else{l1Round++;newL1Question();}
+      },850);
+    }else{
+      btn.classList.add('wrong');badSound();
+      document.getElementById('l1feedback').textContent='Almost! Count the empty spaces.';
+      setTimeout(()=>btn.classList.remove('wrong'),350);
+    }
+  }
+
+  // LEVEL 2
+  const MAKE_10_PAIRS = [[1,9],[0,10],[2,8],[7,3],[4,6],[5,5]];
+  const L2_TOTAL_ROUNDS = MAKE_10_PAIRS.length;
+  let l2Round=1,l2Stars=0,l2Selected=[],l2Locked=false,l2RoundPairs=[];
+
+  function startLevel2(){
+    l2Round=1;l2Stars=0;l2Selected=[];l2Locked=false;
+    l2RoundPairs=shuffle(MAKE_10_PAIRS.map(pair=>[...pair]));
+    document.getElementById('l2stars').textContent=0;
+    showScreen('level2');
+    speak('Level two. Four number cards are open. Pick two numbers that add up to ten.');
+    setTimeout(newL2Round,300);
+  }
+
+  function makeFourNumberCards(target){
+    const cards=[target[0],target[1]];
+
+    while(cards.length<4){
+      const n=Math.floor(Math.random()*11);
+      const test=[...cards,n];
+
+      let makeTenPairs=0;
+      for(let i=0;i<test.length;i++){
+        for(let j=i+1;j<test.length;j++){
+          if(test[i]+test[j]===10) makeTenPairs++;
+        }
+      }
+
+      const targetIsDoubleFive = target[0]===5 && target[1]===5;
+      const duplicateDistractor = cards.includes(n) && !(targetIsDoubleFive && n===5 && cards.filter(x=>x===5).length<2);
+
+      if(makeTenPairs===1 && !duplicateDistractor) cards.push(n);
+    }
+    return shuffle(cards);
+  }
+
+  function newL2Round(){
+    l2Selected=[];l2Locked=false;
+    const target=l2RoundPairs[l2Round-1];
+    document.getElementById('l2round').textContent=l2Round;
+    document.getElementById('l2progress').style.width=((l2Round-1)/L2_TOTAL_ROUNDS*100)+'%';
+    document.getElementById('l2feedback').textContent='Choose the first number.';
+    const board=document.getElementById('equationBoard');
+    board.innerHTML='';
+
+    makeFourNumberCards(target).forEach(value=>{
+      const card=document.createElement('button');
+      card.className='equation-card';
+      card.textContent=value;
+      card.dataset.value=value;
+      card.onclick=()=>pickNumberCard(card);
+      board.appendChild(card);
+    });
+
+    setTimeout(()=>speak(`Round ${l2Round}. Pick two numbers that make ten.`),250);
+  }
+
+  function pickNumberCard(card){
+    if(l2Locked)return;
+
+    if(card.classList.contains('selected')){
+      card.classList.remove('selected');
+      l2Selected=l2Selected.filter(c=>c!==card);
+      document.getElementById('l2feedback').textContent='Choose the partner number.';
+      speak('Choose the partner number.');
+      return;
+    }
+
+    if(l2Selected.length>=2)return;
+    card.classList.add('selected');
+    l2Selected.push(card);
+    tone(420,.08);
+
+    if(l2Selected.length===1){
+      const first=Number(card.dataset.value);
+      document.getElementById('l2feedback').textContent=`You picked ${first}. What makes 10 with it?`;
+      speak(`You picked ${first}. What number makes ten with ${first}?`);
+      return;
+    }
+
+    l2Locked=true;
+    const a=Number(l2Selected[0].dataset.value);
+    const b=Number(l2Selected[1].dataset.value);
+
+    if(a+b===10){
+      l2Selected.forEach(c=>{
+        c.classList.remove('selected');
+        c.classList.add('selected-good');
+      });
+      goodSound();l2Stars++;
+      document.getElementById('l2stars').textContent=l2Stars;
+      document.getElementById('l2feedback').textContent=`Yes! ${a} + ${b} = 10 🎉`;
+      document.getElementById('l2progress').style.width=(l2Round/L2_TOTAL_ROUNDS*100)+'%';
+      setTimeout(()=>speak(`Well done. ${a} plus ${b} equals ten.`),180);
+
+      setTimeout(()=>{
+        if(l2Round>=L2_TOTAL_ROUNDS){
+          showWin(2,'Pair-Picking Champion!','You completed all six number pairs that make 10.','Play Level 3',startLevel3);
+        }else{
+          l2Round++;
+          newL2Round();
+        }
+      },1150);
+    }else{
+      l2Selected.forEach(c=>{
+        c.classList.remove('selected');
+        c.classList.add('selected-bad');
+      });
+      badSound();
+      document.getElementById('l2feedback').textContent=`${a} + ${b} = ${a+b}. Try another pair.`;
+      speak(`${a} plus ${b} equals ${a+b}, not ten. Try another pair.`);
+      setTimeout(()=>{
+        l2Selected.forEach(c=>c.classList.remove('selected-bad'));
+        l2Selected=[];
+        l2Locked=false;
+        document.getElementById('l2feedback').textContent='Choose the first number.';
+      },1000);
+    }
+  }
+
+  // LEVEL 3
+  const L3_TOTAL_PAIRS = MAKE_10_PAIRS.length;
+  let flipped=[],matches=0,moves=0,checking=false;
+
+  function startLevel3(){
+    flipped=[];matches=0;moves=0;checking=false;
+    document.getElementById('matches').textContent='0';
+    document.getElementById('moves').textContent='0';
+    document.getElementById('l3progress').style.width='0%';
+    document.getElementById('l3feedback').textContent='Clear all 12 cards!';
+    showScreen('level3');
+
+    const values=MAKE_10_PAIRS.flat();
+    const deck=shuffle(values.map((value,index)=>({id:index,value})));
+    const grid=document.getElementById('memoryGrid');
+    grid.innerHTML='';
+
+    deck.forEach(card=>{
+      const button=document.createElement('button');
+      button.className='memory-card';
+      button.dataset.value=card.value;
+      button.setAttribute('aria-label','Hidden number card');
+      button.innerHTML=`
+        <div class="memory-inner">
+          <div class="memory-front">⭐</div>
+          <div class="memory-back">${card.value}</div>
+        </div>`;
+      button.onclick=()=>flipMemory(button);
+      grid.appendChild(button);
+    });
+
+    setTimeout(()=>speak('Level three. There are twelve hidden cards. Turn over two cards. If the numbers add up to ten, the cards will disappear.'),300);
+  }
+
+  function flipMemory(card){
+    if(checking || card.classList.contains('flipped') || card.classList.contains('matched'))return;
+    card.classList.add('flipped');
+    tone(420,.08);
+    flipped.push(card);
+
+    const current=Number(card.dataset.value);
+    if(flipped.length===1){
+      speak(`You found ${current}. Find the number that makes ten.`);
+    }
+
+    if(flipped.length===2){
+      checking=true;moves++;
+      document.getElementById('moves').textContent=moves;
+      const first=flipped[0];
+      const second=flipped[1];
+      const a=Number(first.dataset.value);
+      const b=Number(second.dataset.value);
+
+      if(a+b===10){
+        goodSound();
+        document.getElementById('l3feedback').textContent=`Yes! ${a} + ${b} = 10. The pair is gone! 🎉`;
+        setTimeout(()=>speak(`Great job. ${a} plus ${b} equals ten. The pair is removed.`),150);
+
+        setTimeout(()=>{
+          first.classList.add('matched');
+          second.classList.add('matched');
+          matches++;
+          document.getElementById('matches').textContent=matches;
+          document.getElementById('l3progress').style.width=(matches/L3_TOTAL_PAIRS*100)+'%';
+          flipped=[];checking=false;
+
+          setTimeout(()=>{
+            first.remove();
+            second.remove();
+          },360);
+
+          if(matches===L3_TOTAL_PAIRS){
+            setTimeout(()=>{
+              showWin(3,'Make-10 Memory Master!',`You cleared all 12 cards in ${moves} moves!`,'Play Again',startLevel3);
+            },850);
+          }
+        },650);
+      }else{
+        badSound();
+        document.getElementById('l3feedback').textContent=`${a} + ${b} = ${a+b}. Look for numbers that make 10.`;
+        speak(`${a} plus ${b} equals ${a+b}, not ten. Try again.`);
+        setTimeout(()=>{
+          first.classList.remove('flipped');
+          second.classList.remove('flipped');
+          flipped=[];checking=false;
+        },1100);
+      }
+    }
+  }
+
+  updateBadges();
+</script>
+</body>
+</html>
