@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maths Story Adventure | 數學應用題大冒險</title>
+  <style>
+    :root {
+      --ink: #24324b;
+      --paper: #fffdf6;
+      --purple: #7557e8;
+      --purple-dark: #5b3fc8;
+      --yellow: #ffd75e;
+      --mint: #70dfbd;
+      --pink: #ff8fb1;
+      --blue: #63b8ff;
+      --green: #3dbb78;
+      --red: #e75b65;
+      --shadow: 0 16px 40px rgba(48, 48, 88, 0.16);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Arial Rounded MT Bold", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255, 215, 94, .42), transparent 28%),
+        radial-gradient(circle at 92% 12%, rgba(99, 184, 255, .36), transparent 25%),
+        radial-gradient(circle at 82% 90%, rgba(112, 223, 189, .35), transparent 28%),
+        linear-gradient(150deg, #fff7d8, #f2f1ff 48%, #e7fbff);
+      overflow-x: hidden;
+    }
+
+    button, input, select { font: inherit; }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .floating {
+      position: fixed;
+      z-index: 0;
+      opacity: .28;
+      pointer-events: none;
+      animation: drift 7s ease-in-out infinite;
+      font-size: clamp(30px, 5vw, 60px);
+    }
+    .f1 { top: 7%; left: 3%; }
+    .f2 { top: 18%; right: 4%; animation-delay: -2s; }
+    .f3 { bottom: 10%; left: 5%; animation-delay: -4s; }
+    .f4 { bottom: 7%; right: 5%; animation-delay: -1s; }
+
+    @keyframes drift {
+      0%, 100% { transform: translateY(0) rotate(-4deg); }
+      50% { transform: translateY(-16px) rotate(5deg); }
+    }
+
+    .app {
+      position: relative;
+      z-index: 2;
+      width: min(1120px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 18px 0 36px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      color: var(--purple-dark);
+      letter-spacing: .2px;
+    }
+
+    .brand-badge {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: white;
+      box-shadow: var(--shadow);
+      font-size: 27px;
+      transform: rotate(-4deg);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .icon-btn {
+      min-height: 42px;
+      padding: 8px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.88);
+      color: var(--ink);
+      box-shadow: 0 7px 18px rgba(48, 48, 88, .12);
+      font-weight: 800;
+    }
+
+    .icon-btn:hover { transform: translateY(-1px); }
+    .icon-btn:focus-visible, .primary:focus-visible, .level-card:focus-visible,
+    .key:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 4px solid rgba(117, 87, 232, .25);
+      outline-offset: 3px;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .panel {
+      background: rgba(255,255,255,.92);
+      border: 3px solid rgba(255,255,255,.88);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      padding: clamp(24px, 5vw, 52px);
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::before, .hero::after {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      opacity: .2;
+    }
+    .hero::before { background: var(--yellow); left: -70px; top: -70px; }
+    .hero::after { background: var(--mint); right: -70px; bottom: -80px; }
+
+    h1 {
+      position: relative;
+      margin: 2px auto 8px;
+      max-width: 800px;
+      font-size: clamp(34px, 6vw, 70px);
+      line-height: 1.02;
+      color: var(--purple-dark);
+      text-shadow: 0 5px 0 rgba(117,87,232,.10);
+    }
+
+    .subtitle {
+      position: relative;
+      font-size: clamp(17px, 2.2vw, 24px);
+      margin: 0 auto 22px;
+      max-width: 720px;
+      line-height: 1.55;
+    }
+
+    .hero-mascot {
+      position: relative;
+      font-size: clamp(68px, 12vw, 130px);
+      line-height: 1;
+      margin: 10px 0 18px;
+      animation: mascotBounce 2.4s ease-in-out infinite;
+    }
+
+    @keyframes mascotBounce {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-10px) rotate(3deg); }
+    }
+
+    .language-title {
+      position: relative;
+      margin: 12px 0;
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .language-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(160px, 280px));
+      gap: 14px;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+
+    .language-card {
+      padding: 18px 16px;
+      border-radius: 20px;
+      background: #fff;
+      border: 3px solid transparent;
+      box-shadow: 0 10px 24px rgba(40,50,80,.10);
+      font-weight: 900;
+      color: var(--ink);
+      transition: .18s ease;
+    }
+
+    .language-card span {
+      display: block;
+      font-size: 30px;
+      margin-bottom: 4px;
+    }
+
+    .language-card.selected {
+      border-color: var(--purple);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(117,87,232,.20);
+    }
+
+    .primary {
+      position: relative;
+      min-height: 54px;
+      padding: 13px 24px;
+      border-radius: 17px;
+      background: linear-gradient(180deg, #8569ef, #6548d5);
+      color: white;
+      font-weight: 900;
+      font-size: 19px;
+      box-shadow: 0 8px 0 #4c35ad, 0 14px 26px rgba(91,63,200,.25);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+    .primary:hover { transform: translateY(-2px); }
+    .primary:active {
+      transform: translateY(5px);
+      box-shadow: 0 3px 0 #4c35ad, 0 7px 14px rgba(91,63,200,.18);
+    }
+
+    .primary.green {
+      background: linear-gradient(180deg, #55cf8d, #2ea66a);
+      box-shadow: 0 8px 0 #21794e, 0 14px 26px rgba(46,166,106,.22);
+    }
+
+    .primary.yellow {
+      color: #4f3c00;
+      background: linear-gradient(180deg, #ffe67e, #ffc83f);
+      box-shadow: 0 8px 0 #d99c14, 0 14px 26px rgba(217,156,20,.22);
+    }
+
+    .small-note {
+      position: relative;
+      font-size: 13px;
+      opacity: .7;
+      margin-top: 18px;
+    }
+
+    .map-panel { padding: clamp(18px, 3vw, 34px); }
+
+    .map-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .map-head h2, .game-title {
+      margin: 0;
+      color: var(--purple-dark);
+      font-size: clamp(28px, 4vw, 44px);
+    }
+
+    .map-head p { margin: 6px 0 0; }
+
+    .coin-box {
+      flex: 0 0 auto;
+      background: #fff7ce;
+      border: 2px solid #ffd75e;
+      border-radius: 18px;
+      padding: 10px 14px;
+      font-weight: 900;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+
+    .levels {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+    }
+
+    .level-card {
+      min-height: 190px;
+      padding: 18px 14px;
+      border-radius: 22px;
+      color: var(--ink);
+      background: white;
+      box-shadow: 0 12px 24px rgba(48,48,88,.11);
+      border: 3px solid transparent;
+      text-align: left;
+      transition: .18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .level-card:hover:not(:disabled) {
+      transform: translateY(-5px) rotate(-.5deg);
+      border-color: rgba(117,87,232,.25);
+    }
+
+    .level-card:disabled {
+      filter: grayscale(.45);
+      opacity: .58;
+      cursor: not-allowed;
+    }
+
+    .level-number {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: #f0edff;
+      color: var(--purple-dark);
+      font-weight: 900;
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .level-emoji {
+      position: absolute;
+      right: 12px;
+      top: 10px;
+      font-size: 40px;
+    }
+
+    .level-card h3 {
+      margin: 0 0 8px;
+      font-size: 19px;
+      line-height: 1.15;
+    }
+
+    .level-card p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.45;
+      opacity: .75;
+    }
+
+    .level-stars {
+      position: absolute;
+      bottom: 13px;
+      left: 14px;
+      letter-spacing: 2px;
+    }
+
+    .game-panel {
+      padding: clamp(16px, 3vw, 30px);
+    }
+
+    .game-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .back-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 15px;
+      background: #f0edff;
+      color: var(--purple-dark);
+      font-weight: 900;
+      font-size: 23px;
+    }
+
+    .game-title-wrap { min-width: 0; }
+    .game-title { font-size: clamp(22px, 3vw, 34px); }
+    .game-subtitle { margin: 2px 0 0; opacity: .72; }
+
+    .progress-wrap { min-width: 150px; text-align: right; }
+    .progress-text { font-weight: 900; margin-bottom: 5px; }
+    .progress {
+      width: 170px;
+      max-width: 25vw;
+      height: 13px;
+      background: #e8e5f5;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress > div {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--mint), var(--purple));
+      border-radius: inherit;
+      transition: width .35s ease;
+    }
+
+    .question-zone {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, .75fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .story-card {
+      position: relative;
+      min-height: 390px;
+      padding: clamp(20px, 4vw, 38px);
+      border-radius: 24px;
+      background: linear-gradient(145deg, #fffdf6, #fff);
+      border: 3px dashed #d9d1ff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .story-emoji {
+      font-size: clamp(64px, 10vw, 108px);
+      line-height: 1;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 9px 10px rgba(40,50,80,.12));
+    }
+
+    .question-text {
+      font-size: clamp(21px, 3vw, 31px);
+      line-height: 1.5;
+      font-weight: 900;
+      margin: 0 auto;
+      max-width: 760px;
+    }
+
+    .speech-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 9px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .soft-btn {
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: #f1efff;
+      color: var(--purple-dark);
+      font-weight: 900;
+    }
+
+    .hint-box {
+      display: none;
+      margin: 16px auto 0;
+      padding: 12px 16px;
+      border-radius: 15px;
+      max-width: 560px;
+      background: #fff4bf;
+      border: 2px solid #ffd75e;
+      font-size: 18px;
+      font-weight: 900;
+    }
+    .hint-box.show { display: block; animation: pop .25s ease; }
+
+    @keyframes pop {
+      from { transform: scale(.88); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .answer-card {
+      padding: 20px;
+      border-radius: 24px;
+      background: #f8f6ff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: 2px solid #ebe6ff;
+    }
+
+    .answer-label {
+      font-size: 19px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .answer-input {
+      width: 100%;
+      height: 70px;
+      border: 3px solid #d7cef9;
+      border-radius: 18px;
+      background: white;
+      text-align: center;
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--purple-dark);
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .key {
+      min-height: 48px;
+      border-radius: 14px;
+      background: white;
+      color: var(--ink);
+      box-shadow: 0 4px 0 #ddd8ef;
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    .key:active { transform: translateY(3px); box-shadow: 0 1px 0 #ddd8ef; }
+    .key.utility { background: #fff4bf; }
+
+    .feedback {
+      min-height: 28px;
+      text-align: center;
+      font-weight: 900;
+      margin-top: 12px;
+      font-size: 18px;
+    }
+    .feedback.good { color: var(--green); }
+    .feedback.bad { color: var(--red); }
+
+    .success-overlay, .modal {
+      position: fixed;
+      z-index: 20;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(38, 34, 72, .55);
+      backdrop-filter: blur(5px);
+    }
+
+    .success-overlay.show, .modal.show { display: grid; }
+
+    .success-card, .modal-card {
+      width: min(560px, 100%);
+      background: white;
+      border-radius: 28px;
+      padding: clamp(24px, 5vw, 42px);
+      text-align: center;
+      box-shadow: 0 28px 70px rgba(20,18,50,.30);
+      animation: pop .28s ease;
+    }
+
+    .success-icon { font-size: 94px; }
+    .success-card h2 { margin: 8px 0; font-size: 38px; color: var(--purple-dark); }
+    .success-card p { font-size: 18px; line-height: 1.5; }
+
+    .modal-card { text-align: left; }
+    .modal-card h2 { margin: 0 0 14px; color: var(--purple-dark); }
+    .modal-card label { display: block; font-weight: 900; margin: 14px 0 6px; }
+    .modal-card select {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 14px;
+      border: 2px solid #d9d1ff;
+      background: white;
+      padding: 8px 10px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .confetti {
+      position: fixed;
+      z-index: 30;
+      width: 11px;
+      height: 18px;
+      border-radius: 3px;
+      top: -24px;
+      animation: confettiFall 1.7s linear forwards;
+      pointer-events: none;
+    }
+    @keyframes confettiFall {
+      to { transform: translateY(110vh) rotate(760deg); opacity: .85; }
+    }
+
+    .shake { animation: shake .35s ease; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-9px); }
+      75% { transform: translateX(9px); }
+    }
+
+    @media (max-width: 950px) {
+      .levels { grid-template-columns: repeat(2, 1fr); }
+      .level-card:last-child { grid-column: 1 / -1; }
+      .question-zone { grid-template-columns: 1fr; }
+      .answer-card { max-width: 520px; width: 100%; margin: 0 auto; }
+    }
+
+    @media (max-width: 620px) {
+      .app { width: min(100% - 14px, 1120px); padding-top: 9px; }
+      .brand-text { display: none; }
+      .top-actions .label { display: none; }
+      .language-row { grid-template-columns: 1fr; }
+      .levels { grid-template-columns: 1fr; }
+      .level-card:last-child { grid-column: auto; }
+      .map-head { align-items: center; }
+      .game-head { grid-template-columns: auto 1fr; }
+      .progress-wrap { grid-column: 1 / -1; text-align: left; }
+      .progress { max-width: none; width: 100%; }
+      .story-card { min-height: 330px; }
+      .question-text { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="floating f1">➕</div>
+  <div class="floating f2">✖️</div>
+  <div class="floating f3">➗</div>
+  <div class="floating f4">➖</div>
+
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge">🦊</div>
+        <div class="brand-text" id="brandText">Maths Story Adventure</div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="voiceToggleBtn" aria-label="Voice on or off">🔊 <span class="label" id="voiceToggleLabel">Voice on</span></button>
+        <button class="icon-btn" id="settingsBtn" aria-label="Voice settings">⚙️ <span class="label" id="settingsLabel">Voice settings</span></button>
+      </div>
+    </header>
+
+    <section class="screen active" id="welcomeScreen">
+      <div class="panel hero">
+        <div class="hero-mascot">🦊📚</div>
+        <h1 id="welcomeTitle">Maths Story Adventure</h1>
+        <p class="subtitle" id="welcomeSubtitle">Listen to the story, work out the answer, and collect shiny coins!</p>
+
+        <div class="language-title" id="languageTitle">Choose your language</div>
+        <div class="language-row">
+          <button class="language-card" data-lang="zh-HK">
+            <span>🇭🇰</span>
+            廣東話
+          </button>
+          <button class="language-card selected" data-lang="en-GB">
+            <span>🇬🇧</span>
+            British English
+          </button>
+        </div>
+
+        <button class="primary" id="startBtn">Start Adventure 🚀</button>
+        <div class="small-note" id="voiceNote">Tip: Tap the speaker button to hear any question again.</div>
+      </div>
+    </section>
+
+    <section class="screen" id="mapScreen">
+      <div class="panel map-panel">
+        <div class="map-head">
+          <div>
+            <h2 id="mapTitle">Choose a level</h2>
+            <p id="mapSubtitle">Complete five questions to unlock the next level.</p>
+          </div>
+          <div class="coin-box">🪙 <span id="coinCount">0</span></div>
+        </div>
+        <div class="levels" id="levelGrid"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="gameScreen">
+      <div class="panel game-panel">
+        <div class="game-head">
+          <button class="back-btn" id="backBtn" aria-label="Back">←</button>
+          <div class="game-title-wrap">
+            <h2 class="game-title" id="gameLevelTitle">Level 1</h2>
+            <p class="game-subtitle" id="gameLevelSubtitle">Addition within 10</p>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-text" id="progressText">Question 1 of 5</div>
+            <div class="progress"><div id="progressBar"></div></div>
+          </div>
+        </div>
+
+        <div class="question-zone">
+          <article class="story-card" id="storyCard">
+            <div class="story-emoji" id="storyEmoji">🍎</div>
+            <p class="question-text" id="questionText"></p>
+            <div class="speech-buttons">
+              <button class="soft-btn" id="repeatBtn">🔊 Hear again</button>
+              <button class="soft-btn" id="hintBtn">💡 Hint</button>
+            </div>
+            <div class="hint-box" id="hintBox"></div>
+          </article>
+
+          <aside class="answer-card">
+            <div class="answer-label" id="answerLabel">Your answer</div>
+            <input
+              class="answer-input"
+              id="answerInput"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              autocomplete="off"
+              aria-label="Answer"
+              maxlength="4"
+            />
+            <div class="keypad" id="keypad"></div>
+            <button class="primary green" id="checkBtn">Check Answer ✓</button>
+            <div class="feedback" id="feedback" aria-live="polite"></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-card">
+      <div class="success-icon" id="successIcon">🏆</div>
+      <h2 id="successTitle">Level complete!</h2>
+      <p id="successMessage">Brilliant work! You earned 5 coins.</p>
+      <button class="primary yellow" id="continueBtn">Continue</button>
+    </div>
+  </div>
+
+  <div class="modal" id="settingsModal">
+    <div class="modal-card">
+      <h2 id="settingsModalTitle">Voice settings</h2>
+      <p id="settingsIntro">Choose a voice installed on this device.</p>
+
+      <label for="voiceSelect" id="voiceSelectLabel">Voice</label>
+      <select id="voiceSelect"></select>
+
+      <label for="rateSelect" id="rateLabel">Speaking speed</label>
+      <select id="rateSelect">
+        <option value="0.72">Slow</option>
+        <option value="0.84" selected>Child-friendly</option>
+        <option value="0.98">Normal</option>
+      </select>
+
+      <div class="modal-actions">
+        <button class="soft-btn" id="testVoiceBtn">▶ Test voice</button>
+        <button class="primary" id="closeSettingsBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    "use strict";
+
+    const QUESTIONS_PER_LEVEL = 5;
+    const state = {
+      lang: "en-GB",
+      voiceOn: true,
+      currentLevel: 1,
+      questionIndex: 0,
+      currentQuestion: null,
+      coins: Number(localStorage.getItem("mathStoryCoins") || 0),
+      unlocked: Number(localStorage.getItem("mathStoryUnlocked") || 1),
+      completed: JSON.parse(localStorage.getItem("mathStoryCompleted") || "{}"),
+      voices: [],
+      selectedVoiceURI: localStorage.getItem("mathStoryVoiceURI") || "",
+      speechRate: Number(localStorage.getItem("mathStorySpeechRate") || 0.84),
+      lockedAfterCorrect: false
+    };
+
+    const copy = {
+      "en-GB": {
+        brand: "Maths Story Adventure",
+        title: "Maths Story Adventure",
+        subtitle: "Listen to the story, work out the answer, and collect shiny coins!",
+        chooseLanguage: "Choose your language",
+        start: "Start Adventure 🚀",
+        voiceNote: "Tip: Tap the speaker button to hear any question again.",
+        mapTitle: "Choose a level",
+        mapSubtitle: "Complete five questions to unlock the next level.",
+        voiceOn: "Voice on",
+        voiceOff: "Voice off",
+        voiceSettings: "Voice settings",
+        questionOf: (n) => `Question ${n} of ${QUESTIONS_PER_LEVEL}`,
+        answer: "Your answer",
+        check: "Check Answer ✓",
+        repeat: "🔊 Hear again",
+        hint: "💡 Hint",
+        correct: ["Brilliant!", "Amazing work!", "You got it!", "Super maths!", "Fantastic!"],
+        wrong: ["Nearly! Try again.", "Good try. Have another go.", "Not quite. You can do it!"],
+        empty: "Please enter a number.",
+        complete: "Level complete!",
+        earned: "Brilliant work! You earned 5 coins.",
+        allComplete: "Adventure complete!",
+        allMessage: "You completed all five levels. You are a Maths Story Champion!",
+        continue: "Continue",
+        done: "Done",
+        settingsIntro: "Choose a British English or Cantonese voice installed on this device.",
+        voice: "Voice",
+        speed: "Speaking speed",
+        test: "▶ Test voice",
+        voiceTest: "Hello! I am ready to help you with your maths adventure.",
+        locked: "Complete the previous level first.",
+        levelLabels: [
+          { title: "Adding Picnic", desc: "Addition within 10", emoji: "🍎" },
+          { title: "Take-away Toys", desc: "Subtraction within 10", emoji: "🧸" },
+          { title: "Mixed-up Market", desc: "Addition and subtraction within 20", emoji: "🛒" },
+          { title: "Groups & Sharing", desc: "Multiplication and division", emoji: "🍪" },
+          { title: "Champion Challenge", desc: "Two-step mixed problems", emoji: "🏆" }
+        ],
+        hints: {
+          add: (a,b) => `${a} + ${b} = ?`,
+          subtract: (a,b) => `${a} − ${b} = ?`,
+          multiply: (a,b) => `${a} groups × ${b} in each group = ?`,
+          divide: (a,b) => `${a} shared equally among ${b} = ? each`,
+          addSubtract: (a,b,c) => `First ${a} + ${b}, then subtract ${c}.`,
+          multiplySubtract: (a,b,c) => `First ${a} × ${b}, then subtract ${c}.`,
+          addDivide: (a,b,c) => `First ${a} + ${b}, then share equally among ${c}.`
+        },
+        speakHint: "Here is a hint.",
+        next: "Next challenge",
+        home: "Back to levels"
+      },
+      "zh-HK": {
+        brand: "數學應用題大冒險",
+        title: "數學應用題大冒險",
+        subtitle: "聽清楚故事，計出答案，收集閃亮金幣！",
+        chooseLanguage: "選擇語言",
+        start: "開始大冒險 🚀",
+        voiceNote: "提示：撳喇叭掣，可以再聽一次題目。",
+        mapTitle: "選擇關卡",
+        mapSubtitle: "每關答啱五題，就可以解鎖下一關。",
+        voiceOn: "語音開啟",
+        voiceOff: "語音關閉",
+        voiceSettings: "語音設定",
+        questionOf: (n) => `第 ${n} 題，共 ${QUESTIONS_PER_LEVEL} 題`,
+        answer: "你的答案",
+        check: "檢查答案 ✓",
+        repeat: "🔊 再聽一次",
+        hint: "💡 提示",
+        correct: ["答啱啦！", "好叻呀！", "完全正確！", "數學小高手！", "做得非常好！"],
+        wrong: ["差少少，再試一次！", "努力呀，再諗一諗！", "未啱呀，你一定做到！"],
+        empty: "請輸入數字。",
+        complete: "完成關卡！",
+        earned: "好叻呀！你得到 5 個金幣。",
+        allComplete: "完成大冒險！",
+        allMessage: "你已經完成全部五關，成為數學應用題小冠軍！",
+        continue: "繼續",
+        done: "完成",
+        settingsIntro: "請選擇裝置內的廣東話或英式英語語音。",
+        voice: "語音",
+        speed: "說話速度",
+        test: "▶ 試聽語音",
+        voiceTest: "你好呀！我會陪你一齊玩數學應用題大冒險。",
+        locked: "請先完成上一關。",
+        levelLabels: [
+          { title: "野餐加法", desc: "十以內加法", emoji: "🍎" },
+          { title: "玩具減法", desc: "十以內減法", emoji: "🧸" },
+          { title: "熱鬧小市場", desc: "二十以內加減法", emoji: "🛒" },
+          { title: "分組與分享", desc: "乘法和除法", emoji: "🍪" },
+          { title: "冠軍挑戰", desc: "兩步混合應用題", emoji: "🏆" }
+        ],
+        hints: {
+          add: (a,b) => `${a} + ${b} = ?`,
+          subtract: (a,b) => `${a} − ${b} = ?`,
+          multiply: (a,b) => `${a} 組 × 每組 ${b} 個 = ?`,
+          divide: (a,b) => `${a} 個平均分畀 ${b} 人 = 每人 ? 個`,
+          addSubtract: (a,b,c) => `先計 ${a} + ${b}，再減 ${c}。`,
+          multiplySubtract: (a,b,c) => `先計 ${a} × ${b}，再減 ${c}。`,
+          addDivide: (a,b,c) => `先計 ${a} + ${b}，再平均分畀 ${c} 人。`
+        },
+        speakHint: "俾你一個提示。",
+        next: "下一題",
+        home: "返回關卡"
+      }
+    };
+
+    const people = {
+      "en-GB": ["Howie", "Mia", "Ben", "Sophie", "Leo", "Mum", "Dad"],
+      "zh-HK": ["雲雲", "美美", "賓賓", "蘇菲", "樂樂", "媽媽", "爸爸"]
+    };
+
+    const itemSets = [
+      { emoji: "🍎", en: "apple", enPlural: "apples", zh: "蘋果", classifier: "個" },
+      { emoji: "🎈", en: "balloon", enPlural: "balloons", zh: "氣球", classifier: "個" },
+      { emoji: "🚗", en: "toy car", enPlural: "toy cars", zh: "玩具車", classifier: "架" },
+      { emoji: "🍪", en: "biscuit", enPlural: "biscuits", zh: "曲奇", classifier: "塊" },
+      { emoji: "✏️", en: "pencil", enPlural: "pencils", zh: "鉛筆", classifier: "枝" },
+      { emoji: "⭐", en: "star sticker", enPlural: "star stickers", zh: "星星貼紙", classifier: "張" },
+      { emoji: "🍊", en: "orange", enPlural: "oranges", zh: "橙", classifier: "個" },
+      { emoji: "🧸", en: "teddy bear", enPlural: "teddy bears", zh: "啤啤熊", classifier: "隻" }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const screens = ["welcomeScreen", "mapScreen", "gameScreen"];
+
+    function showScreen(id) {
+      screens.forEach(s => $(s).classList.toggle("active", s === id));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function otherPerson(primary) {
+      const list = people[state.lang].filter(p => p !== primary);
+      return pick(list);
+    }
+
+    function saveProgress() {
+      localStorage.setItem("mathStoryCoins", state.coins);
+      localStorage.setItem("mathStoryUnlocked", state.unlocked);
+      localStorage.setItem("mathStoryCompleted", JSON.stringify(state.completed));
+    }
+
+    function setLanguage(lang) {
+      state.lang = lang;
+      document.documentElement.lang = lang;
+      document.querySelectorAll(".language-card").forEach(btn => {
+        btn.classList.toggle("selected", btn.dataset.lang === lang);
+      });
+      applyCopy();
+      populateVoiceList();
+      if (state.currentQuestion && $("gameScreen").classList.contains("active")) renderQuestion();
+    }
+
+    function applyCopy() {
+      const c = copy[state.lang];
+      $("brandText").textContent = c.brand;
+      $("welcomeTitle").textContent = c.title;
+      $("welcomeSubtitle").textContent = c.subtitle;
+      $("languageTitle").textContent = c.chooseLanguage;
+      $("startBtn").textContent = c.start;
+      $("voiceNote").textContent = c.voiceNote;
+      $("mapTitle").textContent = c.mapTitle;
+      $("mapSubtitle").textContent = c.mapSubtitle;
+      $("settingsLabel").textContent = c.voiceSettings;
+      $("voiceToggleLabel").textContent = state.voiceOn ? c.voiceOn : c.voiceOff;
+      $("answerLabel").textContent = c.answer;
+      $("checkBtn").textContent = c.check;
+      $("repeatBtn").textContent = c.repeat;
+      $("hintBtn").textContent = c.hint;
+      $("settingsModalTitle").textContent = c.voiceSettings;
+      $("settingsIntro").textContent = c.settingsIntro;
+      $("voiceSelectLabel").textContent = c.voice;
+      $("rateLabel").textContent = c.speed;
+      $("testVoiceBtn").textContent = c.test;
+      $("closeSettingsBtn").textContent = c.done;
+      $("continueBtn").textContent = c.continue;
+      renderLevelGrid();
+    }
+
+    function renderLevelGrid() {
+      const labels = copy[state.lang].levelLabels;
+      const grid = $("levelGrid");
+      grid.innerHTML = "";
+      labels.forEach((level, i) => {
+        const levelNo = i + 1;
+        const unlocked = levelNo <= state.unlocked;
+        const completed = Boolean(state.completed[levelNo]);
+        const card = document.createElement("button");
+        card.className = "level-card";
+        card.disabled = !unlocked;
+        card.setAttribute("aria-label", `${level.title}. ${level.desc}`);
+        card.innerHTML = `
+          <div class="level-number">${levelNo}</div>
+          <div class="level-emoji">${unlocked ? level.emoji : "🔒"}</div>
+          <h3>${level.title}</h3>
+          <p>${level.desc}</p>
+          <div class="level-stars">${completed ? "⭐ ⭐ ⭐" : unlocked ? "☆ ☆ ☆" : "🔒"}</div>
+        `;
+        card.addEventListener("click", () => {
+          if (!unlocked) return;
+          startLevel(levelNo);
+        });
+        grid.appendChild(card);
+      });
+      $("coinCount").textContent = state.coins;
+    }
+
+    function startLevel(levelNo) {
+      stopSpeech();
+      state.currentLevel = levelNo;
+      state.questionIndex = 0;
+      state.lockedAfterCorrect = false;
+      showScreen("gameScreen");
+      updateGameHeader();
+      nextQuestion();
+    }
+
+    function updateGameHeader() {
+      const label = copy[state.lang].levelLabels[state.currentLevel - 1];
+      $("gameLevelTitle").textContent = `${state.lang === "zh-HK" ? "第" : "Level"} ${state.currentLevel}${state.lang === "zh-HK" ? " 關" : ""}: ${label.title}`;
+      $("gameLevelSubtitle").textContent = label.desc;
+      $("progressText").textContent = copy[state.lang].questionOf(state.questionIndex + 1);
+      $("progressBar").style.width = `${(state.questionIndex / QUESTIONS_PER_LEVEL) * 100}%`;
+    }
+
+    function nextQuestion() {
+      state.lockedAfterCorrect = false;
+      state.currentQuestion = generateQuestion(state.currentLevel);
+      $("answerInput").value = "";
+      $("feedback").textContent = "";
+      $("feedback").className = "feedback";
+      $("hintBox").classList.remove("show");
+      updateGameHeader();
+      renderQuestion();
+      setTimeout(() => speakCurrentQuestion(), 250);
+      $("answerInput").focus();
+    }
+
+    function generateQuestion(level) {
+      const item = pick(itemSets);
+      const primaryIndex = randomInt(0, people["en-GB"].length - 1);
+      const pEn = people["en-GB"][primaryIndex];
+      const pZh = people["zh-HK"][primaryIndex];
+      const otherIndexChoices = people["en-GB"].map((_, i) => i).filter(i => i !== primaryIndex);
+      const otherIndex = pick(otherIndexChoices);
+      const oEn = people["en-GB"][otherIndex];
+      const oZh = people["zh-HK"][otherIndex];
+
+      let q = { item, pEn, pZh, oEn, oZh, level, type: "add", a: 0, b: 0, c: 0, answer: 0 };
+
+      if (level === 1) {
+        q.type = "add";
+        q.a = randomInt(1, 6);
+        q.b = randomInt(1, 10 - q.a);
+        q.answer = q.a + q.b;
+      } else if (level === 2) {
+        q.type = "subtract";
+        q.a = randomInt(4, 10);
+        q.b = randomInt(1, q.a - 1);
+        q.answer = q.a - q.b;
+      } else if (level === 3) {
+        q.type = Math.random() < 0.5 ? "add" : "subtract";
+        if (q.type === "add") {
+          q.a = randomInt(5, 14);
+          q.b = randomInt(2, 20 - q.a);
+          q.answer = q.a + q.b;
+        } else {
+          q.a = randomInt(10, 20);
+          q.b = randomInt(2, q.a - 1);
+          q.answer = q.a - q.b;
+        }
+      } else if (level === 4) {
+        q.type = Math.random() < 0.5 ? "multiply" : "divide";
+        if (q.type === "multiply") {
+          q.a = randomInt(2, 5);
+          q.b = pick([2, 3, 4, 5, 10]);
+          q.answer = q.a * q.b;
+        } else {
+          q.b = randomInt(2, 5);
+          q.answer = pick([2, 3, 4, 5, 6]);
+          q.a = q.b * q.answer;
+        }
+      } else {
+        const type = pick(["addSubtract", "multiplySubtract", "addDivide"]);
+        q.type = type;
+        if (type === "addSubtract") {
+          q.a = randomInt(5, 15);
+          q.b = randomInt(2, 10);
+          q.c = randomInt(1, Math.min(8, q.a + q.b - 1));
+          q.answer = q.a + q.b - q.c;
+        } else if (type === "multiplySubtract") {
+          q.a = randomInt(2, 5);
+          q.b = randomInt(2, 5);
+          q.c = randomInt(1, Math.min(5, q.a * q.b - 1));
+          q.answer = q.a * q.b - q.c;
+        } else {
+          q.c = randomInt(2, 4);
+          q.answer = randomInt(2, 6);
+          const total = q.c * q.answer;
+          q.a = randomInt(1, total - 1);
+          q.b = total - q.a;
+        }
+      }
+      return q;
+    }
+
+    function pluralForm(item, n) {
+      return n === 1 ? item.en : item.enPlural;
+    }
+
+    function getQuestionText(q, lang) {
+      const i = q.item;
+      if (lang === "zh-HK") {
+        const p = q.pZh, o = q.oZh, n = i.zh, cl = i.classifier;
+        if (q.type === "add") {
+          return `${p}有${q.a}${cl}${n}，${o}再畀${p}${q.b}${cl}${n}。而家一共有幾多${cl}${n}？`;
+        }
+        if (q.type === "subtract") {
+          return `${p}有${q.a}${cl}${n}，送咗${q.b}${cl}畀${o}。${p}仲剩低幾多${cl}${n}？`;
+        }
+        if (q.type === "multiply") {
+          return `${p}有${q.a}個袋，每個袋有${q.b}${cl}${n}。全部一共有幾多${cl}${n}？`;
+        }
+        if (q.type === "divide") {
+          return `${p}有${q.a}${cl}${n}，平均分畀${q.b}個小朋友。每個小朋友可以得到幾多${cl}${n}？`;
+        }
+        if (q.type === "addSubtract") {
+          return `${p}原本有${q.a}${cl}${n}，${o}再畀${p}${q.b}${cl}。之後${p}送出${q.c}${cl}，最後仲有幾多${cl}${n}？`;
+        }
+        if (q.type === "multiplySubtract") {
+          return `${p}有${q.a}盒${n}，每盒有${q.b}${cl}。食咗${q.c}${cl}之後，仲剩低幾多${cl}${n}？`;
+        }
+        return `${p}有${q.a}${cl}${n}，${o}再帶嚟${q.b}${cl}。佢哋將全部${n}平均分畀${q.c}個小朋友，每人有幾多${cl}？`;
+      } else {
+        const p = q.pEn, o = q.oEn;
+        if (q.type === "add") {
+          return `${p} has ${q.a} ${pluralForm(i, q.a)}. ${o} gives ${p} ${q.b} more. How many ${i.enPlural} are there altogether?`;
+        }
+        if (q.type === "subtract") {
+          return `${p} has ${q.a} ${pluralForm(i, q.a)} and gives ${q.b} to ${o}. How many ${i.enPlural} does ${p} have left?`;
+        }
+        if (q.type === "multiply") {
+          return `${p} has ${q.a} bags. Each bag has ${q.b} ${pluralForm(i, q.b)}. How many ${i.enPlural} are there altogether?`;
+        }
+        if (q.type === "divide") {
+          return `${p} has ${q.a} ${pluralForm(i, q.a)} and shares them equally among ${q.b} children. How many does each child get?`;
+        }
+        if (q.type === "addSubtract") {
+          return `${p} has ${q.a} ${pluralForm(i, q.a)}. ${o} brings ${q.b} more, then ${p} gives away ${q.c}. How many ${i.enPlural} are left?`;
+        }
+        if (q.type === "multiplySubtract") {
+          return `${p} has ${q.a} boxes with ${q.b} ${pluralForm(i, q.b)} in each box. After using ${q.c}, how many ${i.enPlural} are left?`;
+        }
+        return `${p} has ${q.a} ${pluralForm(i, q.a)} and ${o} brings ${q.b} more. They share all of them equally among ${q.c} children. How many does each child get?`;
+      }
+    }
+
+    function renderQuestion() {
+      const q = state.currentQuestion;
+      $("storyEmoji").textContent = `${q.item.emoji} ${state.currentLevel === 5 ? "🧠" : ""}`;
+      $("questionText").textContent = getQuestionText(q, state.lang);
+      $("progressText").textContent = copy[state.lang].questionOf(state.questionIndex + 1);
+      $("answerLabel").textContent = copy[state.lang].answer;
+      $("checkBtn").textContent = copy[state.lang].check;
+      $("repeatBtn").textContent = copy[state.lang].repeat;
+      $("hintBtn").textContent = copy[state.lang].hint;
+      const label = copy[state.lang].levelLabels[state.currentLevel - 1];
+      $("gameLevelTitle").textContent = `${state.lang === "zh-HK" ? "第" : "Level"} ${state.currentLevel}${state.lang === "zh-HK" ? " 關" : ""}: ${label.title}`;
+      $("gameLevelSubtitle").textContent = label.desc;
+    }
+
+    function getHint(q) {
+      const h = copy[state.lang].hints;
+      if (q.type === "add") return h.add(q.a, q.b);
+      if (q.type === "subtract") return h.subtract(q.a, q.b);
+      if (q.type === "multiply") return h.multiply(q.a, q.b);
+      if (q.type === "divide") return h.divide(q.a, q.b);
+      if (q.type === "addSubtract") return h.addSubtract(q.a, q.b, q.c);
+      if (q.type === "multiplySubtract") return h.multiplySubtract(q.a, q.b, q.c);
+      return h.addDivide(q.a, q.b, q.c);
+    }
+
+    function showHint() {
+      const hint = getHint(state.currentQuestion);
+      $("hintBox").textContent = hint;
+      $("hintBox").classList.add("show");
+      speak(`${copy[state.lang].speakHint} ${hint}`);
+    }
+
+    function checkAnswer() {
+      if (state.lockedAfterCorrect) return;
+      const raw = $("answerInput").value.trim();
+      const c = copy[state.lang];
+
+      if (raw === "") {
+        setFeedback(c.empty, "bad");
+        speak(c.empty);
+        shakeAnswer();
+        return;
+      }
+
+      const value = Number(raw);
+      if (value === state.currentQuestion.answer) {
+        state.lockedAfterCorrect = true;
+        const msg = pick(c.correct);
+        setFeedback(`🌟 ${msg}`, "good");
+        playTone("correct");
+        speak(msg);
+        burstConfetti(28);
+        state.coins += 1;
+        $("coinCount").textContent = state.coins;
+        saveProgress();
+
+        setTimeout(() => {
+          state.questionIndex += 1;
+          if (state.questionIndex >= QUESTIONS_PER_LEVEL) {
+            finishLevel();
+          } else {
+            nextQuestion();
+          }
+        }, 1050);
+      } else {
+        const msg = pick(c.wrong);
+        setFeedback(`💪 ${msg}`, "bad");
+        playTone("wrong");
+        speak(msg);
+        shakeAnswer();
+        $("answerInput").select();
+      }
+    }
+
+    function setFeedback(text, type) {
+      $("feedback").textContent = text;
+      $("feedback").className = `feedback ${type}`;
+    }
+
+    function shakeAnswer() {
+      const card = document.querySelector(".answer-card");
+      card.classList.remove("shake");
+      requestAnimationFrame(() => card.classList.add("shake"));
+      setTimeout(() => card.classList.remove("shake"), 400);
+    }
+
+    function finishLevel() {
+      const isLast = state.currentLevel === 5;
+      state.completed[state.currentLevel] = true;
+      state.unlocked = Math.max(state.unlocked, Math.min(5, state.currentLevel + 1));
+      $("progressBar").style.width = "100%";
+      saveProgress();
+      renderLevelGrid();
+
+      const c = copy[state.lang];
+      $("successIcon").textContent = isLast ? "👑🏆" : "🏆";
+      $("successTitle").textContent = isLast ? c.allComplete : c.complete;
+      $("successMessage").textContent = isLast ? c.allMessage : c.earned;
+      $("continueBtn").textContent = isLast ? c.home : c.continue;
+      $("successOverlay").classList.add("show");
+      burstConfetti(80);
+      playTone("win");
+      speak(`${$("successTitle").textContent} ${$("successMessage").textContent}`);
+    }
+
+    function continueAfterLevel() {
+      $("successOverlay").classList.remove("show");
+      if (state.currentLevel < 5 && state.unlocked > state.currentLevel) {
+        startLevel(state.currentLevel + 1);
+      } else {
+        showScreen("mapScreen");
+      }
+    }
+
+    function buildKeypad() {
+      const keys = [
+        "1","2","3","4","5","6","7","8","9","C","0","⌫"
+      ];
+      const keypad = $("keypad");
+      keypad.innerHTML = "";
+      keys.forEach(k => {
+        const btn = document.createElement("button");
+        btn.className = `key ${k === "C" || k === "⌫" ? "utility" : ""}`;
+        btn.textContent = k;
+        btn.type = "button";
+        btn.addEventListener("click", () => {
+          if (state.lockedAfterCorrect) return;
+          if (k === "C") $("answerInput").value = "";
+          else if (k === "⌫") $("answerInput").value = $("answerInput").value.slice(0, -1);
+          else if ($("answerInput").value.length < 4) $("answerInput").value += k;
+          $("answerInput").focus();
+        });
+        keypad.appendChild(btn);
+      });
+    }
+
+    function sanitiseInput() {
+      $("answerInput").value = $("answerInput").value.replace(/\D/g, "").slice(0, 4);
+    }
+
+    function loadVoices() {
+      if (!("speechSynthesis" in window)) return;
+      state.voices = window.speechSynthesis.getVoices();
+      populateVoiceList();
+    }
+
+    function matchingVoices() {
+      const target = state.lang;
+      let matches;
+      if (target === "zh-HK") {
+        matches = state.voices.filter(v =>
+          /^zh-HK/i.test(v.lang) ||
+          /^yue/i.test(v.lang) ||
+          /cantonese|hong kong/i.test(`${v.name} ${v.lang}`)
+        );
+        if (!matches.length) matches = state.voices.filter(v => /^zh/i.test(v.lang));
+      } else {
+        matches = state.voices.filter(v => /^en-GB/i.test(v.lang));
+        if (!matches.length) matches = state.voices.filter(v => /^en/i.test(v.lang));
+      }
+      return matches;
+    }
+
+    function populateVoiceList() {
+      const select = $("voiceSelect");
+      if (!select) return;
+      const matches = matchingVoices();
+      select.innerHTML = "";
+
+      if (!matches.length) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = state.lang === "zh-HK" ? "使用瀏覽器預設語音" : "Use browser default voice";
+        select.appendChild(opt);
+        return;
+      }
+
+      matches.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v.voiceURI;
+        opt.textContent = `${v.name} (${v.lang})`;
+        if (v.voiceURI === state.selectedVoiceURI) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      if (!matches.some(v => v.voiceURI === state.selectedVoiceURI)) {
+        const preferred = matches.find(v =>
+          state.lang === "zh-HK"
+            ? /cantonese|hong kong|hiumaan|sinji/i.test(v.name)
+            : /daniel|serena|kate|oliver|susan|george/i.test(v.name)
+        ) || matches[0];
+        state.selectedVoiceURI = preferred.voiceURI;
+        select.value = preferred.voiceURI;
+      }
+    }
+
+    function speak(text) {
+      if (!state.voiceOn || !("speechSynthesis" in window)) return;
+      stopSpeech();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = state.lang;
+      utterance.rate = state.speechRate;
+      utterance.pitch = 1.04;
+
+      const matches = matchingVoices();
+      const chosen = state.voices.find(v => v.voiceURI === state.selectedVoiceURI) || matches[0];
+      if (chosen) utterance.voice = chosen;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function speakCurrentQuestion() {
+      if (!state.currentQuestion) return;
+      speak(getQuestionText(state.currentQuestion, state.lang));
+    }
+
+    function stopSpeech() {
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    }
+
+    function toggleVoice() {
+      state.voiceOn = !state.voiceOn;
+      $("voiceToggleBtn").firstChild.textContent = state.voiceOn ? "🔊 " : "🔇 ";
+      $("voiceToggleLabel").textContent = state.voiceOn ? copy[state.lang].voiceOn : copy[state.lang].voiceOff;
+      if (!state.voiceOn) stopSpeech();
+      else if (state.currentQuestion && $("gameScreen").classList.contains("active")) speakCurrentQuestion();
+    }
+
+    function openSettings() {
+      populateVoiceList();
+      $("rateSelect").value = String(state.speechRate);
+      $("settingsModal").classList.add("show");
+    }
+
+    function closeSettings() {
+      state.selectedVoiceURI = $("voiceSelect").value;
+      state.speechRate = Number($("rateSelect").value);
+      localStorage.setItem("mathStoryVoiceURI", state.selectedVoiceURI);
+      localStorage.setItem("mathStorySpeechRate", state.speechRate);
+      $("settingsModal").classList.remove("show");
+      stopSpeech();
+    }
+
+    function playTone(kind) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
+        const notes = kind === "correct" ? [523, 659, 784]
+          : kind === "win" ? [523, 659, 784, 1047]
+          : [220, 196];
+
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = kind === "wrong" ? "sine" : "triangle";
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.0001, ctx.currentTime + idx * 0.11);
+          gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + idx * 0.11 + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.11 + 0.16);
+          osc.connect(gain).connect(ctx.destination);
+          osc.start(ctx.currentTime + idx * 0.11);
+          osc.stop(ctx.currentTime + idx * 0.11 + 0.18);
+        });
+        setTimeout(() => ctx.close(), 900);
+      } catch (e) {}
+    }
+
+    function burstConfetti(count) {
+      const colours = ["#7557e8", "#ffd75e", "#70dfbd", "#ff8fb1", "#63b8ff"];
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti";
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.background = pick(colours);
+        piece.style.animationDelay = `${Math.random() * .45}s`;
+        piece.style.animationDuration = `${1.25 + Math.random() * 1.1}s`;
+        piece.style.transform = `rotate(${Math.random() * 180}deg)`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 2700);
+      }
+    }
+
+    document.querySelectorAll(".language-card").forEach(btn => {
+      btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+    });
+
+    $("startBtn").addEventListener("click", () => {
+      showScreen("mapScreen");
+      renderLevelGrid();
+      speak(state.lang === "zh-HK"
+        ? "歡迎來到數學應用題大冒險！請選擇第一關。"
+        : "Welcome to Maths Story Adventure! Choose a level to begin.");
+    });
+
+    $("voiceToggleBtn").addEventListener("click", toggleVoice);
+    $("settingsBtn").addEventListener("click", openSettings);
+    $("closeSettingsBtn").addEventListener("click", closeSettings);
+    $("testVoiceBtn").addEventListener("click", () => {
+      state.selectedVoiceURI = $("voiceSelect").value;
+      state.speechRate = Number($("rateSelect").value);
+      speak(copy[state.lang].voiceTest);
+    });
+    $("settingsModal").addEventListener("click", e => {
+      if (e.target === $("settingsModal")) closeSettings();
+    });
+
+    $("backBtn").addEventListener("click", () => {
+      stopSpeech();
+      showScreen("mapScreen");
+      renderLevelGrid();
+    });
+    $("repeatBtn").addEventListener("click", speakCurrentQuestion);
+    $("hintBtn").addEventListener("click", showHint);
+    $("checkBtn").addEventListener("click", checkAnswer);
+    $("continueBtn").addEventListener("click", continueAfterLevel);
+    $("answerInput").addEventListener("input", sanitiseInput);
+    $("answerInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") checkAnswer();
+    });
+
+    buildKeypad();
+    applyCopy();
+    $("coinCount").textContent = state.coins;
+    $("rateSelect").value = String(state.speechRate);
+
+    if ("speechSynthesis" in window) {
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+      setTimeout(loadVoices, 300);
+    }
+  </script>
+</body>
+</html>
