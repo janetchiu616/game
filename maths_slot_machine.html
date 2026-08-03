@@ -1218,7 +1218,7 @@
             <label class="level-card" for="levelMixed">
               <span>
                 <strong>1 digit &amp; 2 digits</strong>
-                <small>Example: 8 + 24</small>
+                <small>Example: 24 ÷ 8 </small>
               </span>
             </label>
           </div>
@@ -1465,6 +1465,10 @@
       }
 
       function createDivisionQuestion(level) {
+        // Every division question is built from:
+        // dividend = divisor × whole-number quotient.
+        // This guarantees that every answer is an integer.
+
         if (level === "one-one") {
           let divisor;
           let quotient;
@@ -1476,24 +1480,63 @@
             dividend = divisor * quotient;
           } while (dividend > 9);
 
-          return { first: dividend, second: divisor, operator: "÷", answer: quotient };
+          return {
+            first: dividend,
+            second: divisor,
+            operator: "÷",
+            answer: quotient
+          };
         }
 
         if (level === "one-two") {
-          const divisor = nonZeroOneDigit();
-          const minQuotient = Math.ceil(10 / divisor);
-          const maxQuotient = Math.floor(99 / divisor);
-          const quotient = randomInteger(minQuotient, Math.max(minQuotient, maxQuotient));
-          const dividend = divisor * quotient;
-          return { first: dividend, second: divisor, operator: "÷", answer: quotient };
+          // The two-digit number must always be in the FIRST box.
+          // Example: 24 ÷ 8 = 3.
+          let divisor;
+          let quotient;
+          let dividend;
+
+          do {
+            divisor = nonZeroOneDigit();
+            const minimumWholeQuotient = Math.ceil(10 / divisor);
+            const maximumWholeQuotient = Math.floor(99 / divisor);
+            quotient = randomInteger(minimumWholeQuotient, maximumWholeQuotient);
+            dividend = divisor * quotient;
+          } while (
+            dividend < 10 ||
+            dividend > 99 ||
+            !Number.isInteger(dividend / divisor)
+          );
+
+          return {
+            first: dividend,
+            second: divisor,
+            operator: "÷",
+            answer: dividend / divisor
+          };
         }
 
-        // Both displayed numbers stay two-digit and the answer is a whole number.
-        const divisor = randomInteger(10, 49);
-        const maxQuotient = Math.floor(99 / divisor);
-        const quotient = randomInteger(2, Math.max(2, maxQuotient));
-        const dividend = divisor * quotient;
-        return { first: dividend, second: divisor, operator: "÷", answer: quotient };
+        // Both displayed numbers are two digits and the result is a whole number.
+        let divisor;
+        let quotient;
+        let dividend;
+
+        do {
+          divisor = randomInteger(10, 49);
+          const maximumWholeQuotient = Math.floor(99 / divisor);
+          quotient = randomInteger(2, maximumWholeQuotient);
+          dividend = divisor * quotient;
+        } while (
+          dividend < 10 ||
+          dividend > 99 ||
+          !Number.isInteger(dividend / divisor)
+        );
+
+        return {
+          first: dividend,
+          second: divisor,
+          operator: "÷",
+          answer: dividend / divisor
+        };
       }
 
       function createQuestion() {
