@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Howie's Number Jackpot</title>
+  <title>Number Jackpot</title>
   <style>
     :root {
       --sky: #7dd3fc;
@@ -1124,6 +1124,413 @@
       }
     }
 
+
+    .player-name-group {
+      text-align: center;
+    }
+
+    .name-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 1000;
+    }
+
+    .player-name-input {
+      width: min(460px, 100%);
+      padding: 14px 17px;
+      border: 4px solid #60a5fa;
+      border-radius: 18px;
+      background: white;
+      color: var(--navy);
+      text-align: center;
+      font-size: clamp(1.2rem, 3vw, 1.55rem);
+      font-weight: 1000;
+      outline: none;
+    }
+
+    .player-name-input:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 5px rgba(139,92,246,.18);
+    }
+
+    .name-hint {
+      margin-top: 10px;
+      margin-bottom: 0;
+    }
+
+    .report-button {
+      padding: 13px 20px;
+      border: 4px solid var(--navy);
+      border-radius: 22px;
+      background: var(--green);
+      color: #052e16;
+      font-size: 1.05rem;
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 7px 0 #15803d;
+    }
+
+    .report-button:active {
+      transform: translateY(3px);
+      box-shadow: 0 4px 0 #15803d;
+    }
+
+    .report-panel {
+      position: relative;
+      z-index: 3;
+      max-width: 920px;
+      margin: 28px auto;
+      padding: clamp(18px, 4vw, 34px);
+      border: 5px solid var(--navy);
+      border-radius: 32px;
+      background: #f8fafc;
+      box-shadow: 0 15px 0 rgba(23,37,84,.18), 0 25px 36px rgba(23,37,84,.18);
+    }
+
+    .report-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      padding-bottom: 17px;
+      border-bottom: 4px solid #cbd5e1;
+    }
+
+    .report-kicker {
+      margin: 0 0 4px;
+      font-weight: 1000;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .report-header h2 {
+      margin: 0;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+    }
+
+    .report-meta {
+      margin: 8px 0 0;
+      color: #475569;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .close-report-button {
+      flex: 0 0 auto;
+      width: 46px;
+      height: 46px;
+      border: 3px solid var(--navy);
+      border-radius: 50%;
+      background: white;
+      color: var(--navy);
+      font-size: 1.25rem;
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    .report-section {
+      margin-top: 25px;
+    }
+
+    .report-section h3 {
+      margin: 0 0 13px;
+      font-size: clamp(1.2rem, 3vw, 1.55rem);
+      color: var(--navy);
+    }
+
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 11px;
+    }
+
+    .summary-card {
+      min-height: 104px;
+      padding: 13px 10px;
+      border: 3px solid #93c5fd;
+      border-radius: 18px;
+      background: white;
+      text-align: center;
+      box-shadow: 0 5px 0 rgba(23,37,84,.1);
+    }
+
+    .summary-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: clamp(1.35rem, 4vw, 2rem);
+      color: var(--purple);
+    }
+
+    .summary-card span {
+      display: block;
+      font-size: .82rem;
+      font-weight: 900;
+      line-height: 1.25;
+      color: #475569;
+    }
+
+    .report-note {
+      margin: 13px 0 0;
+      padding: 10px 13px;
+      border-radius: 14px;
+      background: #e0f2fe;
+      font-size: .9rem;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      border: 3px solid #cbd5e1;
+      border-radius: 18px;
+      background: white;
+    }
+
+    .report-table {
+      width: 100%;
+      min-width: 690px;
+      border-collapse: collapse;
+    }
+
+    .report-table th,
+    .report-table td {
+      padding: 11px 10px;
+      border-bottom: 2px solid #e2e8f0;
+      text-align: left;
+      vertical-align: top;
+      font-size: .92rem;
+    }
+
+    .report-table th {
+      background: #dbeafe;
+      color: var(--navy);
+      font-weight: 1000;
+    }
+
+    .report-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .report-table tr.needs-practice td {
+      background: #fff7ed;
+    }
+
+    .result-good {
+      color: #15803d;
+      font-weight: 1000;
+    }
+
+    .result-practice {
+      color: #b45309;
+      font-weight: 1000;
+    }
+
+    .report-two-column {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+
+    .report-two-column > div {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .report-two-column > div h3 {
+      margin-bottom: 0;
+      line-height: 1.2;
+    }
+
+    .insight-box {
+      height: auto;
+      min-height: 220px;
+      padding: 15px 17px;
+      border: 3px solid #c4b5fd;
+      border-radius: 18px;
+      background: white;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
+    .insight-box ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .insight-box li + li {
+      margin-top: 8px;
+    }
+
+    .report-two-column + .report-section {
+      margin-top: 38px;
+    }
+
+    .review-question-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .review-chip {
+      padding: 9px 13px;
+      border: 3px solid #f59e0b;
+      border-radius: 999px;
+      background: #fffbeb;
+      font-weight: 1000;
+    }
+
+    .perfect-chip {
+      border-color: var(--green);
+      background: #dcfce7;
+    }
+
+    .report-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 4px solid #cbd5e1;
+    }
+
+    .report-action {
+      padding: 11px 15px;
+      border: 3px solid var(--navy);
+      border-radius: 16px;
+      background: white;
+      color: var(--navy);
+      font-size: .95rem;
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 5px 0 rgba(23,37,84,.18);
+    }
+
+    .report-action:disabled {
+      opacity: .48;
+      cursor: not-allowed;
+    }
+
+    .primary-report-action {
+      background: var(--yellow);
+      box-shadow: 0 5px 0 #ca8a04;
+    }
+
+    @media (max-width: 760px) {
+      .summary-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .report-panel {
+        padding: 16px;
+      }
+
+      .report-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .close-report-button {
+        align-self: flex-end;
+      }
+
+      .report-section h3 {
+        line-height: 1.2;
+      }
+
+      .report-two-column {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        margin-bottom: 8px;
+      }
+
+      .report-two-column > div {
+        gap: 10px;
+      }
+
+      .insight-box {
+        min-height: 0;
+      }
+
+      .report-two-column + .report-section {
+        margin-top: 28px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .summary-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .report-section {
+        margin-top: 22px;
+      }
+
+      .report-table th,
+      .report-table td {
+        font-size: .88rem;
+      }
+
+      .review-question-list {
+        gap: 8px;
+      }
+
+      .review-chip {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    @media print {
+      body {
+        background: white !important;
+      }
+
+      body * {
+        visibility: hidden !important;
+      }
+
+      #reportPanel,
+      #reportPanel * {
+        visibility: visible !important;
+      }
+
+      #reportPanel {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 14px;
+        border: 0;
+        box-shadow: none;
+        background: white;
+      }
+
+      .close-report-button,
+      .report-actions {
+        display: none !important;
+      }
+
+      .report-section {
+        break-inside: avoid;
+      }
+
+      .table-scroll {
+        overflow: visible;
+      }
+
+      .report-table {
+        min-width: 0;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *,
       *::before,
@@ -1143,7 +1550,7 @@
   <main class="app">
     <header class="top-bar">
       <div class="title-wrap">
-        <h1>Howie's Number Jackpot</h1>
+        <h1 id="gameTitle">Number Jackpot</h1>
         <p id="subtitle" class="subtitle">Parents choose the maths challenge!</p>
       </div>
       <button id="soundButton" class="sound-button" type="button" aria-label="Turn sound and music off" title="Sound and music on">
@@ -1158,8 +1565,23 @@
         Choose the maths skills, number size and number of rounds before the child starts playing.
       </p>
 
+
+      <fieldset class="setup-group player-name-group">
+        <legend>1. Enter the player’s name</legend>
+        <label class="name-label" for="playerNameInput">Player name</label>
+        <input
+          id="playerNameInput"
+          class="player-name-input"
+          type="text"
+          maxlength="24"
+          autocomplete="name"
+          placeholder="e.g. Alex"
+        >
+        <p class="setup-hint name-hint">The name will appear in the game and Parent Learning Report.</p>
+      </fieldset>
+
       <fieldset class="setup-group">
-        <legend>1. Choose one or more operations</legend>
+        <legend>2. Choose one or more operations</legend>
         <p class="setup-hint">You may select several operations for a mixed challenge.</p>
         <div class="operation-grid">
           <div>
@@ -1202,7 +1624,7 @@
       </fieldset>
 
       <fieldset class="setup-group">
-        <legend>2. Choose the number size</legend>
+        <legend>3. Choose the number size</legend>
         <div class="level-grid">
           <div>
             <input class="choice-input level-input" type="radio" name="numberLevel" id="levelOne" value="one-one" checked>
@@ -1218,7 +1640,7 @@
             <label class="level-card" for="levelMixed">
               <span>
                 <strong>1 digit &amp; 2 digits</strong>
-                <small>Example: 24 ÷ 8 </small>
+                <small>Example: 24 ÷ 8 or 8 + 24</small>
               </span>
             </label>
           </div>
@@ -1235,7 +1657,7 @@
       </fieldset>
 
       <fieldset class="setup-group">
-        <legend>3. Choose the number of rounds</legend>
+        <legend>4. Choose the number of rounds</legend>
         <div class="round-picker">
           <button id="roundMinus" class="round-step-button" type="button" aria-label="Reduce rounds">−</button>
           <div class="round-slider-wrap">
@@ -1351,8 +1773,98 @@
         <button id="playAgainButton" class="play-again-button" type="button">
           PLAY AGAIN
         </button>
+        <button id="parentReportButton" class="report-button" type="button">
+          👨‍👩‍👧 PARENT REPORT
+        </button>
         <button id="changeSettingsButton" class="secondary-winner-button" type="button">
           CHANGE SETTINGS
+        </button>
+      </div>
+    </section>
+
+    <section id="reportPanel" class="report-panel" hidden aria-labelledby="reportTitle">
+      <div class="report-header">
+        <div>
+          <p class="report-kicker">👨‍👩‍👧 Parent Learning Report</p>
+          <h2 id="reportTitle">Learning Report</h2>
+          <p id="reportMeta" class="report-meta"></p>
+        </div>
+        <button id="closeReportButton" class="close-report-button" type="button" aria-label="Close report">✕</button>
+      </div>
+
+      <section class="report-section">
+        <h3>1. Overall Summary</h3>
+        <div id="summaryCards" class="summary-cards"></div>
+        <p class="report-note">
+          “Questions requiring another attempt” counts different questions.
+          “Total wrong attempts” counts every incorrect answer entered.
+        </p>
+      </section>
+
+      <section class="report-section">
+        <h3>2. Question-by-Question Results</h3>
+        <div class="table-scroll">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Round</th>
+                <th>Question</th>
+                <th>Player’s answers</th>
+                <th>Correct answer</th>
+                <th>Performance</th>
+              </tr>
+            </thead>
+            <tbody id="questionReportBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="report-section">
+        <h3>3. Performance by Operation</h3>
+        <div class="table-scroll">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Operation</th>
+                <th>Questions</th>
+                <th>First-try correct</th>
+                <th>Wrong attempts</th>
+                <th>First-try accuracy</th>
+              </tr>
+            </thead>
+            <tbody id="operationReportBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="report-section report-two-column">
+        <div>
+          <h3>4. Possible Error Patterns</h3>
+          <div id="errorPatterns" class="insight-box"></div>
+        </div>
+        <div>
+          <h3>5. Suggested Next Practice</h3>
+          <div id="practiceSuggestions" class="insight-box"></div>
+        </div>
+      </section>
+
+      <section class="report-section">
+        <h3>Questions to Review</h3>
+        <div id="reviewQuestions" class="review-question-list"></div>
+      </section>
+
+      <div class="report-actions">
+        <button id="practiceMistakesButton" class="report-action primary-report-action" type="button">
+          🔁 PRACTISE MISTAKES AGAIN
+        </button>
+        <button id="printReportButton" class="report-action" type="button">
+          🖨️ PRINT REPORT
+        </button>
+        <button id="saveReportButton" class="report-action" type="button">
+          📄 SAVE REPORT
+        </button>
+        <button id="newGameButton" class="report-action" type="button">
+          🎰 NEW GAME
         </button>
       </div>
     </section>
@@ -1373,10 +1885,27 @@
       const COINS_PER_ROUND = 100;
 
       const setupScreen = document.getElementById("setupScreen");
+      const playerNameInput = document.getElementById("playerNameInput");
+      const gameTitle = document.getElementById("gameTitle");
       const gameScreen = document.getElementById("gameScreen");
       const startGameButton = document.getElementById("startGameButton");
       const settingsButton = document.getElementById("settingsButton");
       const changeSettingsButton = document.getElementById("changeSettingsButton");
+      const parentReportButton = document.getElementById("parentReportButton");
+      const reportPanel = document.getElementById("reportPanel");
+      const reportTitle = document.getElementById("reportTitle");
+      const reportMeta = document.getElementById("reportMeta");
+      const summaryCards = document.getElementById("summaryCards");
+      const questionReportBody = document.getElementById("questionReportBody");
+      const operationReportBody = document.getElementById("operationReportBody");
+      const errorPatterns = document.getElementById("errorPatterns");
+      const practiceSuggestions = document.getElementById("practiceSuggestions");
+      const reviewQuestions = document.getElementById("reviewQuestions");
+      const closeReportButton = document.getElementById("closeReportButton");
+      const practiceMistakesButton = document.getElementById("practiceMistakesButton");
+      const printReportButton = document.getElementById("printReportButton");
+      const saveReportButton = document.getElementById("saveReportButton");
+      const newGameButton = document.getElementById("newGameButton");
       const setupError = document.getElementById("setupError");
       const operationInputs = [...document.querySelectorAll(".operation-input")];
       const levelInputs = [...document.querySelectorAll(".level-input")];
@@ -1407,6 +1936,7 @@
       const coinBurst = document.getElementById("coinBurst");
       const reels = [...document.querySelectorAll(".reel")];
 
+      let playerName = "Player";
       let totalRounds = 5;
       let selectedOperations = ["+", "−"];
       let numberLevel = "one-one";
@@ -1426,6 +1956,12 @@
       let leverStartY = 0;
       let leverPullDistance = 0;
       let suppressLeverClick = false;
+      let sessionLog = [];
+      let currentAttempts = [];
+      let gameStartedAt = null;
+      let gameFinishedAt = null;
+      let practiceQueue = null;
+      let isMistakePractice = false;
       let spinIntervals = [];
       let spinTimeouts = [];
       let nextRoundTimer = null;
@@ -1598,6 +2134,412 @@
           "one-two": "1 digit and 2 digits",
           "two-two": "2 digits and 2 digits"
         }[level];
+      }
+
+
+      function safeName(value) {
+        return value.trim().replace(/\s+/g, " ").slice(0, 24);
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function operationLabel(operator) {
+        return {
+          "+": "Addition",
+          "−": "Subtraction",
+          "×": "Multiplication",
+          "÷": "Division"
+        }[operator] || operator;
+      }
+
+      function formatDuration(milliseconds) {
+        const totalSeconds = Math.max(0, Math.round(milliseconds / 1000));
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+
+        if (minutes === 0) return `${seconds} seconds`;
+        return `${minutes} minute${minutes === 1 ? "" : "s"} ${seconds} second${seconds === 1 ? "" : "s"}`;
+      }
+
+      function questionTextFromRecord(record) {
+        return `${record.first} ${record.operator} ${record.second}`;
+      }
+
+      function createSessionRecord() {
+        sessionLog.push({
+          round,
+          first: currentFormula.first,
+          second: currentFormula.second,
+          operator: currentFormula.operator,
+          correctAnswer: currentFormula.answer,
+          attempts: [...currentAttempts],
+          wrongAnswers: currentAttempts.slice(0, -1),
+          firstTryCorrect: currentAttempts.length === 1
+        });
+      }
+
+      function getWrongQuestionRecords() {
+        return sessionLog.filter(record => record.wrongAnswers.length > 0);
+      }
+
+      function alternateOperationMatch(record, wrongAnswer) {
+        const { first, second, operator } = record;
+        const alternatives = [
+          { operator: "+", value: first + second },
+          { operator: "−", value: Math.abs(first - second) },
+          { operator: "×", value: first * second }
+        ];
+
+        if (second !== 0 && Number.isInteger(first / second)) {
+          alternatives.push({ operator: "÷", value: first / second });
+        }
+
+        return alternatives.find(
+          alternative => alternative.operator !== operator && alternative.value === wrongAnswer
+        );
+      }
+
+      function generateErrorPatterns() {
+        const wrongRecords = getWrongQuestionRecords();
+        const allWrongAnswers = wrongRecords.flatMap(record =>
+          record.wrongAnswers.map(answer => ({ record, answer }))
+        );
+
+        if (allWrongAnswers.length === 0) {
+          return [
+            `${playerName} answered every question correctly on the first attempt.`,
+            "No repeated error pattern appeared in this game."
+          ];
+        }
+
+        const patterns = [];
+        const oneAway = allWrongAnswers.filter(
+          item => Math.abs(item.answer - item.record.correctAnswer) === 1
+        );
+
+        if (oneAway.length > 0) {
+          patterns.push(
+            `${oneAway.length} wrong answer${oneAway.length === 1 ? " was" : "s were"} one above or below the correct answer. This may suggest a counting or checking slip.`
+          );
+        }
+
+        const operationConfusions = allWrongAnswers
+          .map(item => ({
+            ...item,
+            match: alternateOperationMatch(item.record, item.answer)
+          }))
+          .filter(item => item.match);
+
+        if (operationConfusions.length > 0) {
+          const examples = operationConfusions.slice(0, 2).map(item =>
+            `${questionTextFromRecord(item.record)} was answered as ${item.answer}, which matches ${operationLabel(item.match.operator).toLowerCase()}`
+          );
+          patterns.push(
+            `A possible operation-sign mix-up appeared: ${examples.join("; ")}.`
+          );
+        }
+
+        const byOperator = {};
+        wrongRecords.forEach(record => {
+          byOperator[record.operator] = (byOperator[record.operator] || 0) + record.wrongAnswers.length;
+        });
+
+        const weakestOperator = Object.entries(byOperator)
+          .sort((a, b) => b[1] - a[1])[0];
+
+        if (weakestOperator) {
+          patterns.push(
+            `${operationLabel(weakestOperator[0])} produced the most wrong attempts in this game (${weakestOperator[1]}).`
+          );
+        }
+
+        if (patterns.length === 0) {
+          patterns.push(
+            "The wrong answers were spread across different question types, with no clear repeated pattern in this game."
+          );
+        }
+
+        patterns.push(
+          "These observations are possible patterns only. Several games provide a more reliable picture than one session."
+        );
+        return patterns;
+      }
+
+      function generatePracticeSuggestions(operationStats) {
+        const suggestions = [];
+        const stats = Object.values(operationStats);
+
+        if (stats.length > 0) {
+          const weakest = [...stats].sort((a, b) => {
+            const accuracyA = a.firstTryCorrect / a.questions;
+            const accuracyB = b.firstTryCorrect / b.questions;
+            return accuracyA - accuracyB || b.wrongAttempts - a.wrongAttempts;
+          })[0];
+
+          if (weakest && weakest.firstTryCorrect < weakest.questions) {
+            suggestions.push(
+              `Focus first on ${operationLabel(weakest.operator).toLowerCase()}.`
+            );
+          }
+        }
+
+        const wrongRecords = getWrongQuestionRecords();
+        if (wrongRecords.length > 0) {
+          suggestions.push(
+            `Repeat the ${wrongRecords.length} question${wrongRecords.length === 1 ? "" : "s"} that needed another attempt.`
+          );
+          suggestions.push(
+            "Ask the player to explain the calculation aloud before entering the answer."
+          );
+
+          if (wrongRecords.some(record => record.operator === "÷")) {
+            suggestions.push("Connect division questions to the matching multiplication facts.");
+          }
+
+          if (wrongRecords.some(record => record.operator === "×")) {
+            suggestions.push("Use groups, arrays or repeated addition to support multiplication facts.");
+          }
+
+          if (wrongRecords.some(record => record.operator === "−")) {
+            suggestions.push("Use a number line or make-ten strategy for subtraction.");
+          }
+
+          if (wrongRecords.some(record => record.operator === "+")) {
+            suggestions.push("Practise making ten before adding the remaining amount.");
+          }
+        } else {
+          suggestions.push("Increase the number size, add another operation, or choose more rounds next time.");
+        }
+
+        return suggestions;
+      }
+
+      function buildOperationStats() {
+        const stats = {};
+
+        sessionLog.forEach(record => {
+          if (!stats[record.operator]) {
+            stats[record.operator] = {
+              operator: record.operator,
+              questions: 0,
+              firstTryCorrect: 0,
+              wrongAttempts: 0
+            };
+          }
+
+          stats[record.operator].questions += 1;
+          if (record.firstTryCorrect) stats[record.operator].firstTryCorrect += 1;
+          stats[record.operator].wrongAttempts += record.wrongAnswers.length;
+        });
+
+        return stats;
+      }
+
+      function buildReport() {
+        const totalQuestions = sessionLog.length;
+        const correctFirstTry = sessionLog.filter(record => record.firstTryCorrect).length;
+        const questionsNeedingAnotherTry = sessionLog.filter(
+          record => record.wrongAnswers.length > 0
+        ).length;
+        const totalWrongAttempts = sessionLog.reduce(
+          (sum, record) => sum + record.wrongAnswers.length,
+          0
+        );
+        const totalAttempts = sessionLog.reduce(
+          (sum, record) => sum + record.attempts.length,
+          0
+        );
+        const firstTryAccuracy = totalQuestions
+          ? Math.round((correctFirstTry / totalQuestions) * 100)
+          : 0;
+        const averageAttempts = totalQuestions
+          ? (totalAttempts / totalQuestions).toFixed(1)
+          : "0.0";
+        const duration = formatDuration(
+          Math.max(0, (gameFinishedAt || Date.now()) - (gameStartedAt || Date.now()))
+        );
+        const operationStats = buildOperationStats();
+        const operationsPractised = Object.keys(operationStats)
+          .map(operationLabel)
+          .join(", ");
+
+        reportTitle.textContent = `${playerName}'s Learning Report`;
+        reportMeta.textContent =
+          `${isMistakePractice ? "Mistake practice" : "Game"} • ${levelName(numberLevel)} • ${totalQuestions} rounds • ${duration}`;
+
+        const summaryItems = [
+          [totalQuestions, "Total questions"],
+          [correctFirstTry, "Correct on first attempt"],
+          [questionsNeedingAnotherTry, "Questions requiring another attempt"],
+          [totalWrongAttempts, "Total wrong attempts"],
+          [`${firstTryAccuracy}%`, "First-attempt accuracy"],
+          [averageAttempts, "Average attempts per question"],
+          [operationsPractised || "—", "Operations practised"],
+          [duration, "Playing time"]
+        ];
+
+        summaryCards.innerHTML = summaryItems.map(([value, label]) =>
+          `<div class="summary-card"><strong>${escapeHtml(value)}</strong><span>${escapeHtml(label)}</span></div>`
+        ).join("");
+
+        questionReportBody.innerHTML = sessionLog.map(record => {
+          const needsPractice = record.wrongAnswers.length > 0;
+          const answerPath = record.attempts.join(" → ");
+          const performance = record.firstTryCorrect
+            ? "Correct on first attempt"
+            : `${record.wrongAnswers.length} wrong attempt${record.wrongAnswers.length === 1 ? "" : "s"}`;
+
+          return `
+            <tr class="${needsPractice ? "needs-practice" : ""}">
+              <td>${record.round}</td>
+              <td><strong>${escapeHtml(questionTextFromRecord(record))}</strong></td>
+              <td>${escapeHtml(answerPath)}</td>
+              <td>${record.correctAnswer}</td>
+              <td class="${needsPractice ? "result-practice" : "result-good"}">${performance}</td>
+            </tr>
+          `;
+        }).join("");
+
+        operationReportBody.innerHTML = Object.values(operationStats).map(stat => {
+          const accuracy = Math.round((stat.firstTryCorrect / stat.questions) * 100);
+          return `
+            <tr>
+              <td><strong>${escapeHtml(operationLabel(stat.operator))} (${stat.operator})</strong></td>
+              <td>${stat.questions}</td>
+              <td>${stat.firstTryCorrect}</td>
+              <td>${stat.wrongAttempts}</td>
+              <td>${accuracy}%</td>
+            </tr>
+          `;
+        }).join("");
+
+        errorPatterns.innerHTML =
+          `<ul>${generateErrorPatterns().map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+
+        practiceSuggestions.innerHTML =
+          `<ul>${generatePracticeSuggestions(operationStats).map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+
+        const wrongRecords = getWrongQuestionRecords();
+        reviewQuestions.innerHTML = wrongRecords.length
+          ? wrongRecords.map(record =>
+              `<span class="review-chip">${escapeHtml(questionTextFromRecord(record))} = ${record.correctAnswer}</span>`
+            ).join("")
+          : '<span class="review-chip perfect-chip">Excellent — no questions need reviewing from this game.</span>';
+
+        practiceMistakesButton.disabled = wrongRecords.length === 0;
+      }
+
+      function showReport() {
+        buildReport();
+        winnerPanel.classList.remove("show");
+        reportPanel.hidden = false;
+        reportPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function hideReport() {
+        reportPanel.hidden = true;
+        winnerPanel.classList.add("show");
+        winnerPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function createReportText() {
+        const totalQuestions = sessionLog.length;
+        const correctFirstTry = sessionLog.filter(record => record.firstTryCorrect).length;
+        const wrongQuestions = getWrongQuestionRecords().length;
+        const wrongAttempts = sessionLog.reduce(
+          (sum, record) => sum + record.wrongAnswers.length,
+          0
+        );
+        const duration = formatDuration(
+          Math.max(0, (gameFinishedAt || Date.now()) - (gameStartedAt || Date.now()))
+        );
+        const accuracy = totalQuestions
+          ? Math.round((correctFirstTry / totalQuestions) * 100)
+          : 0;
+
+        const lines = [
+          "PARENT LEARNING REPORT",
+          "======================",
+          `Player: ${playerName}`,
+          `Game type: ${isMistakePractice ? "Mistake practice" : "Main game"}`,
+          `Number level: ${levelName(numberLevel)}`,
+          `Playing time: ${duration}`,
+          "",
+          "OVERALL SUMMARY",
+          `Total questions: ${totalQuestions}`,
+          `Correct on first attempt: ${correctFirstTry}`,
+          `Questions requiring another attempt: ${wrongQuestions}`,
+          `Total wrong attempts: ${wrongAttempts}`,
+          `First-attempt accuracy: ${accuracy}%`,
+          "",
+          "QUESTION-BY-QUESTION RESULTS"
+        ];
+
+        sessionLog.forEach(record => {
+          lines.push(
+            `Round ${record.round}: ${questionTextFromRecord(record)} = ${record.correctAnswer}`,
+            `  Answers entered: ${record.attempts.join(" -> ")}`,
+            `  Result: ${record.firstTryCorrect ? "Correct on first attempt" : `${record.wrongAnswers.length} wrong attempt(s)`}`
+          );
+        });
+
+        lines.push("", "POSSIBLE ERROR PATTERNS");
+        generateErrorPatterns().forEach(item => lines.push(`- ${item}`));
+
+        lines.push("", "SUGGESTED NEXT PRACTICE");
+        generatePracticeSuggestions(buildOperationStats()).forEach(item => lines.push(`- ${item}`));
+
+        return lines.join("\n");
+      }
+
+      function saveReport() {
+        const blob = new Blob([createReportText()], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        const filenameName = playerName.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "player";
+        link.href = url;
+        link.download = `${filenameName}-number-jackpot-report.txt`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function startMistakePractice() {
+        const wrongRecords = getWrongQuestionRecords();
+        if (wrongRecords.length === 0) return;
+
+        practiceQueue = wrongRecords.map(record => ({
+          first: record.first,
+          second: record.second,
+          operator: record.operator,
+          answer: record.correctAnswer
+        }));
+
+        totalRounds = practiceQueue.length;
+        selectedOperations = [...new Set(practiceQueue.map(question => question.operator))];
+        isMistakePractice = true;
+        resetGameState({ preservePracticeQueue: true });
+        reportPanel.hidden = true;
+        winnerPanel.classList.remove("show");
+
+        gameSummary.textContent =
+          `Player: ${playerName} • Mistake Practice • Questions: ${totalRounds}`;
+        subtitle.textContent = `${playerName}, practise the questions again!`;
+        gameTitle.textContent = `${playerName}'s Number Jackpot`;
+        startBackgroundMusic();
+        speak(
+          `${playerName}, let's practise the questions again. Pull the lever to start.`
+        );
+        leverButton.focus();
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       function getBritishVoice() {
@@ -1834,8 +2776,11 @@
         leverPrompt.textContent = "🎰 The reels are spinning...";
         leverPrompt.classList.add("spinning");
 
-        currentFormula = createQuestion();
+        currentFormula = practiceQueue && practiceQueue.length > 0
+          ? practiceQueue.shift()
+          : createQuestion();
         currentAnswer = currentFormula.answer;
+        currentAttempts = [];
 
         startBackgroundMusic();
         speak(`Round ${round}. Here we go!`);
@@ -1908,10 +2853,12 @@
         }
 
         const playerAnswer = Number(rawAnswer);
+        currentAttempts.push(playerAnswer);
 
         if (playerAnswer === currentAnswer) {
+          createSessionRecord();
           coins += COINS_PER_ROUND;
-          messageEl.textContent = `Brilliant! You earned ${COINS_PER_ROUND} coins!`;
+          messageEl.textContent = `Brilliant, ${playerName}! You got it!`;
           messageEl.className = "message good";
           playCorrectSound();
 
@@ -1922,13 +2869,14 @@
           answerButton.disabled = true;
 
           if (round >= totalRounds) {
+            gameFinishedAt = Date.now();
             speak(
-              `Brilliant! You solved all ${totalRounds} rounds. Jackpot! You won ${coins} coins!`
+              `Brilliant, ${playerName}! You solved all ${totalRounds} rounds. Jackpot!`
             );
             nextRoundTimer = window.setTimeout(showWinner, 800);
           } else {
             speak(
-              `Brilliant! That is correct. You earned ${COINS_PER_ROUND} coins. Get ready for round ${round + 1}.`
+              `Brilliant, ${playerName}! That is correct. Get ready for round ${round + 1}.`
             );
 
             nextRoundTimer = window.setTimeout(() => {
@@ -1936,6 +2884,7 @@
               round += 1;
               currentAnswer = null;
               currentFormula = null;
+              currentAttempts = [];
               updateStatus();
 
               answerInput.disabled = false;
@@ -1956,7 +2905,7 @@
           messageEl.textContent = "Not quite. Have another try — the round stays here!";
           messageEl.className = "message try";
           playWrongSound();
-          speak("Not quite. Have another try. You can do it!");
+          speak(`Not quite, ${playerName}. Have another try. You can do it!`);
           answerInput.select();
           answerInput.focus();
         }
@@ -1987,7 +2936,7 @@
         leverPrompt.textContent = "🏆 You hit the jackpot!";
         leverPrompt.classList.remove("spinning");
         winnerText.innerHTML =
-          `You solved all <strong>${totalRounds} rounds</strong> and won <strong>${coins} coins!</strong>`;
+          `Brilliant, <strong>${escapeHtml(playerName)}</strong>! You completed all <strong>${totalRounds} rounds</strong>!`;
         winnerPanel.classList.add("show");
         showerCoins(Math.min(120, 55 + totalRounds * 3));
         updateStatus();
@@ -1999,12 +2948,20 @@
         });
       }
 
-      function resetGameState() {
+      function resetGameState(options = {}) {
         if ("speechSynthesis" in window) window.speechSynthesis.cancel();
         clearGameTimers();
 
         round = 1;
         coins = 0;
+        sessionLog = [];
+        currentAttempts = [];
+        gameStartedAt = Date.now();
+        gameFinishedAt = null;
+        if (!options.preservePracticeQueue) {
+          practiceQueue = null;
+          isMistakePractice = false;
+        }
         currentAnswer = null;
         currentFormula = null;
         isSpinning = false;
@@ -2019,6 +2976,7 @@
         answerButton.disabled = false;
         answerArea.classList.remove("show");
         winnerPanel.classList.remove("show");
+        reportPanel.hidden = true;
         messageEl.textContent = "";
         messageEl.className = "message";
         leverPrompt.textContent = "⬇️ Pull the lever to start!";
@@ -2034,13 +2992,18 @@
       }
 
       function playAgain() {
+        practiceQueue = null;
+        isMistakePractice = false;
         resetGameState();
+        gameSummary.textContent =
+          `Player: ${playerName} • Operations: ${selectedOperations.join("  ")} • Numbers: ${levelName(numberLevel)} • Rounds: ${totalRounds}`;
         startBackgroundMusic();
-        speak(`Let's play again. Pull the lever for round one!`);
+        speak(`${playerName}, let's play again. Pull the lever for round one!`);
         leverButton.focus();
       }
 
       function readSettings() {
+        playerName = safeName(playerNameInput.value);
         selectedOperations = operationInputs
           .filter(input => input.checked)
           .map(input => input.value);
@@ -2052,6 +3015,12 @@
 
       function beginConfiguredGame() {
         readSettings();
+
+        if (!playerName) {
+          setupError.textContent = "Please enter the player’s name.";
+          playerNameInput.focus();
+          return;
+        }
 
         if (selectedOperations.length === 0) {
           setupError.textContent = "Please choose at least one operation.";
@@ -2065,13 +3034,14 @@
         gameScreen.hidden = false;
 
         const operationsText = selectedOperations.join("  ");
+        gameTitle.textContent = `${playerName}'s Number Jackpot`;
         gameSummary.textContent =
-          `Operations: ${operationsText}  •  Numbers: ${levelName(numberLevel)}  •  Rounds: ${totalRounds}`;
-        subtitle.textContent = `Pull, spin and solve ${totalRounds} rounds!`;
+          `Player: ${playerName} • Operations: ${operationsText} • Numbers: ${levelName(numberLevel)} • Rounds: ${totalRounds}`;
+        subtitle.textContent = `${playerName}, pull, spin and solve ${totalRounds} rounds!`;
 
         startBackgroundMusic();
         speak(
-          `Your game is ready with ${totalRounds} rounds. Pull the red lever to start round one!`
+          `${playerName}, your game is ready with ${totalRounds} rounds. Pull the red lever to start round one!`
         );
         leverButton.focus();
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -2086,6 +3056,7 @@
         gameScreen.hidden = true;
         setupScreen.hidden = false;
         subtitle.textContent = "Parents choose the maths challenge!";
+        gameTitle.textContent = "Number Jackpot";
         setupError.textContent = "";
         setupScreen.scrollIntoView({ behavior: "smooth", block: "start" });
       }
@@ -2117,6 +3088,17 @@
         );
         soundButton.title = soundOn ? "Sound and music on" : "Sound and music off";
       }
+
+      parentReportButton.addEventListener("click", showReport);
+      closeReportButton.addEventListener("click", hideReport);
+      practiceMistakesButton.addEventListener("click", startMistakePractice);
+      printReportButton.addEventListener("click", () => window.print());
+      saveReportButton.addEventListener("click", saveReport);
+      newGameButton.addEventListener("click", showSettings);
+
+      playerNameInput.addEventListener("input", () => {
+        if (safeName(playerNameInput.value)) setupError.textContent = "";
+      });
 
       startGameButton.addEventListener("click", beginConfiguredGame);
       settingsButton.addEventListener("click", showSettings);
