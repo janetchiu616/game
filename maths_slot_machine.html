@@ -803,6 +803,327 @@
       }
     }
 
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .setup-panel {
+      max-width: 820px;
+      margin: 18px auto 34px;
+      padding: clamp(20px, 4vw, 34px);
+      border: 5px solid var(--navy);
+      border-radius: 34px;
+      background:
+        radial-gradient(circle at 8% 8%, rgba(255,255,255,.95) 0 2%, transparent 2.4%),
+        radial-gradient(circle at 92% 14%, rgba(255,255,255,.8) 0 1.7%, transparent 2.1%),
+        linear-gradient(145deg, rgba(255,255,255,.97), rgba(255,247,214,.97));
+      box-shadow: 0 14px 0 rgba(23,37,84,.18), 0 24px 35px rgba(23,37,84,.18);
+    }
+
+    .setup-heading {
+      margin: 0;
+      text-align: center;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      color: var(--purple);
+      text-shadow: 0 3px 0 #ddd6fe;
+    }
+
+    .setup-intro {
+      margin: 8px auto 22px;
+      max-width: 650px;
+      text-align: center;
+      font-weight: 800;
+      line-height: 1.5;
+      color: #475569;
+    }
+
+    .setup-group {
+      margin: 18px 0;
+      padding: 18px;
+      border: 3px solid #93c5fd;
+      border-radius: 24px;
+      background: rgba(239,246,255,.82);
+    }
+
+    .setup-group legend {
+      padding: 0 10px;
+      font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+      font-weight: 1000;
+      color: var(--navy);
+    }
+
+    .setup-hint {
+      margin: -3px 0 14px;
+      text-align: center;
+      font-size: .92rem;
+      font-weight: 800;
+      color: #64748b;
+    }
+
+    .operation-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 11px;
+    }
+
+    .choice-input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .operation-card,
+    .level-card {
+      display: grid;
+      place-items: center;
+      min-height: 86px;
+      padding: 12px;
+      border: 4px solid #94a3b8;
+      border-radius: 21px;
+      background: white;
+      text-align: center;
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 6px 0 rgba(23,37,84,.16);
+      transition: transform .15s, border-color .15s, background .15s, box-shadow .15s;
+      user-select: none;
+    }
+
+    .operation-card:hover,
+    .level-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .choice-input:focus-visible + .operation-card,
+    .choice-input:focus-visible + .level-card {
+      outline: 5px solid rgba(139,92,246,.28);
+      outline-offset: 3px;
+    }
+
+    .choice-input:checked + .operation-card,
+    .choice-input:checked + .level-card {
+      border-color: var(--purple);
+      background: #ede9fe;
+      box-shadow: 0 7px 0 #8b5cf6;
+      transform: translateY(-2px);
+    }
+
+    .operation-symbol {
+      display: block;
+      font-size: clamp(2.2rem, 6vw, 3.5rem);
+      line-height: 1;
+    }
+
+    .operation-name {
+      display: block;
+      margin-top: 5px;
+      font-size: .88rem;
+    }
+
+    .level-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .level-card {
+      min-height: 116px;
+      align-content: center;
+      line-height: 1.35;
+    }
+
+    .level-card strong {
+      display: block;
+      font-size: clamp(1rem, 2.3vw, 1.25rem);
+    }
+
+    .level-card small {
+      display: block;
+      margin-top: 7px;
+      color: #64748b;
+      font-size: .84rem;
+    }
+
+    .round-picker {
+      display: grid;
+      grid-template-columns: auto minmax(120px, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      max-width: 570px;
+      margin: 4px auto 0;
+    }
+
+    .round-step-button {
+      width: 52px;
+      height: 52px;
+      border: 4px solid var(--navy);
+      border-radius: 17px;
+      background: var(--yellow);
+      color: var(--navy);
+      font-size: 1.8rem;
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #ca8a04;
+    }
+
+    .round-step-button:active {
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #ca8a04;
+    }
+
+    .round-slider-wrap {
+      text-align: center;
+    }
+
+    .round-output {
+      display: inline-block;
+      min-width: 118px;
+      margin-bottom: 10px;
+      padding: 7px 15px;
+      border: 3px solid var(--navy);
+      border-radius: 999px;
+      background: white;
+      font-size: 1.15rem;
+      font-weight: 1000;
+    }
+
+    #roundSlider {
+      width: 100%;
+      accent-color: var(--purple);
+      cursor: pointer;
+    }
+
+    .setup-error {
+      min-height: 25px;
+      margin: 12px 0 0;
+      text-align: center;
+      color: #b91c1c;
+      font-weight: 1000;
+    }
+
+    .start-game-button {
+      display: block;
+      width: min(390px, 100%);
+      margin: 12px auto 0;
+      padding: 16px 22px;
+      border: 4px solid var(--navy);
+      border-radius: 22px;
+      background: var(--green);
+      color: #052e16;
+      font-size: clamp(1.25rem, 3vw, 1.65rem);
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 9px 0 #15803d;
+      transition: transform .15s, filter .15s;
+    }
+
+    .start-game-button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.04);
+    }
+
+    .start-game-button:active {
+      transform: translateY(4px);
+      box-shadow: 0 4px 0 #15803d;
+    }
+
+    .game-toolbar {
+      display: flex;
+      justify-content: center;
+      margin: 5px 0 12px;
+    }
+
+    .settings-button {
+      padding: 8px 15px;
+      border: 3px solid var(--navy);
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      color: var(--navy);
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 5px 0 rgba(23,37,84,.18);
+    }
+
+    .settings-button:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 rgba(23,37,84,.18);
+    }
+
+    .settings-button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .game-summary {
+      max-width: 760px;
+      margin: 0 auto 14px;
+      padding: 9px 14px;
+      border: 3px solid var(--navy);
+      border-radius: 17px;
+      background: rgba(255,255,255,.86);
+      text-align: center;
+      font-size: .92rem;
+      font-weight: 900;
+    }
+
+    .round-dots {
+      flex-wrap: wrap;
+      max-width: 220px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .reel.two-digit span {
+      font-size: clamp(3.3rem, 9vw, 6.1rem);
+    }
+
+    .winner-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 11px;
+    }
+
+    .secondary-winner-button {
+      padding: 13px 20px;
+      border: 4px solid var(--navy);
+      border-radius: 22px;
+      background: white;
+      color: var(--navy);
+      font-size: 1.05rem;
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 7px 0 rgba(23,37,84,.22);
+    }
+
+    @media (max-width: 620px) {
+      .operation-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .level-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .level-card {
+        min-height: 88px;
+      }
+
+      .setup-group {
+        padding: 14px 11px;
+      }
+
+      .round-picker {
+        gap: 8px;
+      }
+
+      .round-step-button {
+        width: 46px;
+        height: 46px;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *,
       *::before,
@@ -823,12 +1144,119 @@
     <header class="top-bar">
       <div class="title-wrap">
         <h1>Howie's Number Jackpot</h1>
-        <p class="subtitle">Pull, spin, solve and win five rounds!</p>
+        <p id="subtitle" class="subtitle">Parents choose the maths challenge!</p>
       </div>
       <button id="soundButton" class="sound-button" type="button" aria-label="Turn sound and music off" title="Sound and music on">
         🔊
       </button>
     </header>
+
+
+    <section id="setupScreen" class="setup-panel" aria-labelledby="setupHeading">
+      <h2 id="setupHeading" class="setup-heading">👨‍👩‍👧 Parent Setup</h2>
+      <p class="setup-intro">
+        Choose the maths skills, number size and number of rounds before the child starts playing.
+      </p>
+
+      <fieldset class="setup-group">
+        <legend>1. Choose one or more operations</legend>
+        <p class="setup-hint">You may select several operations for a mixed challenge.</p>
+        <div class="operation-grid">
+          <div>
+            <input class="choice-input operation-input" type="checkbox" id="opAdd" value="+" checked>
+            <label class="operation-card" for="opAdd">
+              <span>
+                <span class="operation-symbol">+</span>
+                <span class="operation-name">Addition</span>
+              </span>
+            </label>
+          </div>
+          <div>
+            <input class="choice-input operation-input" type="checkbox" id="opSubtract" value="−" checked>
+            <label class="operation-card" for="opSubtract">
+              <span>
+                <span class="operation-symbol">−</span>
+                <span class="operation-name">Subtraction</span>
+              </span>
+            </label>
+          </div>
+          <div>
+            <input class="choice-input operation-input" type="checkbox" id="opMultiply" value="×">
+            <label class="operation-card" for="opMultiply">
+              <span>
+                <span class="operation-symbol">×</span>
+                <span class="operation-name">Multiplication</span>
+              </span>
+            </label>
+          </div>
+          <div>
+            <input class="choice-input operation-input" type="checkbox" id="opDivide" value="÷">
+            <label class="operation-card" for="opDivide">
+              <span>
+                <span class="operation-symbol">÷</span>
+                <span class="operation-name">Division</span>
+              </span>
+            </label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="setup-group">
+        <legend>2. Choose the number size</legend>
+        <div class="level-grid">
+          <div>
+            <input class="choice-input level-input" type="radio" name="numberLevel" id="levelOne" value="one-one" checked>
+            <label class="level-card" for="levelOne">
+              <span>
+                <strong>1 digit only</strong>
+                <small>Example: 7 + 2</small>
+              </span>
+            </label>
+          </div>
+          <div>
+            <input class="choice-input level-input" type="radio" name="numberLevel" id="levelMixed" value="one-two">
+            <label class="level-card" for="levelMixed">
+              <span>
+                <strong>1 digit &amp; 2 digits</strong>
+                <small>Example: 8 + 24</small>
+              </span>
+            </label>
+          </div>
+          <div>
+            <input class="choice-input level-input" type="radio" name="numberLevel" id="levelTwo" value="two-two">
+            <label class="level-card" for="levelTwo">
+              <span>
+                <strong>2 digits &amp; 2 digits</strong>
+                <small>Example: 36 + 48</small>
+              </span>
+            </label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="setup-group">
+        <legend>3. Choose the number of rounds</legend>
+        <div class="round-picker">
+          <button id="roundMinus" class="round-step-button" type="button" aria-label="Reduce rounds">−</button>
+          <div class="round-slider-wrap">
+            <output id="roundOutput" class="round-output" for="roundSlider">5 rounds</output>
+            <input id="roundSlider" type="range" min="5" max="20" value="5" step="1" aria-label="Number of rounds">
+          </div>
+          <button id="roundPlus" class="round-step-button" type="button" aria-label="Increase rounds">+</button>
+        </div>
+      </fieldset>
+
+      <p id="setupError" class="setup-error" role="alert"></p>
+      <button id="startGameButton" class="start-game-button" type="button">
+        🎰 START MY GAME
+      </button>
+    </section>
+
+    <div id="gameScreen" hidden>
+      <div class="game-toolbar">
+        <button id="settingsButton" class="settings-button" type="button">⚙️ Parent Settings</button>
+      </div>
+      <p id="gameSummary" class="game-summary"></p>
 
     <section class="status-row" aria-label="Game progress">
       <div class="status-card">
@@ -838,13 +1266,7 @@
 
       <div class="status-card">
         <span class="status-label">Progress</span>
-        <div class="round-dots" aria-label="Completed rounds">
-          <span class="dot" data-round="1"></span>
-          <span class="dot" data-round="2"></span>
-          <span class="dot" data-round="3"></span>
-          <span class="dot" data-round="4"></span>
-          <span class="dot" data-round="5"></span>
-        </div>
+        <div id="roundDots" class="round-dots" aria-label="Completed rounds"></div>
       </div>
 
       <div class="status-card">
@@ -907,7 +1329,7 @@
               type="text"
               inputmode="numeric"
               pattern="[0-9]*"
-              maxlength="2"
+              maxlength="4"
               autocomplete="off"
               placeholder="Type a number"
               aria-describedby="message"
@@ -924,16 +1346,22 @@
     <section id="winnerPanel" class="winner-panel" aria-live="assertive">
       <p class="trophy" aria-hidden="true">🏆</p>
       <h2>JACKPOT!</h2>
-      <p>You solved all five rounds and won <strong>500 coins!</strong></p>
-      <button id="playAgainButton" class="play-again-button" type="button">
-        PLAY AGAIN
-      </button>
+      <p id="winnerText">You solved every round and won the jackpot!</p>
+      <div class="winner-actions">
+        <button id="playAgainButton" class="play-again-button" type="button">
+          PLAY AGAIN
+        </button>
+        <button id="changeSettingsButton" class="secondary-winner-button" type="button">
+          CHANGE SETTINGS
+        </button>
+      </div>
     </section>
 
     <p class="help-text">
       Pull the <strong>red lever</strong>, watch the reels spin, work out the maths, then type the answer.
       A wrong answer keeps the same question on screen so you can try again.
     </p>
+    </div>
   </main>
 
   <div id="coinBurst" class="coin-burst" aria-hidden="true"></div>
@@ -942,8 +1370,22 @@
     (() => {
       "use strict";
 
-      const TOTAL_ROUNDS = 5;
       const COINS_PER_ROUND = 100;
+
+      const setupScreen = document.getElementById("setupScreen");
+      const gameScreen = document.getElementById("gameScreen");
+      const startGameButton = document.getElementById("startGameButton");
+      const settingsButton = document.getElementById("settingsButton");
+      const changeSettingsButton = document.getElementById("changeSettingsButton");
+      const setupError = document.getElementById("setupError");
+      const operationInputs = [...document.querySelectorAll(".operation-input")];
+      const levelInputs = [...document.querySelectorAll(".level-input")];
+      const roundSlider = document.getElementById("roundSlider");
+      const roundOutput = document.getElementById("roundOutput");
+      const roundMinus = document.getElementById("roundMinus");
+      const roundPlus = document.getElementById("roundPlus");
+      const subtitle = document.getElementById("subtitle");
+      const gameSummary = document.getElementById("gameSummary");
 
       const firstNumberEl = document.getElementById("firstNumber");
       const operatorEl = document.getElementById("operator");
@@ -957,13 +1399,18 @@
       const questionText = document.getElementById("questionText");
       const roundValue = document.getElementById("roundValue");
       const coinValue = document.getElementById("coinValue");
+      const roundDots = document.getElementById("roundDots");
       const soundButton = document.getElementById("soundButton");
       const winnerPanel = document.getElementById("winnerPanel");
+      const winnerText = document.getElementById("winnerText");
       const playAgainButton = document.getElementById("playAgainButton");
       const coinBurst = document.getElementById("coinBurst");
       const reels = [...document.querySelectorAll(".reel")];
-      const dots = [...document.querySelectorAll(".dot")];
 
+      let totalRounds = 5;
+      let selectedOperations = ["+", "−"];
+      let numberLevel = "one-one";
+      let operationBag = [];
       let round = 1;
       let coins = 0;
       let currentAnswer = null;
@@ -979,27 +1426,135 @@
       let leverStartY = 0;
       let leverPullDistance = 0;
       let suppressLeverClick = false;
+      let spinIntervals = [];
+      let spinTimeouts = [];
+      let nextRoundTimer = null;
 
-      function randomDigit() {
-        return Math.floor(Math.random() * 10);
+      function randomInteger(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function shuffle(items) {
+        const copy = [...items];
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function refillOperationBag() {
+        operationBag = shuffle(selectedOperations);
       }
 
       function chooseOperator() {
-        return Math.random() < 0.5 ? "+" : "−";
+        if (operationBag.length === 0) refillOperationBag();
+        return operationBag.pop();
+      }
+
+      function oneDigit() {
+        return randomInteger(0, 9);
+      }
+
+      function nonZeroOneDigit() {
+        return randomInteger(1, 9);
+      }
+
+      function twoDigit() {
+        return randomInteger(10, 99);
+      }
+
+      function createDivisionQuestion(level) {
+        if (level === "one-one") {
+          let divisor;
+          let quotient;
+          let dividend;
+
+          do {
+            divisor = nonZeroOneDigit();
+            quotient = randomInteger(0, 9);
+            dividend = divisor * quotient;
+          } while (dividend > 9);
+
+          return { first: dividend, second: divisor, operator: "÷", answer: quotient };
+        }
+
+        if (level === "one-two") {
+          const divisor = nonZeroOneDigit();
+          const minQuotient = Math.ceil(10 / divisor);
+          const maxQuotient = Math.floor(99 / divisor);
+          const quotient = randomInteger(minQuotient, Math.max(minQuotient, maxQuotient));
+          const dividend = divisor * quotient;
+          return { first: dividend, second: divisor, operator: "÷", answer: quotient };
+        }
+
+        // Both displayed numbers stay two-digit and the answer is a whole number.
+        const divisor = randomInteger(10, 49);
+        const maxQuotient = Math.floor(99 / divisor);
+        const quotient = randomInteger(2, Math.max(2, maxQuotient));
+        const dividend = divisor * quotient;
+        return { first: dividend, second: divisor, operator: "÷", answer: quotient };
       }
 
       function createQuestion() {
-        let first = randomDigit();
-        let second = randomDigit();
         const operator = chooseOperator();
 
-        // Keep subtraction answers at zero or above for young learners.
+        if (operator === "÷") {
+          return createDivisionQuestion(numberLevel);
+        }
+
+        let first;
+        let second;
+
+        if (numberLevel === "one-one") {
+          first = oneDigit();
+          second = oneDigit();
+        } else if (numberLevel === "one-two") {
+          const small = oneDigit();
+          const large = twoDigit();
+
+          if (operator === "−") {
+            first = large;
+            second = small;
+          } else if (Math.random() < 0.5) {
+            first = small;
+            second = large;
+          } else {
+            first = large;
+            second = small;
+          }
+        } else {
+          first = twoDigit();
+          second = twoDigit();
+        }
+
         if (operator === "−" && second > first) {
           [first, second] = [second, first];
         }
 
-        const answer = operator === "+" ? first + second : first - second;
+        let answer;
+        if (operator === "+") answer = first + second;
+        else if (operator === "−") answer = first - second;
+        else answer = first * second;
+
         return { first, second, operator, answer };
+      }
+
+      function operatorName(operator) {
+        return {
+          "+": "plus",
+          "−": "minus",
+          "×": "times",
+          "÷": "divided by"
+        }[operator] || operator;
+      }
+
+      function levelName(level) {
+        return {
+          "one-one": "1 digit only",
+          "one-two": "1 digit and 2 digits",
+          "two-two": "2 digits and 2 digits"
+        }[level];
       }
 
       function getBritishVoice() {
@@ -1036,20 +1591,14 @@
       function speak(text, interrupt = true) {
         if (!soundOn || !("speechSynthesis" in window)) return;
 
-        if (interrupt) {
-          window.speechSynthesis.cancel();
-        }
+        if (interrupt) window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = "en-GB";
         utterance.rate = 0.88;
         utterance.pitch = 1.08;
         utterance.volume = 1;
-
-        if (ukVoice) {
-          utterance.voice = ukVoice;
-        }
-
+        if (ukVoice) utterance.voice = ukVoice;
         window.speechSynthesis.speak(utterance);
       }
 
@@ -1067,10 +1616,7 @@
             masterGain.connect(audioContext.destination);
           }
 
-          if (audioContext.state === "suspended") {
-            audioContext.resume();
-          }
-
+          if (audioContext.state === "suspended") audioContext.resume();
           return audioContext;
         } catch (error) {
           return null;
@@ -1154,26 +1700,68 @@
         window.setTimeout(() => makeBeep(175, 0.22, "triangle", 0.06), 130);
       }
 
-      function updateStatus() {
-        roundValue.textContent = `${Math.min(round, TOTAL_ROUNDS)} / ${TOTAL_ROUNDS}`;
-        coinValue.textContent = `${coins} 🪙`;
+      function buildRoundDots() {
+        roundDots.innerHTML = "";
+        for (let i = 1; i <= totalRounds; i += 1) {
+          const dot = document.createElement("span");
+          dot.className = "dot";
+          dot.dataset.round = String(i);
+          roundDots.appendChild(dot);
+        }
+      }
 
-        dots.forEach((dot, index) => {
+      function getDots() {
+        return [...roundDots.querySelectorAll(".dot")];
+      }
+
+      function updateStatus() {
+        roundValue.textContent = `${Math.min(round, totalRounds)} / ${totalRounds}`;
+        coinValue.textContent = `${coins} 🪙`;
+        getDots().forEach((dot, index) => {
           dot.classList.toggle("complete", index < round - 1);
         });
       }
 
+      function updateReelSizeClasses() {
+        const firstIsTwoDigit = Number(firstNumberEl.textContent) >= 10;
+        const secondIsTwoDigit = Number(secondNumberEl.textContent) >= 10;
+        reels[0].classList.toggle("two-digit", firstIsTwoDigit);
+        reels[2].classList.toggle("two-digit", secondIsTwoDigit);
+      }
+
+      function randomValueForReel(index) {
+        if (index === 1) {
+          return selectedOperations[randomInteger(0, selectedOperations.length - 1)];
+        }
+
+        if (numberLevel === "one-one") return oneDigit();
+        if (numberLevel === "two-two") return twoDigit();
+
+        // During the animation, show a lively mixture of one- and two-digit values.
+        return Math.random() < 0.5 ? oneDigit() : twoDigit();
+      }
+
       function setReelValue(index) {
-        if (index === 0) {
-          firstNumberEl.textContent = randomDigit();
-        } else if (index === 1) {
-          operatorEl.textContent = Math.random() < 0.5 ? "+" : "−";
-        } else {
-          secondNumberEl.textContent = randomDigit();
+        if (index === 0) firstNumberEl.textContent = randomValueForReel(0);
+        else if (index === 1) operatorEl.textContent = randomValueForReel(1);
+        else secondNumberEl.textContent = randomValueForReel(2);
+        updateReelSizeClasses();
+      }
+
+      function clearGameTimers() {
+        spinIntervals.forEach(timer => window.clearInterval(timer));
+        spinTimeouts.forEach(timer => window.clearTimeout(timer));
+        spinIntervals = [];
+        spinTimeouts = [];
+
+        if (nextRoundTimer !== null) {
+          window.clearTimeout(nextRoundTimer);
+          nextRoundTimer = null;
         }
       }
 
       function finishSpin() {
+        settingsButton.disabled = false;
         questionText.textContent =
           `What is ${currentFormula.first} ${currentFormula.operator} ${currentFormula.second}?`;
 
@@ -1183,9 +1771,8 @@
         leverPrompt.classList.remove("spinning");
         isSpinning = false;
 
-        const spokenOperator = currentFormula.operator === "+" ? "plus" : "minus";
         speak(
-          `${currentFormula.first} ${spokenOperator} ${currentFormula.second}. What is the answer?`
+          `${currentFormula.first} ${operatorName(currentFormula.operator)} ${currentFormula.second}. What is the answer?`
         );
 
         window.setTimeout(() => answerInput.focus(), 120);
@@ -1196,6 +1783,7 @@
 
         isSpinning = true;
         leverButton.disabled = true;
+        settingsButton.disabled = true;
         answerArea.classList.remove("show");
         messageEl.textContent = "";
         messageEl.className = "message";
@@ -1210,7 +1798,7 @@
         speak(`Round ${round}. Here we go!`);
         makeBeep(330, 0.12, "square", 0.04);
 
-        const intervals = [
+        spinIntervals = [
           window.setInterval(() => setReelValue(0), 68),
           window.setInterval(() => setReelValue(1), 82),
           window.setInterval(() => setReelValue(2), 74)
@@ -1218,28 +1806,29 @@
 
         reels.forEach(reel => reel.classList.add("spinning"));
 
-        // Stop each reel separately, like a real slot machine.
-        window.setTimeout(() => {
-          window.clearInterval(intervals[0]);
+        spinTimeouts.push(window.setTimeout(() => {
+          window.clearInterval(spinIntervals[0]);
           firstNumberEl.textContent = currentFormula.first;
           reels[0].classList.remove("spinning");
+          updateReelSizeClasses();
           makeBeep(392, 0.09, "square", 0.035);
-        }, 2350);
+        }, 2350));
 
-        window.setTimeout(() => {
-          window.clearInterval(intervals[1]);
+        spinTimeouts.push(window.setTimeout(() => {
+          window.clearInterval(spinIntervals[1]);
           operatorEl.textContent = currentFormula.operator;
           reels[1].classList.remove("spinning");
           makeBeep(494, 0.09, "square", 0.035);
-        }, 2675);
+        }, 2675));
 
-        window.setTimeout(() => {
-          window.clearInterval(intervals[2]);
+        spinTimeouts.push(window.setTimeout(() => {
+          window.clearInterval(spinIntervals[2]);
           secondNumberEl.textContent = currentFormula.second;
           reels[2].classList.remove("spinning");
+          updateReelSizeClasses();
           makeBeep(659, 0.15, "square", 0.045);
           finishSpin();
-        }, 3000);
+        }, 3000));
       }
 
       function setLeverPull(distance) {
@@ -1255,15 +1844,12 @@
         leverButton.classList.add("pulled");
         setLeverPull(0);
 
-        window.setTimeout(() => {
-          leverButton.classList.remove("pulled");
-        }, 760);
-
+        window.setTimeout(() => leverButton.classList.remove("pulled"), 760);
         startSpin();
       }
 
       function keepDigitsOnly() {
-        answerInput.value = answerInput.value.replace(/[^0-9]/g, "").slice(0, 2);
+        answerInput.value = answerInput.value.replace(/[^0-9]/g, "").slice(0, 4);
       }
 
       function checkAnswer() {
@@ -1286,19 +1872,24 @@
           messageEl.className = "message good";
           playCorrectSound();
 
+          const dots = getDots();
           dots[round - 1]?.classList.add("complete");
           coinValue.textContent = `${coins} 🪙`;
-
           answerInput.disabled = true;
           answerButton.disabled = true;
 
-          if (round >= TOTAL_ROUNDS) {
-            speak("Brilliant! You solved all five rounds. Jackpot! You won five hundred coins!");
-            window.setTimeout(showWinner, 800);
+          if (round >= totalRounds) {
+            speak(
+              `Brilliant! You solved all ${totalRounds} rounds. Jackpot! You won ${coins} coins!`
+            );
+            nextRoundTimer = window.setTimeout(showWinner, 800);
           } else {
-            speak(`Brilliant! That is correct. You earned ${COINS_PER_ROUND} coins. Get ready for round ${round + 1}.`);
+            speak(
+              `Brilliant! That is correct. You earned ${COINS_PER_ROUND} coins. Get ready for round ${round + 1}.`
+            );
 
-            window.setTimeout(() => {
+            nextRoundTimer = window.setTimeout(() => {
+              nextRoundTimer = null;
               round += 1;
               currentAnswer = null;
               currentFormula = null;
@@ -1310,6 +1901,7 @@
               firstNumberEl.textContent = "?";
               operatorEl.textContent = "?";
               secondNumberEl.textContent = "?";
+              reels.forEach(reel => reel.classList.remove("two-digit"));
 
               leverPrompt.textContent = `⬇️ Pull the lever for round ${round}!`;
               leverPrompt.classList.remove("spinning");
@@ -1351,10 +1943,12 @@
         leverButton.disabled = true;
         leverPrompt.textContent = "🏆 You hit the jackpot!";
         leverPrompt.classList.remove("spinning");
+        winnerText.innerHTML =
+          `You solved all <strong>${totalRounds} rounds</strong> and won <strong>${coins} coins!</strong>`;
         winnerPanel.classList.add("show");
-        showerCoins();
+        showerCoins(Math.min(120, 55 + totalRounds * 3));
         updateStatus();
-        dots.forEach(dot => dot.classList.add("complete"));
+        getDots().forEach(dot => dot.classList.add("complete"));
 
         winnerPanel.scrollIntoView({
           behavior: "smooth",
@@ -1362,20 +1956,21 @@
         });
       }
 
-      function resetGame() {
-        if ("speechSynthesis" in window) {
-          window.speechSynthesis.cancel();
-        }
+      function resetGameState() {
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+        clearGameTimers();
 
         round = 1;
         coins = 0;
         currentAnswer = null;
         currentFormula = null;
         isSpinning = false;
+        operationBag = [];
 
         firstNumberEl.textContent = "?";
         operatorEl.textContent = "?";
         secondNumberEl.textContent = "?";
+        reels.forEach(reel => reel.classList.remove("two-digit", "spinning"));
         answerInput.value = "";
         answerInput.disabled = false;
         answerButton.disabled = false;
@@ -1386,34 +1981,90 @@
         leverPrompt.textContent = "⬇️ Pull the lever to start!";
         leverPrompt.classList.remove("spinning");
         leverButton.disabled = false;
+        settingsButton.disabled = false;
         leverButton.classList.remove("pulled", "dragging");
         setLeverPull(0);
         coinBurst.innerHTML = "";
 
+        buildRoundDots();
         updateStatus();
+      }
+
+      function playAgain() {
+        resetGameState();
         startBackgroundMusic();
-        speak("Welcome back to Howie's Number Jackpot. Pull the lever to play!");
+        speak(`Let's play again. Pull the lever for round one!`);
         leverButton.focus();
+      }
+
+      function readSettings() {
+        selectedOperations = operationInputs
+          .filter(input => input.checked)
+          .map(input => input.value);
+
+        const chosenLevel = levelInputs.find(input => input.checked);
+        numberLevel = chosenLevel ? chosenLevel.value : "one-one";
+        totalRounds = Number(roundSlider.value);
+      }
+
+      function beginConfiguredGame() {
+        readSettings();
+
+        if (selectedOperations.length === 0) {
+          setupError.textContent = "Please choose at least one operation.";
+          operationInputs[0].focus();
+          return;
+        }
+
+        setupError.textContent = "";
+        resetGameState();
+        setupScreen.hidden = true;
+        gameScreen.hidden = false;
+
+        const operationsText = selectedOperations.join("  ");
+        gameSummary.textContent =
+          `Operations: ${operationsText}  •  Numbers: ${levelName(numberLevel)}  •  Rounds: ${totalRounds}`;
+        subtitle.textContent = `Pull, spin and solve ${totalRounds} rounds!`;
+
+        startBackgroundMusic();
+        speak(
+          `Your game is ready with ${totalRounds} rounds. Pull the red lever to start round one!`
+        );
+        leverButton.focus();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function showSettings() {
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+        clearGameTimers();
+        isSpinning = false;
+        reels.forEach(reel => reel.classList.remove("spinning"));
+        stopBackgroundMusic();
+        gameScreen.hidden = true;
+        setupScreen.hidden = false;
+        subtitle.textContent = "Parents choose the maths challenge!";
+        setupError.textContent = "";
+        setupScreen.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function updateRoundPicker(nextValue) {
+        const value = Math.max(5, Math.min(20, Number(nextValue)));
+        roundSlider.value = String(value);
+        roundOutput.textContent = `${value} rounds`;
       }
 
       function toggleSound() {
         soundOn = !soundOn;
 
         if (!soundOn) {
-          if ("speechSynthesis" in window) {
-            window.speechSynthesis.cancel();
-          }
+          if ("speechSynthesis" in window) window.speechSynthesis.cancel();
           stopBackgroundMusic();
-          if (masterGain) {
-            masterGain.gain.value = 0;
-          }
+          if (masterGain) masterGain.gain.value = 0;
         } else {
           loadVoices();
-          if (masterGain) {
-            masterGain.gain.value = 0.7;
-          }
-          startBackgroundMusic();
-          speak("Sound and music are on. Let's play!");
+          if (masterGain) masterGain.gain.value = 0.7;
+          if (!gameScreen.hidden) startBackgroundMusic();
+          speak("Sound and music are on.");
         }
 
         soundButton.textContent = soundOn ? "🔊" : "🔇";
@@ -1423,6 +2074,22 @@
         );
         soundButton.title = soundOn ? "Sound and music on" : "Sound and music off";
       }
+
+      startGameButton.addEventListener("click", beginConfiguredGame);
+      settingsButton.addEventListener("click", showSettings);
+      changeSettingsButton.addEventListener("click", showSettings);
+      playAgainButton.addEventListener("click", playAgain);
+      soundButton.addEventListener("click", toggleSound);
+
+      roundSlider.addEventListener("input", () => updateRoundPicker(roundSlider.value));
+      roundMinus.addEventListener("click", () => updateRoundPicker(Number(roundSlider.value) - 1));
+      roundPlus.addEventListener("click", () => updateRoundPicker(Number(roundSlider.value) + 1));
+
+      operationInputs.forEach(input => {
+        input.addEventListener("change", () => {
+          if (operationInputs.some(item => item.checked)) setupError.textContent = "";
+        });
+      });
 
       leverButton.addEventListener("click", () => {
         if (suppressLeverClick) return;
@@ -1453,9 +2120,7 @@
         suppressLeverClick = true;
         setLeverPull(0);
 
-        if (pulledFarEnough || wasSimpleTap) {
-          animateLeverAndSpin();
-        }
+        if (pulledFarEnough || wasSimpleTap) animateLeverAndSpin();
 
         window.setTimeout(() => {
           suppressLeverClick = false;
@@ -1465,16 +2130,12 @@
       leverButton.addEventListener("pointerup", releaseLever);
       leverButton.addEventListener("pointercancel", releaseLever);
       answerButton.addEventListener("click", checkAnswer);
-      playAgainButton.addEventListener("click", resetGame);
-      soundButton.addEventListener("click", toggleSound);
       answerInput.addEventListener("input", keepDigitsOnly);
       answerInput.addEventListener("keydown", event => {
-        if (event.key === "Enter") {
-          checkAnswer();
-        }
+        if (event.key === "Enter") checkAnswer();
       });
 
-      updateStatus();
+      updateRoundPicker(5);
     })();
   </script>
 </body>
