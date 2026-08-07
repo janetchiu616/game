@@ -49,12 +49,9 @@
   <div class="topbar">
     <div class="brand"><span class="ball"></span><span>句子保齡球</span></div>
     <div class="top-actions">
-      <button id="homeBtn" class="voice-btn" onclick="goHome()" style="display:none">🏠 Home</button>
       <button id="levelsBtn" class="voice-btn" onclick="showLevels()" style="display:none">🎚 Levels</button>
       <button id="voiceToggle" class="voice-btn" onclick="toggleVoice()">🔊 Voice On</button>
       <button id="sfxToggle" class="voice-btn" onclick="toggleSfx()">🔔 SFX On</button>
-      <button id="repeatVoice" class="voice-btn" onclick="repeatVoice()">↻ Repeat</button>
-      <div class="pill">Sentence Bowling 🎳</div>
     </div>
   </div>
 
@@ -347,7 +344,7 @@ function updateVoiceUI(){
   if(t)t.textContent=voiceEnabled?'🔊 Voice On':'🔇 Voice Off';
   const sb=document.getElementById('sfxToggle');if(sb)sb.textContent=sfxEnabled?'🔔 SFX On':'🔕 SFX Off';
   if(l)l.textContent=language==='en'?'🔊 British English':'🔊 廣東話 Cantonese';
-  if(tip)tip.textContent=language==='en'?'Tap ↻ Repeat anytime. Correct answers are read aloud.':'可按 ↻ Repeat 重播；答啱後會讀出完整句子。';
+  if(tip)tip.textContent=language==='en'?'Correct answers are read aloud.':'答啱後會讀出完整句子。';
 }
 function speakInstruction(){
   const text=language==='en'?'Put the words in the correct order. Tap the word cards to build the sentence.':'將啲詞語排返做一個正確嘅句子。逐張撳詞語卡去砌句子。';
