@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>句子保齡球 Sentence Bowling</title>
+<style>
+  :root{
+    --ink:#f8fbff;--muted:#b9c5d8;--panel:#111b30;--panel2:#172744;
+    --blue:#24c7ff;--pink:#ff4aa2;--yellow:#ffd23f;--green:#4ee39a;
+    --red:#ff5d67;--wood:#d9a665;--wood2:#f2c47e;--wood3:#b7783c;
+    --shadow:0 18px 55px rgba(0,0,0,.32);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","PingFang TC","Noto Sans TC",Arial,sans-serif;color:var(--ink);min-height:100vh;background:
+    radial-gradient(circle at 12% 8%,rgba(36,199,255,.15),transparent 22%),
+    radial-gradient(circle at 88% 12%,rgba(255,74,162,.13),transparent 22%),
+    linear-gradient(180deg,#07101f 0%,#0c1830 58%,#08111f 100%);overflow-x:hidden}
+  body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:34px 34px}
+  button{font:inherit}.app{max-width:1080px;margin:0 auto;padding:18px;position:relative;z-index:1}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding:10px 14px;background:rgba(8,17,31,.82);border:1px solid rgba(255,255,255,.08);border-radius:18px;backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.18)}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:1000;font-size:clamp(20px,4vw,30px);letter-spacing:.01em;text-shadow:0 0 15px rgba(36,199,255,.35)}
+  .brand .ball{width:40px;height:40px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#5a6b91 0 8%,#26334f 9% 45%,#0d1426 72%);position:relative;box-shadow:0 0 18px rgba(36,199,255,.35),inset -5px -8px 0 rgba(255,255,255,.05)}
+  .brand .ball:before,.brand .ball:after{content:"";position:absolute;background:#050812;border-radius:50%;width:6px;height:6px;top:10px}.brand .ball:before{left:12px;box-shadow:8px 4px 0 #050812}.brand .ball:after{left:10px;top:18px}
+  .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.pill{background:#152641;border:1px solid rgba(36,199,255,.28);border-radius:999px;padding:8px 12px;font-weight:800;color:#d9efff}
+  .voice-btn{border:1px solid rgba(255,255,255,.13);background:#1a2d4b;color:white;border-radius:999px;padding:8px 11px;font-weight:900;cursor:pointer}.voice-btn:hover{border-color:var(--blue)}
+  .screen{display:none}.screen.active{display:block}
+  .panel,.question-card,.lane-card{background:linear-gradient(180deg,rgba(20,34,58,.97),rgba(11,22,41,.98));border:1px solid rgba(255,255,255,.09);border-radius:24px;box-shadow:var(--shadow)}
+  .panel{padding:24px}.hero{text-align:center;padding:20px 8px 12px}.hero h1{font-size:clamp(30px,6vw,55px);margin:9px 0 12px;line-height:1.02;text-transform:none;text-shadow:0 0 18px rgba(36,199,255,.22)}.hero p{font-size:18px;color:var(--muted);margin:0 auto 22px;max-width:720px}
+  .bowling-sign{display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:12px 22px;border:2px solid var(--pink);border-radius:18px;background:#101a2e;box-shadow:0 0 14px rgba(255,74,162,.42),inset 0 0 18px rgba(255,74,162,.08);font-weight:1000;font-size:clamp(26px,5vw,44px);letter-spacing:.04em;color:white;text-shadow:0 0 12px rgba(255,255,255,.25)}
+  .bowling-sign .neon{color:var(--blue);text-shadow:0 0 8px var(--blue),0 0 20px rgba(36,199,255,.55)}
+  .mini-pins{font-size:42px;letter-spacing:-5px;margin:12px 0 4px;filter:drop-shadow(0 8px 8px rgba(0,0,0,.3))}
+  .language-grid,.level-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}.choice{border:1px solid rgba(255,255,255,.11);background:linear-gradient(180deg,#1c3153,#13233e);color:white;border-radius:18px;padding:20px;cursor:pointer;transition:.2s;text-align:left;box-shadow:0 8px 20px rgba(0,0,0,.18)}.choice:hover{transform:translateY(-3px);border-color:var(--blue);box-shadow:0 0 22px rgba(36,199,255,.13)}.choice strong{display:block;font-size:22px;margin-bottom:5px}.choice span{color:var(--muted)}
+  .level-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.level-card{border:1px solid rgba(255,255,255,.11);border-radius:18px;padding:18px 8px;background:linear-gradient(180deg,#1b304f,#122039);box-shadow:0 7px 18px rgba(0,0,0,.24);cursor:pointer;font-weight:1000;color:white;transition:.2s}.level-card:hover:not(:disabled){transform:translateY(-3px);border-color:var(--yellow)}.level-card small{display:block;font-weight:700;color:var(--muted);margin-top:5px}.level-card:disabled{opacity:.34;cursor:not-allowed;filter:grayscale(1)}.level-card.done{outline:2px solid var(--green);box-shadow:0 0 16px rgba(78,227,154,.16)}.level-card.current{border-color:var(--yellow);box-shadow:0 0 18px rgba(255,210,63,.18)}
+  .primary,.secondary,.danger{border:0;border-radius:14px;padding:12px 18px;font-weight:1000;cursor:pointer}.primary{background:linear-gradient(135deg,#12b9f4,#5673ff);color:#fff;box-shadow:0 7px 18px rgba(36,199,255,.24)}.secondary{background:#203655;color:#dceeff;border:1px solid rgba(255,255,255,.08)}.danger{background:#4d2430;color:#ffd7da}
+  .game-head{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-bottom:14px;background:#101d33;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.18)}.progress-wrap{background:#263854;border-radius:999px;height:12px;overflow:hidden}.progress{height:100%;width:0;background:linear-gradient(90deg,var(--blue),#6e7cff,var(--pink));transition:.3s;box-shadow:0 0 12px rgba(36,199,255,.45)}.stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.stat{background:#172844;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px 12px;font-weight:900;color:#eef7ff}
+  .game-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:18px;align-items:start}.question-card{padding:22px}.eyebrow{font-weight:1000;color:var(--yellow);font-size:14px;text-transform:uppercase;letter-spacing:.09em}.question-card h2{font-size:clamp(24px,4vw,34px);margin:8px 0 6px}.helper{color:var(--muted);margin:0 0 16px}.voice-line{display:flex;gap:8px;align-items:center;margin-bottom:12px;color:#d6e9fa;font-weight:800}.voice-chip{font-size:13px;background:#203655;border:1px solid rgba(36,199,255,.26);padding:6px 9px;border-radius:999px}
+  .answer-zone{min-height:82px;border:2px dashed rgba(36,199,255,.42);background:rgba(5,14,27,.56);border-radius:18px;padding:11px;display:flex;gap:9px;flex-wrap:wrap;align-content:flex-start;box-shadow:inset 0 0 18px rgba(36,199,255,.04)}.answer-zone.empty:before{content:attr(data-placeholder);color:#7f91aa;font-weight:800;padding:8px}.word-bank{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;min-height:66px}.word{border:1px solid rgba(255,255,255,.08);border-radius:12px;background:linear-gradient(180deg,#27456f,#1b3152);color:white;padding:11px 14px;font-weight:1000;cursor:pointer;box-shadow:0 4px 0 #0f2037;user-select:none}.word:active{transform:translateY(2px);box-shadow:0 2px 0 #0f2037}.word.used{display:none}.answer-zone .word{background:linear-gradient(180deg,#5a3d13,#49300e);color:#ffe9a2;box-shadow:0 4px 0 #2e1e08;border-color:rgba(255,210,63,.24)}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.feedback{margin-top:14px;min-height:50px;border-radius:14px;padding:12px 14px;font-weight:900;display:none}.feedback.good{display:block;background:rgba(46,155,103,.16);color:#a7f3cf;border:1px solid rgba(78,227,154,.28)}.feedback.bad{display:block;background:rgba(231,76,60,.14);color:#ffc1c4;border:1px solid rgba(255,93,103,.25)}.hint{margin-top:8px;color:#ffe89d;background:rgba(156,109,17,.22);border:1px solid rgba(255,210,63,.2);border-radius:12px;padding:10px 12px;display:none}
+  .lane-card{padding:14px;display:flex;flex-direction:column;align-items:center;min-height:700px;overflow:hidden}.lane-title{width:min(100%,350px);display:flex;justify-content:space-between;align-items:center;padding:3px 6px 10px;font-weight:1000;color:white}.lane{position:relative;width:min(100%,350px);height:620px;min-height:620px;flex:none;border-radius:16px 16px 12px 12px;overflow:hidden;background:repeating-linear-gradient(90deg,var(--wood) 0 38px,var(--wood2) 39px 41px,var(--wood) 42px 80px);border:10px solid #5d3b26;border-top-width:7px;box-shadow:inset 0 0 35px rgba(83,42,12,.25),0 12px 26px rgba(0,0,0,.24)}.lane:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.20),transparent 22%,rgba(255,255,255,.06));pointer-events:none}.lane:after{content:"";position:absolute;left:18%;right:18%;bottom:184px;height:34px;opacity:.66;background:linear-gradient(90deg,transparent 0 7%,#5a4230 7% 10%,transparent 10% 22%,#5a4230 22% 25%,transparent 25% 38%,#5a4230 38% 41%,transparent 41% 59%,#5a4230 59% 62%,transparent 62% 75%,#5a4230 75% 78%,transparent 78% 90%,#5a4230 90% 93%,transparent 93%);clip-path:polygon(50% 0,100% 100%,0 100%);pointer-events:none}.gutter{position:absolute;top:0;bottom:0;width:20px;background:linear-gradient(90deg,#1b1c22,#4c4f57,#15161b);z-index:1;box-shadow:inset 0 0 8px rgba(255,255,255,.11)}.gutter.left{left:0}.gutter.right{right:0}.foul-line{position:absolute;left:20px;right:20px;bottom:142px;height:5px;background:#382415;box-shadow:0 2px 0 rgba(255,255,255,.22);z-index:2}.start-spot{position:absolute;left:50%;bottom:104px;width:76px;height:76px;transform:translateX(-50%);border:2px dashed rgba(255,210,63,.72);border-radius:50%;box-shadow:0 0 14px rgba(255,210,63,.18);z-index:2;pointer-events:none}.pin-deck{position:absolute;top:24px;left:50%;transform:translateX(-50%) scale(.86);width:220px;height:150px;z-index:3}.pin{position:absolute;width:28px;height:70px;background:linear-gradient(90deg,#f0f3f6,#fff 45%,#d9e0e8);border-radius:44% 44% 34% 34%/36% 36% 16% 16%;border:2px solid #cfd7e6;box-shadow:0 4px 7px rgba(0,0,0,.22);transform-origin:50% 90%;transition:.45s}.pin:before,.pin:after{content:"";position:absolute;left:3px;right:3px;height:5px;background:#ef3d52;top:18px}.pin:after{top:26px}.pin.down{transform:translate(24px,28px) rotate(72deg);opacity:.26}.ball-game{--aim-x:0px;position:absolute;left:50%;bottom:113px;transform:translateX(-50%);width:58px;height:58px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#8ce8ff 0 6%,#1e9bc8 7% 14%,#304768 15% 46%,#0d1628 72%);box-shadow:0 10px 14px rgba(0,0,0,.33),0 0 16px rgba(36,199,255,.22);z-index:4;transition:none}.ball-game:before{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:#060914;left:20px;top:13px;box-shadow:12px 4px 0 #060914,3px 13px 0 #060914}.ball-game.roll{animation:rollBall 1.2s cubic-bezier(.22,.75,.24,1) forwards}@keyframes rollBall{0%{bottom:113px;transform:translateX(-50%) rotate(0) scale(1)}100%{bottom:calc(100% - 154px);transform:translateX(calc(-50% + var(--aim-x))) rotate(980deg) scale(.58)}}
+  .aim-controls{width:min(100%,350px);display:grid;grid-template-columns:58px 1fr 58px;gap:8px;align-items:center;margin:0 0 10px}.aim-btn{height:48px;border-radius:14px;border:1px solid rgba(36,199,255,.3);background:linear-gradient(180deg,#27456f,#1b3152);color:#fff;font-size:23px;font-weight:1000;cursor:pointer;box-shadow:0 5px 12px rgba(0,0,0,.2)}.aim-btn:disabled{opacity:.35;cursor:not-allowed}.aim-btn:not(:disabled):active{transform:translateY(2px)}.aim-readout{height:50px;border:1px solid rgba(255,210,63,.25);background:#101d33;border-radius:14px;display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr 1fr;column-gap:7px;align-items:center;padding:5px 10px;text-align:left}.aim-readout>span{grid-row:1/3;font-size:22px}.aim-readout strong{font-size:15px;line-height:1}.aim-readout small{font-size:11px;color:var(--muted);line-height:1}.aim-guide{position:absolute;left:50%;bottom:134px;width:4px;height:330px;border-radius:999px;background:linear-gradient(180deg,rgba(255,210,63,0),rgba(255,210,63,.72));box-shadow:0 0 8px rgba(255,210,63,.45);transform:translateX(-50%) rotate(0deg);transform-origin:bottom center;z-index:2;opacity:.15;transition:transform .18s ease,opacity .18s ease;pointer-events:none}.aim-guide:before{content:"";position:absolute;top:-7px;left:50%;width:13px;height:13px;border:3px solid var(--yellow);border-radius:50%;transform:translateX(-50%);box-shadow:0 0 10px rgba(255,210,63,.5)}.aim-guide.ready{opacity:.9}.roll-panel{position:absolute;left:12px;right:12px;bottom:12px;display:flex;justify-content:center;z-index:6}.roll-btn{font-size:18px;padding:12px 22px;border-radius:999px;min-width:180px;border:2px solid rgba(255,255,255,.18)}.roll-btn:disabled{opacity:.4;cursor:not-allowed}.lane-message{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);background:rgba(7,16,31,.95);border:1px solid rgba(255,255,255,.13);border-radius:18px;padding:14px 18px;text-align:center;font-size:23px;font-weight:1000;box-shadow:0 10px 30px rgba(0,0,0,.36),0 0 20px rgba(255,210,63,.12);z-index:7;display:none}.lane-message.show{display:block;animation:pop .35s ease}@keyframes pop{0%{transform:translate(-50%,-50%) scale(.7);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+  .frames{width:min(100%,350px);display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:10px;background:#07101f;border-radius:12px;padding:6px;border:1px solid rgba(255,255,255,.08)}.frame{border:1px solid #33425a;background:#0f1c31;border-radius:8px;padding:6px;text-align:center;font-weight:1000;color:#f5f9ff}.frame.active{border-color:var(--yellow);background:#26334a;box-shadow:0 0 12px rgba(255,210,63,.11)}.frame .throws{font-size:12px;color:#bfcce0;min-height:18px}.frame .score{font-size:20px;color:#ffe16a}
+  .result{text-align:center}.result h2{font-size:42px;margin:4px}.big-score{font-size:76px;font-weight:1000;color:var(--yellow);line-height:1;text-shadow:0 0 18px rgba(255,210,63,.22)}.stars{font-size:36px;letter-spacing:4px}.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0}.result-box{background:#162843;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}.result-box strong{font-size:26px;display:block}.shake{animation:shake .35s}@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+  @media(max-width:780px){.game-grid{grid-template-columns:1fr}.lane-card{min-height:670px}.lane{height:590px;min-height:590px}.level-grid{grid-template-columns:repeat(3,1fr)}.game-head{grid-template-columns:1fr}.stats{justify-content:flex-start}}
+  @media(max-width:520px){.app{padding:10px}.panel,.question-card{padding:16px;border-radius:18px}.language-grid{grid-template-columns:1fr}.level-grid{grid-template-columns:repeat(2,1fr)}.topbar{align-items:flex-start}.top-actions{max-width:55%}.pill{font-size:11px}.voice-btn{font-size:12px;padding:7px 9px}.word{padding:10px 12px}.lane-card{padding:10px;min-height:630px}.lane{width:min(100%,320px);height:550px;min-height:550px}.lane-title,.frames,.aim-controls{width:min(100%,320px)}.pin-deck{transform:translateX(-50%) scale(.78)}.frames{gap:3px}.frame{padding:4px}.result-grid{grid-template-columns:1fr}.hero h1{font-size:38px}.bowling-sign{font-size:27px;padding:10px 13px}.mini-pins{font-size:35px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand"><span class="ball"></span><span>句子保齡球</span></div>
+    <div class="top-actions">
+      <button id="homeBtn" class="voice-btn" onclick="goHome()" style="display:none">🏠 Home</button>
+      <button id="levelsBtn" class="voice-btn" onclick="showLevels()" style="display:none">🎚 Levels</button>
+      <button id="voiceToggle" class="voice-btn" onclick="toggleVoice()">🔊 Voice On</button>
+      <button id="sfxToggle" class="voice-btn" onclick="toggleSfx()">🔔 SFX On</button>
+      <button id="repeatVoice" class="voice-btn" onclick="repeatVoice()">↻ Repeat</button>
+      <div class="pill">Sentence Bowling 🎳</div>
+    </div>
+  </div>
+
+  <section id="home" class="screen active">
+    <div class="panel hero">
+      <div class="mini-pins">🎳 🎳 🎳</div>
+      <div class="bowling-sign"><span class="neon">SENTENCE</span> BOWLING</div>
+      <h1>答啱句子，先有得開波！</h1>
+      <p>重組句子答啱後取得保齡球。第一球未全中，仲有一次 <b>補中 / SPARE</b> 機會！語音會用廣東話或 British English 引導你。</p>
+      <h3>Choose a language / 選擇語言</h3>
+      <div class="language-grid">
+        <button class="choice" onclick="chooseLanguage('en')"><strong>🇬🇧 English · British Voice</strong><span>Sentence ordering + common K3 vocabulary</span></button>
+        <button class="choice" onclick="chooseLanguage('zh')"><strong>🇭🇰 繁體中文 · 廣東話</strong><span>重組句子 + 常用詞語及句式</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section id="levels" class="screen">
+    <div class="panel">
+      <button class="secondary" onclick="showScreen('home')">← 返回語言</button>
+      <div class="hero" style="padding-top:4px">
+        <h1 id="levelTitle">Choose Level</h1>
+        <p id="levelDesc"></p>
+      </div>
+      <div class="level-grid" id="levelGrid"></div>
+      <p style="text-align:center;color:var(--muted);margin-top:18px">Level 1–5 可隨時自由選擇；轉 Level 會重新開始該 Level。</p>
+    </div>
+  </section>
+
+  <section id="game" class="screen">
+    <div class="game-head">
+      <div>
+        <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;font-weight:900"><span id="gameLabel">Level 1</span><span id="qCounter">1 / 5</span></div>
+        <div class="progress-wrap"><div id="progress" class="progress"></div></div>
+      </div>
+      <div class="stats"><div class="stat">✅ <span id="correctCount">0</span></div><div class="stat">❌ <span id="wrongCount">0</span></div><div class="stat">🎳 <span id="pinScore">0</span>/50</div></div>
+    </div>
+
+    <div class="game-grid">
+      <div class="question-card" id="questionCard">
+        <div class="eyebrow" id="difficultyLabel">LEVEL 1 · 3 PARTS</div>
+        <h2 id="questionPrompt">Put the words in the correct order.</h2>
+        <p class="helper" id="helperText">Tap the word cards to build the sentence.</p>
+        <div class="voice-line"><span id="voiceLabel" class="voice-chip">🔊 British English</span><span id="voiceTip">Correct answers will be read aloud.</span></div>
+        <div id="answerZone" class="answer-zone empty" data-placeholder="Your sentence goes here…"></div>
+        <div id="wordBank" class="word-bank"></div>
+        <div class="actions">
+          <button class="primary" id="checkBtn" onclick="checkAnswer()">Check ✓</button>
+          <button class="secondary" onclick="resetAnswer()">Reset ↺</button>
+          <button class="secondary" onclick="showHint()">Hint 💡</button>
+        </div>
+        <div id="feedback" class="feedback"></div>
+        <div id="hint" class="hint"></div>
+      </div>
+
+      <div class="lane-card">
+        <div class="lane-title"><span>Bowling Lane · ↑ Pins</span><span id="throwStatus">🔒 Answer first</span></div>
+        <div class="aim-controls" id="aimControls">
+          <button class="aim-btn" id="aimLeft" onclick="adjustAim(-1)" disabled aria-label="Aim left">◀</button>
+          <div class="aim-readout"><span>🎯</span><strong id="aimLabel">Centre</strong><small id="aimHelp">Answer first to aim</small></div>
+          <button class="aim-btn" id="aimRight" onclick="adjustAim(1)" disabled aria-label="Aim right">▶</button>
+        </div>
+        <div class="lane" id="lane">
+          <div class="gutter left"></div><div class="gutter right"></div><div class="foul-line"></div>
+          <div class="start-spot" aria-hidden="true"></div>
+          <div class="aim-guide" id="aimGuide"></div>
+          <div class="pin-deck" id="pinDeck"></div>
+          <div class="ball-game" id="bowlingBall"></div>
+          <div class="lane-message" id="laneMessage"></div>
+          <div class="roll-panel"><button class="primary roll-btn" id="rollBtn" onclick="rollBall()" disabled>🎳 Roll Ball</button></div>
+        </div>
+        <div class="frames" id="frames"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="result" class="screen">
+    <div class="panel result">
+      <div style="font-size:70px">🏆</div>
+      <h2>Level Complete!</h2>
+      <div id="resultStars" class="stars">⭐⭐⭐</div>
+      <div class="big-score" id="finalScore">0</div>
+      <div style="color:var(--muted);font-weight:800">pins out of 50</div>
+      <div class="result-grid">
+        <div class="result-box"><span>Correct</span><strong id="rCorrect">0</strong></div>
+        <div class="result-box"><span>Wrong tries</span><strong id="rWrong">0</strong></div>
+        <div class="result-box"><span>Strikes / Spares</span><strong id="rSpecial">0</strong></div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="primary" id="nextLevelBtn" onclick="goNextLevel()">Next Level →</button>
+        <button class="secondary" onclick="replayLevel()">Play Again ↺</button>
+        <button class="secondary" onclick="showLevels()">Levels</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const QUESTIONS = {
+ en: [
+  [
+   {parts:['I','like','apples'], answer:'I like apples.'},
+   {parts:['I','can run','fast'], answer:'I can run fast.'},
+   {parts:['The cat','is sleeping','now'], answer:'The cat is sleeping now.'},
+   {parts:['She','has','a book'], answer:'She has a book.'},
+   {parts:['He','plays','football'], answer:'He plays football.'}
+  ],
+  [
+   {parts:['I','have','a red','bag'], answer:'I have a red bag.'},
+   {parts:['The cat','is','sleeping','on the bed'], answer:'The cat is sleeping on the bed.'},
+   {parts:['He','has','a big','ball'], answer:'He has a big ball.'},
+   {parts:['She','is eating','an apple','now'], answer:'She is eating an apple now.'},
+   {parts:['They','are','playing','in the park'], answer:'They are playing in the park.'}
+  ],
+  [
+   {parts:['I','go','to school','by bus','every day'], answer:'I go to school by bus every day.'},
+   {parts:['The dog','is sleeping','under','the table','quietly'], answer:'The dog is sleeping quietly under the table.'},
+   {parts:['She','likes','playing','with','her friends'], answer:'She likes playing with her friends.'},
+   {parts:['My brother','is wearing','a blue','T-shirt','today'], answer:'My brother is wearing a blue T-shirt today.'},
+   {parts:['We','eat','breakfast','together','in the morning'], answer:'We eat breakfast together in the morning.'}
+  ],
+  [
+   {parts:['I','went','to the zoo','with Mum','yesterday'], answer:'I went to the zoo with Mum yesterday.'},
+   {parts:['The children','are','running','happily','in the playground'], answer:'The children are running happily in the playground.'},
+   {parts:['Dad','reads','me','a story','before bed'], answer:'Dad reads me a story before bed.'},
+   {parts:['I','play','football','with my friend','after school'], answer:'I play football with my friend after school.'},
+   {parts:['He','brushes','his teeth','carefully','every morning'], answer:'He brushes his teeth carefully every morning.'}
+  ],
+  [
+   {parts:['I','want','a sandwich','because','I am hungry'], answer:'I want a sandwich because I am hungry.'},
+   {parts:['We','stayed','at home','because','it was raining'], answer:'We stayed at home because it was raining.'},
+   {parts:['My sister','can swim','but','she cannot','ride a bike'], answer:'My sister can swim but she cannot ride a bike.'},
+   {parts:['Mum and I','washed','the dishes','together','after dinner'], answer:'Mum and I washed the dishes together after dinner.'},
+   {parts:['The boy','is happy','because','he got','a new toy'], answer:'The boy is happy because he got a new toy.'}
+  ]
+ ],
+ zh: [
+  [
+   {parts:['我','喜歡','蘋果'], answer:'我喜歡蘋果。'},
+   {parts:['小狗','正在','跑步'], answer:'小狗正在跑步。'},
+   {parts:['媽媽','正在','煮飯'], answer:'媽媽正在煮飯。'},
+   {parts:['弟弟','喜歡','畫畫'], answer:'弟弟喜歡畫畫。'},
+   {parts:['爸爸','正在','看書'], answer:'爸爸正在看書。'}
+  ],
+  [
+   {parts:['我','有','一個','紅色書包'], answer:'我有一個紅色書包。'},
+   {parts:['小貓','在','床上','睡覺'], answer:'小貓在床上睡覺。'},
+   {parts:['哥哥','有','一個','大皮球'], answer:'哥哥有一個大皮球。'},
+   {parts:['妹妹','正在','吃','蘋果'], answer:'妹妹正在吃蘋果。'},
+   {parts:['我們','在','公園','玩耍'], answer:'我們在公園玩耍。'}
+  ],
+  [
+   {parts:['我','每天','坐巴士','去','上學'], answer:'我每天坐巴士去上學。'},
+   {parts:['小狗','正在','桌子下面','安靜地','睡覺'], answer:'小狗正在桌子下面安靜地睡覺。'},
+   {parts:['妹妹','喜歡','和朋友','一起','玩耍'], answer:'妹妹喜歡和朋友一起玩耍。'},
+   {parts:['哥哥','今天','穿着','藍色','T恤'], answer:'哥哥今天穿着藍色T恤。'},
+   {parts:['我們','早上','一起','吃','早餐'], answer:'我們早上一起吃早餐。'}
+  ],
+  [
+   {parts:['昨天','我和媽媽','去','動物園','看動物'], answer:'昨天我和媽媽去動物園看動物。'},
+   {parts:['小朋友','在操場上','開心地','跑來','跑去'], answer:'小朋友在操場上開心地跑來跑去。'},
+   {parts:['每天晚上','爸爸','都會','給我','講故事'], answer:'每天晚上爸爸都會給我講故事。'},
+   {parts:['放學後','我和朋友','一起','踢','足球'], answer:'放學後我和朋友一起踢足球。'},
+   {parts:['每天早上','弟弟','都會','認真地','刷牙'], answer:'每天早上弟弟都會認真地刷牙。'}
+  ],
+  [
+   {parts:['因為','我肚子餓','所以','我想吃','一個三文治'], answer:'因為我肚子餓，所以我想吃一個三文治。'},
+   {parts:['昨天','因為下雨','所以','我們','留在家裏'], answer:'昨天因為下雨，所以我們留在家裏。'},
+   {parts:['妹妹','會游泳','但是','她','不會踩單車'], answer:'妹妹會游泳，但是她不會踩單車。'},
+   {parts:['吃完晚飯後','我和媽媽','一起','在廚房','洗碗'], answer:'吃完晚飯後，我和媽媽一起在廚房洗碗。'},
+   {parts:['小男孩','很開心','因為','他收到','一份新玩具'], answer:'小男孩很開心，因為他收到一份新玩具。'}
+  ]
+ ]
+};
+
+let language='en', level=0, qIndex=0, selected=[], bank=[], answerLocked=false, canRoll=false, throwNo=0, standingPins=10, currentAim=0;
+const PIN_POS=[[96,0],[72,35],[120,35],[48,70],[96,70],[144,70],[24,105],[72,105],[120,105],[168,105]];
+let totalPins=0, correct=0, wrong=0, frameScores=[], frameThrows=[], strikes=0, spares=0;
+let unlocked={en:1,zh:1};
+let voiceEnabled=true, sfxEnabled=true, availableVoices=[], currentVoiceText='', audioCtx=null, rollingNoiseStop=null;
+
+
+function getAudioCtx(){
+  if(!sfxEnabled)return null;
+  const Ctx=window.AudioContext||window.webkitAudioContext;
+  if(!Ctx)return null;
+  if(!audioCtx)audioCtx=new Ctx();
+  if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+  return audioCtx;
+}
+function toggleSfx(){
+  sfxEnabled=!sfxEnabled;
+  const b=document.getElementById('sfxToggle');
+  if(b)b.textContent=sfxEnabled?'🔔 SFX On':'🔕 SFX Off';
+  if(!sfxEnabled && rollingNoiseStop){try{rollingNoiseStop()}catch(e){} rollingNoiseStop=null;}
+  if(sfxEnabled)playClickSfx();
+}
+function tone(freq=440,duration=.12,type='sine',gain=.08,delay=0){
+  const ctx=getAudioCtx(); if(!ctx)return;
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.type=type;o.frequency.setValueAtTime(freq,ctx.currentTime+delay);
+  g.gain.setValueAtTime(.0001,ctx.currentTime+delay);
+  g.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),ctx.currentTime+delay+.01);
+  g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+delay+duration);
+  o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+delay);o.stop(ctx.currentTime+delay+duration+.03);
+}
+function noiseBurst(duration=.16,gain=.16,delay=0,lowpass=1800){
+  const ctx=getAudioCtx(); if(!ctx)return;
+  const len=Math.max(1,Math.floor(ctx.sampleRate*duration));
+  const buf=ctx.createBuffer(1,len,ctx.sampleRate), data=buf.getChannelData(0);
+  for(let i=0;i<len;i++) data[i]=(Math.random()*2-1)*(1-i/len);
+  const src=ctx.createBufferSource(), filter=ctx.createBiquadFilter(), g=ctx.createGain();
+  src.buffer=buf;filter.type='lowpass';filter.frequency.value=lowpass;
+  g.gain.setValueAtTime(.0001,ctx.currentTime+delay);g.gain.linearRampToValueAtTime(gain,ctx.currentTime+delay+.01);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+delay+duration);
+  src.connect(filter);filter.connect(g);g.connect(ctx.destination);src.start(ctx.currentTime+delay);
+}
+function playClickSfx(){tone(700,.055,'sine',.035);}
+function playRollSfx(){
+  const ctx=getAudioCtx(); if(!ctx)return;
+  const dur=.88, len=Math.floor(ctx.sampleRate*dur), buf=ctx.createBuffer(1,len,ctx.sampleRate), data=buf.getChannelData(0);
+  for(let i=0;i<len;i++){
+    const t=i/ctx.sampleRate;
+    const rumble=(Math.random()*2-1)*.50 + Math.sin(2*Math.PI*(45+t*25)*t)*.24;
+    const pulse=.58+.42*Math.sin(2*Math.PI*11*t);
+    data[i]=rumble*pulse*(.20+.80*(i/len));
+  }
+  const src=ctx.createBufferSource(), lp=ctx.createBiquadFilter(), g=ctx.createGain();
+  src.buffer=buf;lp.type='lowpass';lp.frequency.setValueAtTime(520,ctx.currentTime);lp.frequency.linearRampToValueAtTime(1050,ctx.currentTime+dur);
+  g.gain.setValueAtTime(.03,ctx.currentTime);g.gain.linearRampToValueAtTime(.15,ctx.currentTime+dur*.8);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+dur);
+  src.connect(lp);lp.connect(g);g.connect(ctx.destination);src.start();
+  rollingNoiseStop=()=>{try{g.gain.cancelScheduledValues(ctx.currentTime);g.gain.setTargetAtTime(.0001,ctx.currentTime,.02);src.stop(ctx.currentTime+.08)}catch(e){}};
+  setTimeout(()=>rollingNoiseStop=null,950);
+}
+function playPinCrashSfx(count=5){
+  const intensity=Math.min(1,.38+count/12);
+  noiseBurst(.24,.20*intensity,0,2400);
+  noiseBurst(.18,.13*intensity,.035,3800);
+  const hits=Math.min(6,Math.max(2,Math.ceil(count/2)));
+  for(let i=0;i<hits;i++)tone(150+Math.random()*210,.07+Math.random()*.07,'triangle',.035*intensity,Math.random()*.13);
+}
+function playStrikeSfx(){
+  playPinCrashSfx(10);
+  [[523,.14,0],[659,.14,.10],[784,.18,.20],[1047,.33,.31]].forEach(([f,d,dl])=>tone(f,d,'sine',.07,dl));
+}
+function playSpareSfx(){
+  [[587,.12,0],[740,.12,.10],[880,.26,.20]].forEach(([f,d,dl])=>tone(f,d,'sine',.065,dl));
+}
+
+function refreshVoices(){
+  if(!('speechSynthesis' in window)) return;
+  availableVoices=window.speechSynthesis.getVoices()||[];
+  updateVoiceUI();
+}
+if('speechSynthesis' in window){
+  refreshVoices();
+  window.speechSynthesis.onvoiceschanged=refreshVoices;
+}
+function preferredVoice(){
+  if(!availableVoices.length) return null;
+  if(language==='en'){
+    const gb=availableVoices.filter(v=>/^en[-_]GB/i.test(v.lang));
+    return gb.find(v=>/sonia|serena|daniel|kate|google uk|british/i.test(v.name)) || gb[0] || availableVoices.find(v=>/^en/i.test(v.lang)) || null;
+  }
+  const hk=availableVoices.filter(v=>/^(yue|zh)[-_](HK|Hant-HK)/i.test(v.lang) || /canton|hong kong|sin[- ]?ji|hiu/i.test(v.name));
+  return hk[0] || availableVoices.find(v=>/^zh[-_]HK/i.test(v.lang)) || null;
+}
+function speakText(text,{remember=true}={}){
+  if(remember) currentVoiceText=text;
+  if(!voiceEnabled || !text || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=language==='en'?'en-GB':'zh-HK';
+  u.rate=language==='en'?0.82:0.88;
+  u.pitch=1.04;
+  const v=preferredVoice(); if(v)u.voice=v;
+  window.speechSynthesis.speak(u);
+}
+function repeatVoice(){
+  if(!voiceEnabled){voiceEnabled=true;updateVoiceUI()}
+  speakText(currentVoiceText,{remember:false});
+}
+function toggleVoice(){
+  voiceEnabled=!voiceEnabled;
+  if(!voiceEnabled && 'speechSynthesis' in window)window.speechSynthesis.cancel();
+  updateVoiceUI();
+  if(voiceEnabled && currentVoiceText)speakText(currentVoiceText,{remember:false});
+}
+function updateVoiceUI(){
+  const t=document.getElementById('voiceToggle'), l=document.getElementById('voiceLabel'), tip=document.getElementById('voiceTip');
+  if(t)t.textContent=voiceEnabled?'🔊 Voice On':'🔇 Voice Off';
+  const sb=document.getElementById('sfxToggle');if(sb)sb.textContent=sfxEnabled?'🔔 SFX On':'🔕 SFX Off';
+  if(l)l.textContent=language==='en'?'🔊 British English':'🔊 廣東話 Cantonese';
+  if(tip)tip.textContent=language==='en'?'Tap ↻ Repeat anytime. Correct answers are read aloud.':'可按 ↻ Repeat 重播；答啱後會讀出完整句子。';
+}
+function speakInstruction(){
+  const text=language==='en'?'Put the words in the correct order. Tap the word cards to build the sentence.':'將啲詞語排返做一個正確嘅句子。逐張撳詞語卡去砌句子。';
+  speakText(text);
+}
+
+try{unlocked=JSON.parse(localStorage.getItem('sentenceBowlingUnlocked'))||unlocked}catch(e){}
+
+const $=id=>document.getElementById(id);
+function showScreen(id){if('speechSynthesis' in window)window.speechSynthesis.cancel();document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');const hb=$('homeBtn');if(hb)hb.style.display=id==='home'?'none':'inline-block';const lb=$('levelsBtn');if(lb)lb.style.display=(id==='game'||id==='result')?'inline-block':'none';window.scrollTo({top:0,behavior:'smooth'})}
+function goHome(){canRoll=false;answerLocked=false;if('speechSynthesis' in window)window.speechSynthesis.cancel();showScreen('home');currentVoiceText='';}
+function chooseLanguage(lang){language=lang;updateVoiceUI();showLevels()}
+function showLevels(){
+ showScreen('levels');
+ $('levelTitle').textContent=language==='en'?'English Levels':'中文 Levels';
+ $('levelDesc').textContent=language==='en'?'Choose any level anytime. Build the sentence, then bowl!':'任何時候都可以自由揀 Level。重組正確句子，再挑戰保齡球！';
+ const g=$('levelGrid');g.innerHTML='';
+ const desc=language==='en'?['3 parts','4 parts','5 parts','Time & place','Connectors']:['3 個詞組','4 個詞組','5 個詞組','時間＋地點','連接詞'];
+ for(let i=0;i<5;i++){
+  const b=document.createElement('button'); b.className='level-card';
+  // All five levels are always available. The green outline only marks previously reached levels.
+  if(i<Math.max(0,(unlocked[language]||1)-1))b.classList.add('done');
+  if(i===level)b.classList.add('current');
+  b.innerHTML=`Level ${i+1}<small>${desc[i]}</small>`; b.onclick=()=>startLevel(i); g.appendChild(b)
+ }
+ updateVoiceUI();
+ setTimeout(()=>speakText(language==='en'?'Choose a level.':'揀一個 Level 開始玩啦。'),120);
+}
+function startLevel(l){
+ level=l;qIndex=0;selected=[];answerLocked=false;canRoll=false;throwNo=0;standingPins=10;currentAim=0;
+ totalPins=0;correct=0;wrong=0;frameScores=[];frameThrows=Array.from({length:5},()=>[]);strikes=0;spares=0;
+ showScreen('game'); setupPins(); renderFrames(); loadQuestion(); updateStats();
+}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function loadQuestion(){
+ answerLocked=false;canRoll=false;throwNo=0;standingPins=10;selected=[];currentAim=0;
+ const q=QUESTIONS[language][level][qIndex]; bank=shuffle(q.parts.map((text,i)=>({id:i,text})));
+ if(bank.map(x=>x.text).join('|')===q.parts.join('|')) bank.reverse();
+ $('gameLabel').textContent=`${language==='en'?'English':'中文'} · Level ${level+1}`;
+ $('qCounter').textContent=`${qIndex+1} / 5`; $('progress').style.width=`${(qIndex/5)*100}%`;
+ $('difficultyLabel').textContent=`LEVEL ${level+1} · ${q.parts.length} ${language==='en'?'PARTS':'個詞組'}`;
+ $('questionPrompt').textContent=language==='en'?'Put the words in the correct order.':'把詞語重組成正確句子。';
+ $('helperText').textContent=language==='en'?'Tap the cards to build the sentence.':'按詞語卡，排成完整句子。';
+ $('answerZone').dataset.placeholder=language==='en'?'Your sentence goes here…':'把句子放在這裏…';
+ $('feedback').className='feedback';$('feedback').textContent='';$('hint').style.display='none';
+ $('checkBtn').disabled=false;$('rollBtn').disabled=true;$('rollBtn').textContent=language==='en'?'🎳 Roll Ball':'🎳 開波';$('throwStatus').textContent='🔒 '+(language==='en'?'Answer first':'先答題');
+ updateVoiceUI();setupPins();renderWordAreas();renderFrames();resetBallToStart();updateAimUI();
+ setTimeout(speakInstruction,180);
+}
+function renderWordAreas(){
+ const az=$('answerZone'), wb=$('wordBank');az.innerHTML='';wb.innerHTML='';az.classList.toggle('empty',selected.length===0);
+ selected.forEach((item,idx)=>{const b=wordButton(item.text);b.onclick=()=>{if(answerLocked)return;speakText(item.text,{remember:false});selected.splice(idx,1);renderWordAreas()};az.appendChild(b)});
+ bank.forEach(item=>{if(selected.some(s=>s.id===item.id))return;const b=wordButton(item.text);b.onclick=()=>{if(answerLocked)return;speakText(item.text,{remember:false});selected.push(item);renderWordAreas()};wb.appendChild(b)});
+}
+function wordButton(text){const b=document.createElement('button');b.className='word';b.textContent=text;return b}
+function resetAnswer(){if(answerLocked)return;selected=[];renderWordAreas();$('feedback').className='feedback';$('hint').style.display='none'}
+function normalize(s){return s.toLowerCase().replace(/[\s.,!?，。！？、'’"“”]/g,'')}
+function checkAnswer(){
+ if(answerLocked)return;
+ const q=QUESTIONS[language][level][qIndex];
+ if(selected.length!==q.parts.length){showBad(language==='en'?'Use all the cards first.':'要用晒所有詞語卡呀！');return}
+ const built=selected.map(x=>x.text).join(language==='en'?' ':'');
+ if(normalize(built)===normalize(q.answer)){
+  answerLocked=true;canRoll=true;correct++;updateStats();
+  $('feedback').className='feedback good';$('feedback').innerHTML=`✅ ${language==='en'?'Great!':'答啱！'} <b>${q.answer}</b><br>${language==='en'?'You earned a bowling ball!':'你獲得保齡球，可以開波！'}`;
+  $('checkBtn').disabled=true;$('rollBtn').disabled=false;$('throwStatus').textContent='🎳 '+(language==='en'?'Ball ready!':'可以開波！');updateAimUI();
+  speakText(language==='en'?`Great job! ${q.answer} You earned a bowling ball.`:`答啱喇！${q.answer} 你攞到保齡球喇！`);
+ }else{wrong++;updateStats();showBad(language==='en'?'Not quite. Try moving the cards.':'未啱呀，再排一次！');speakText(language==='en'?'Not quite. Try again.':'未啱呀，再試一次。');}
+}
+function showBad(msg){$('feedback').className='feedback bad';$('feedback').textContent='❌ '+msg;$('questionCard').classList.remove('shake');void $('questionCard').offsetWidth;$('questionCard').classList.add('shake')}
+function showHint(){
+ const q=QUESTIONS[language][level][qIndex];const first=q.parts[0];$('hint').style.display='block';
+ $('hint').textContent=language==='en'?`💡 Start with: “${first}”`:`💡 第一個詞組是：「${first}」`;
+}
+function setupPins(){
+ const deck=$('pinDeck');deck.innerHTML='';
+ PIN_POS.forEach((p,i)=>{const pin=document.createElement('div');pin.className='pin';pin.id='pin'+i;pin.style.left=p[0]+'px';pin.style.top=p[1]+'px';deck.appendChild(pin)});
+}
+function targetXForAim(aim){return 110 + aim*37}
+function knockDown(count,aim=0){
+ const standing=[];for(let i=0;i<10;i++){const p=$('pin'+i);if(p&&!p.classList.contains('down'))standing.push(i)}
+ const target=targetXForAim(aim);
+ standing.sort((a,b)=>Math.abs((PIN_POS[a][0]+14)-target)-Math.abs((PIN_POS[b][0]+14)-target));
+ standing.slice(0,count).forEach(i=>$('pin'+i).classList.add('down'))
+}
+function bestAimForRemaining(){
+ const xs=[];for(let i=0;i<10;i++){const p=$('pin'+i);if(p&&!p.classList.contains('down'))xs.push(PIN_POS[i][0]+14)}
+ if(!xs.length)return 0;
+ const avg=xs.reduce((a,b)=>a+b,0)/xs.length;
+ return Math.max(-2,Math.min(2,Math.round((avg-110)/37)));
+}
+function aimName(){
+ const en=['Far Left','Left','Centre','Right','Far Right'];
+ const zh=['最左','左邊','中間','右邊','最右'];
+ return (language==='en'?en:zh)[currentAim+2];
+}
+function resetBallToStart(){
+ const ball=$('bowlingBall');
+ if(!ball)return;
+ ball.classList.remove('roll');
+ ball.style.setProperty('--aim-x',`${currentAim*43}px`);
+ void ball.offsetWidth;
+}
+function updateAimUI(){
+ const ready=answerLocked && canRoll;
+ const left=$('aimLeft'),right=$('aimRight'),guide=$('aimGuide'),ball=$('bowlingBall');
+ if(left)left.disabled=!ready || currentAim<=-2;
+ if(right)right.disabled=!ready || currentAim>=2;
+ if($('aimLabel'))$('aimLabel').textContent=aimName();
+ if($('aimHelp'))$('aimHelp').textContent=ready?(language==='en'?'Use ◀ ▶ before you roll':'開波前用 ◀ ▶ 瞄準'):(language==='en'?'Answer first to aim':'答啱先可以瞄準');
+ if(guide){guide.style.transform=`translateX(-50%) rotate(${currentAim*4.8}deg)`;guide.classList.toggle('ready',ready)}
+ if(ball)ball.style.setProperty('--aim-x',`${currentAim*43}px`);
+}
+function adjustAim(step){
+ if(!(answerLocked&&canRoll))return;
+ currentAim=Math.max(-2,Math.min(2,currentAim+step));
+ playClickSfx();
+ updateAimUI();
+ speakText(language==='en'?`Aim ${aimName()}`:`瞄準${aimName()}`,{remember:false});
+}
+function rollBall(){
+ if(!canRoll)return;canRoll=false;$('rollBtn').disabled=true;updateAimUI();
+ const aimAtRoll=currentAim;
+ playRollSfx();
+ const ball=$('bowlingBall');ball.style.setProperty('--aim-x',`${aimAtRoll*43}px`);ball.classList.remove('roll');void ball.offsetWidth;ball.classList.add('roll');
+ setTimeout(()=>{
+   let knocked;
+   if(throwNo===0){
+     const r=Math.random();
+     const strikeChance=currentAim===0?.30:Math.abs(currentAim)===1?.16:.05;
+     if(r<strikeChance) knocked=10;
+     else if(Math.abs(currentAim)===2) knocked=Math.floor(Math.random()*4)+3; // 3-6
+     else knocked=Math.floor(Math.random()*5)+5; // 5-9
+   }else{
+     const targetAim=bestAimForRemaining();
+     const error=Math.abs(currentAim-targetAim);
+     const spareChance=error===0?.78:error===1?.48:.16;
+     const r=Math.random();
+     knocked=r<spareChance?standingPins:Math.floor(Math.random()*(standingPins+1));
+   }
+   knocked=Math.min(knocked,standingPins);knockDown(knocked,aimAtRoll);standingPins-=knocked;frameThrows[qIndex].push(knocked);throwNo++;
+   if(throwNo===1 && standingPins===0) playStrikeSfx();
+   else { playPinCrashSfx(knocked); if(throwNo===2 && standingPins===0)setTimeout(playSpareSfx,120); }
+   const msg=$('laneMessage');
+   if(throwNo===1 && standingPins===0){
+      strikes++;frameScores[qIndex]=10;showLaneMessage('💥 STRIKE!','全中！');speakText(language==='en'?'Strike! Great bowling!':'全中！好叻呀！');setTimeout(finishFrame,1100);
+   } else if(throwNo===1){
+      showLaneMessage(`🎳 ${knocked} pins`,`${knocked} 支樽`);
+      setTimeout(()=>{msg.classList.remove('show');currentAim=0;resetBallToStart();canRoll=true;$('rollBtn').disabled=false;$('rollBtn').textContent=language==='en'?'🎳 Spare Roll':'🎳 補中';$('throwStatus').textContent=language==='en'?`✨ Spare chance · ${standingPins} left`:`✨ 補中機會 · 還有 ${standingPins} 支`;updateAimUI();},850)
+   } else {
+      frameScores[qIndex]=10-standingPins;
+      if(standingPins===0){spares++;showLaneMessage('✨ SPARE!','補中成功！');speakText(language==='en'?'Spare! Well done!':'補中成功！好叻呀！')} else {showLaneMessage(`👏 ${frameScores[qIndex]} / 10`,`${frameScores[qIndex]} / 10`)}
+      setTimeout(finishFrame,1100);
+   }
+   renderFrames();
+ },900)
+}
+function showLaneMessage(en,zh){const m=$('laneMessage');m.textContent=language==='en'?en:zh;m.classList.add('show')}
+function finishFrame(){
+ $('laneMessage').classList.remove('show');
+ const score=frameScores[qIndex]??10;totalPins+=score;updateStats();renderFrames();
+ qIndex++;
+ if(qIndex>=5){finishLevel();return}
+ setTimeout(loadQuestion,250)
+}
+function renderFrames(){
+ const f=$('frames');f.innerHTML='';
+ for(let i=0;i<5;i++){
+  const d=document.createElement('div');d.className='frame'+(i===qIndex?' active':'');
+  const throws=(frameThrows[i]||[]).map((n,idx)=> idx===0&&n===10?'X':(idx===1&&((frameThrows[i][0]||0)+n===10)?'/':n)).join(' · ');
+  const sc=frameScores[i]??'–';d.innerHTML=`<div>F${i+1}</div><div class="throws">${throws||' '}</div><div class="score">${sc}</div>`;f.appendChild(d)
+ }
+}
+function updateStats(){$('correctCount').textContent=correct;$('wrongCount').textContent=wrong;$('pinScore').textContent=totalPins}
+function finishLevel(){
+ $('progress').style.width='100%';
+ if(unlocked[language]<Math.min(5,level+2)){unlocked[language]=Math.min(5,level+2);localStorage.setItem('sentenceBowlingUnlocked',JSON.stringify(unlocked))}
+ $('finalScore').textContent=totalPins;$('rCorrect').textContent=correct;$('rWrong').textContent=wrong;$('rSpecial').textContent=`${strikes} / ${spares}`;
+ let stars=totalPins>=45?'⭐⭐⭐':totalPins>=35?'⭐⭐':'⭐';$('resultStars').textContent=stars;
+ $('nextLevelBtn').style.display=level<4?'inline-block':'none';showScreen('result');
+ setTimeout(()=>speakText(language==='en'?`Level complete! You knocked down ${totalPins} pins.`:`完成呢一關！你一共擊倒 ${totalPins} 支保齡球樽。`),180);
+}
+function goNextLevel(){if(level<4)startLevel(level+1)}
+function replayLevel(){startLevel(level)}
+updateVoiceUI();
+</script>
+</body>
+</html>
