@@ -76,6 +76,13 @@
       <div class="hero" style="padding-top:4px">
         <h1 id="levelTitle">Choose Level</h1>
         <p id="levelDesc"></p>
+        <div id="mandarinVoicePanel" style="display:none;margin:14px auto 4px;max-width:620px;padding:12px 14px;border:1px solid rgba(36,199,255,.28);border-radius:16px;background:rgba(17,42,72,.72);text-align:left">
+          <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap">
+            <button class="secondary" onclick="testMandarinVoice()">🔊 Test Mandarin Voice</button>
+            <span id="mandarinVoiceStatus" style="font-weight:800;color:#d6e9fa">正在檢查普通話語音…</span>
+          </div>
+          <div id="mandarinVoiceHelp" style="display:none;margin-top:8px;color:#ffd166;font-size:13px;line-height:1.45">⚠️ 此裝置暫時找不到普通話聲線。遊戲會保持靜音，而不會改用廣東話。可在 iPad「設定 → 輔助使用 → 朗讀內容 → 聲音 → 中文」下載普通話／國語聲線後再重開 Safari。</div>
+        </div>
       </div>
       <div class="level-grid" id="levelGrid"></div>
       <p style="text-align:center;color:var(--muted);margin-top:18px">Level 1–5 可隨時自由選擇；轉 Level 會重新開始該 Level。</p>
@@ -307,10 +314,26 @@ function refreshVoices(){
   if(!('speechSynthesis' in window)) return;
   availableVoices=window.speechSynthesis.getVoices()||[];
   updateVoiceUI();
+  updateMandarinVoicePanel();
 }
 if('speechSynthesis' in window){
   refreshVoices();
   window.speechSynthesis.onvoiceschanged=refreshVoices;
+}
+function isCantoneseVoice(v){
+  const lang=(v&&v.lang||'').replace('_','-');
+  const name=(v&&v.name||'');
+  return /^yue(?:-|$)/i.test(lang)
+    || /^zh-(?:HK|Hant-HK)(?:-|$)/i.test(lang)
+    || /canton|cantonese|hong\s*kong|香港|廣東話|粤语|粵語/i.test(name);
+}
+function isMandarinVoice(v){
+  if(!v || isCantoneseVoice(v)) return false;
+  const lang=(v.lang||'').replace('_','-');
+  const name=(v.name||'');
+  return /^cmn(?:-|$)/i.test(lang)
+    || /^zh-(?:TW|CN|SG)(?:-|$)/i.test(lang)
+    || /mandarin|putonghua|國語|普通話|普通话/i.test(name);
 }
 function preferredVoice(){
   if(!availableVoices.length) return null;
@@ -319,23 +342,71 @@ function preferredVoice(){
     return gb.find(v=>/sonia|serena|daniel|kate|google uk|british/i.test(v.name)) || gb[0] || availableVoices.find(v=>/^en/i.test(v.lang)) || null;
   }
   if(language==='zh_mandarin'){
-    // Prefer a Mandarin voice that reads Traditional Chinese naturally.
-    const tw=availableVoices.filter(v=>/^zh[-_]TW/i.test(v.lang) || /taiwan|mandarin.*taiwan|國語|普通話/i.test(v.name));
-    const cn=availableVoices.filter(v=>/^zh[-_]CN/i.test(v.lang) || /^cmn[-_]/i.test(v.lang) || /mandarin|putonghua/i.test(v.name));
-    return tw[0] || cn[0] || availableVoices.find(v=>/^zh/i.test(v.lang)) || null;
+    // STRICT Mandarin only: never fall back to zh-HK / yue / Cantonese.
+    const candidates=availableVoices.filter(isMandarinVoice);
+    const tw=candidates.filter(v=>/^zh[-_]TW/i.test(v.lang));
+    const cn=candidates.filter(v=>/^zh[-_]CN/i.test(v.lang));
+    const cmn=candidates.filter(v=>/^cmn[-_]/i.test(v.lang));
+    const named=candidates.filter(v=>/mandarin|putonghua|國語|普通話|普通话/i.test(v.name));
+    return tw[0] || cn[0] || cmn[0] || named[0] || null;
   }
-  const hk=availableVoices.filter(v=>/^(yue|zh)[-_](HK|Hant-HK)/i.test(v.lang) || /canton|hong kong|sin[- ]?ji|hiu/i.test(v.name));
+  const hk=availableVoices.filter(v=>isCantoneseVoice(v));
   return hk[0] || availableVoices.find(v=>/^zh[-_]HK/i.test(v.lang)) || null;
+}
+function updateMandarinVoicePanel(){
+  const panel=document.getElementById('mandarinVoicePanel');
+  if(!panel)return;
+  panel.style.display=language==='zh_mandarin'?'block':'none';
+  if(language!=='zh_mandarin')return;
+  const status=document.getElementById('mandarinVoiceStatus');
+  const help=document.getElementById('mandarinVoiceHelp');
+  const v=preferredVoice();
+  if(v){
+    if(status)status.textContent=`✅ ${v.name} (${v.lang})`;
+    if(status)status.style.color='#8ff0b0';
+    if(help)help.style.display='none';
+  }else{
+    if(status)status.textContent='⚠️ 未找到普通話聲線';
+    if(status)status.style.color='#ffd166';
+    if(help)help.style.display='block';
+  }
+}
+function testMandarinVoice(){
+  if(!('speechSynthesis' in window)){
+    const status=document.getElementById('mandarinVoiceStatus');
+    if(status)status.textContent='⚠️ 此瀏覽器不支援語音';
+    return;
+  }
+  refreshVoices();
+  const v=preferredVoice();
+  updateMandarinVoicePanel();
+  if(!v)return;
+  if(!voiceEnabled){voiceEnabled=true;updateVoiceUI();}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance('你好，歡迎來玩保齡球！');
+  u.voice=v;
+  u.lang=v.lang || 'zh-TW';
+  u.rate=.86;
+  u.pitch=1.04;
+  window.speechSynthesis.speak(u);
 }
 function speakText(text,{remember=true}={}){
   if(remember) currentVoiceText=text;
   if(!voiceEnabled || !text || !('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
+  const v=preferredVoice();
+  // Critical iPad safeguard: Mandarin mode never speaks unless a confirmed Mandarin voice exists.
+  if(language==='zh_mandarin' && !v){
+    updateMandarinVoicePanel();
+    return;
+  }
   const u=new SpeechSynthesisUtterance(text);
-  u.lang=language==='en'?'en-GB':(language==='zh_mandarin'?'zh-TW':'zh-HK');
+  if(language==='en') u.lang='en-GB';
+  else if(language==='zh_mandarin') u.lang=(v&&v.lang)||'zh-TW';
+  else u.lang='zh-HK';
   u.rate=language==='en'?0.82:(language==='zh_mandarin'?0.86:0.88);
   u.pitch=1.04;
-  const v=preferredVoice(); if(v)u.voice=v;
+  if(v)u.voice=v;
   window.speechSynthesis.speak(u);
 }
 function repeatVoice(){
@@ -354,6 +425,7 @@ function updateVoiceUI(){
   const sb=document.getElementById('sfxToggle');if(sb)sb.textContent=sfxEnabled?'🔔 SFX On':'🔕 SFX Off';
   if(l)l.textContent=language==='en'?'🔊 British English':(language==='zh_mandarin'?'🔊 普通話 Mandarin':'🔊 廣東話 Cantonese');
   if(tip)tip.textContent=language==='en'?'Correct answers are read aloud.':(language==='zh_mandarin'?'答對後會用普通話讀出完整句子。':'答啱後會用廣東話讀出完整句子。');
+  updateMandarinVoicePanel();
 }
 function speakInstruction(){
   const text=language==='en'
@@ -385,7 +457,7 @@ function showLevels(){
   b.innerHTML=`Level ${i+1}<small>${desc[i]}</small>`; b.onclick=()=>startLevel(i); g.appendChild(b)
  }
  updateVoiceUI();
- setTimeout(()=>speakText(language==='en'?'Choose a level.':(language==='zh_mandarin'?'選擇一個 Level 開始玩。':'揀一個 Level 開始玩啦。')),120);
+ setTimeout(()=>{refreshVoices();updateMandarinVoicePanel();speakText(language==='en'?'Choose a level.':(language==='zh_mandarin'?'選擇一個 Level 開始玩。':'揀一個 Level 開始玩啦。'));},220);
 }
 function startLevel(l){
  level=l;qIndex=0;selected=[];answerLocked=false;canRoll=false;throwNo=0;standingPins=10;currentAim=0;
